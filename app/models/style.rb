@@ -725,7 +725,7 @@ Replace = "$STOP()"
 		sld = pd.sld
 		return pd.domain if pd.sld.nil?
 		# last.fm also operates as lastfm.de and such
-		return 'last.fm' if sld = 'lastfm'
+		return 'last.fm' if sld == 'lastfm'
 		return sld
 	end
 
