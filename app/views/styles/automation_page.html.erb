@@ -1,0 +1,13 @@
+<link rel="stylish-code" href="#style-code">
+<link rel="stylish-description" href="#style-description">
+<link rel='stylish-example-url' href="<%=h @style.screenshot_url%>">
+<h1 id="style-description"><%=h @style.short_description%></h1>
+<pre id="style-code"><%=h @style.style_code.code%></pre>
+<button onclick="install()">Install</button>
+<script type="text/javascript">
+	function install() {
+		var stylishEvent = document.createEvent("Events");
+		stylishEvent.initEvent("stylishInstall", false, false, window, null);
+		document.dispatchEvent(stylishEvent);
+	}
+</script>

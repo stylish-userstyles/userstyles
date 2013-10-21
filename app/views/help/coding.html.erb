@@ -1,0 +1,98 @@
+<p>Writing styles requires a working knowledge of CSS. If you don't know CSS, there are many tutorials available online. It may also be helpful to inspect the source of other styles to see how things work.</p>
+
+<p>To post new styles on userstyles.org, you will have to create a user account. Once logged in, you'll see a Create new style link on your user home page.</p>
+
+<p>For help with writing styles, see <a href="https://github.com/JasonBarnabe/stylish/wiki">the wiki</a>. Topics not specifically about writing user styles, but about posting styles to userstyles.org are covered below.</p>
+
+<h2>Limits on user styles</h2>
+
+<p>Styles are limited in a few ways:</p>
+
+<ul>
+	<li>Maximum size is 100,000 bytes. Exemptions are possible by <a href="mailto:jason.barnabe@gmail.com">contacting me</a>, I won't grant exemptions if you're using embedded images.</li>
+	<li>No @import directives. If an @import is done to a slow-loading server, it will cause browser hangs.</li>
+	<li>No XBL due to potential security issues.</li>
+	<li>There are various checks done to determine if the posted code is valid CSS. While the code is not actually validated, it does check that the number of braces match. These checks can sometimes be confused by commented out code.</li>
+</ul>
+
+<!--
+<h2>Getting a better editor inside Stylish for Firefox</h2>
+
+<p>You can use <a href="https://addons.mozilla.org/firefox/addon/4125">It's All Text!</a> to integrate Stylish's code editor with an external editor of your choice.</p>
+-->
+
+<h2>Sharing user styles</h2>
+
+<p>The best way to share user styles is to post them to this site. Doing this makes it easy for others to find and install your styles and lets them easily receive updates should you change your style.</p>
+
+<p>An alternate way is to provide put your code in a CSS file and host it somewhere. This will still allow for updates, but there won't be an easy button for users to click to install, and they will have to provide a name for the style themselves.</p>
+
+<p>A final way is to simply provide the code and make users copy and paste it into Stylish. No updates are possible this way.</p>
+
+
+<h2>Deleting user styles off of userstyles.org</h2>
+
+<p>To delete a style off the site, go to the edit screen, then click the link for deleting. There is no way to truly delete a style; rather, the style no longer shows up in search results, and a large warning is displayed to anyone accessing it directly. This is so that previous users of the style know what happened to it. Please do not "blank out" the style instead of deleting.</p>
+
+
+<h2 id="help-style-settings">Style settings</h2>
+
+<p>Style settings let you give users options for installing your style. The easiest way to explain is with an example.</p>
+
+<p>Here is the code:</p>
+<pre><code>* {
+	color: /*[[mycolor]]*/;
+	font-face: /*[[myfont]]*/;
+}</code></pre>
+
+<p>Here is what you define as the settings</p>
+
+<p><img src="http://<%=STATIC_DOMAIN%>/images/settings-example.png" alt="A style setting form showing two settings. The first's label is 'Choose your color' and the placeholder is 'mycolor'. The second's label is 'Choose your font' and the placeholder is 'myfont'. The second has two options defined, one for serif and one for sans-serif."></p>
+
+<p>The first input for each setting is displayed to the user. The second input matches the placeholder in your code. The indented lines after the second setting define the valid options for that setting.</p>
+
+<p>This will show the user this UI:</p>
+
+<p><img src="http://<%=STATIC_DOMAIN%>/images/settings-example-user.png"></p>
+
+<p>If the user selected "#FFFFFF" for the color and "Sans-serif" for the font, they would receive this code:</p>
+
+<pre><code>* {
+	color: #FFFFFF;
+	font-face: Times New Roman, serif;
+}</code></pre>
+
+<p>There are three types of settings. Text settings are the most versatile and can be used with anything - even whole code blocks. Color settings let the user pick a color from a color chooser; you do not give them predefined values. Image settings let you define certain images, but allow the user to provide their own.</p>
+
+<p>Style settings can be nested two levels deep. That is, your code can reference setting A, whose value can reference setting B, but setting B's value can't then reference setting C.</p>
+
+<p>Styles with style settings are not updatable by Stylish.</p>
+
+<h2 id="format">Format of style descriptions</h2>
+
+<p>Some HTML is allowed in style descriptions. You can use these tags, with allowed attributes in parentheses: a (href), abbr (title), b, blockquote (cite), br, cite, code, dd, dfn (title), dl, dt, em, i, kbd, li, mark, ol, p, pre, q (cite), s, samp, small, strike, strong, sub, sup, time (datetime, pubdate), u, ul, var.</p>
+
+<p>Additionally, you can create links automatically by:</p>
+
+<ul>
+	<li>Writing "style 1" (without quotes) - will create a link to the style with ID 1.</li>
+	<li>Writing "user 1" (without quotes) - will create a link to the user with ID 1.</li>
+	<li>Writing a URL - will create a link to that URL.</li>
+</ul>
+
+
+<h2 id="screenshots-doc">Screenshots</h2>
+
+<p>Screenshots are an important way to show to others what your style does. There are two ways to specify a screenshot.</p>
+
+<h3>Automatic screenshots</h3>
+
+<p>Automatically generating screenshots is recommended for styles that affect webpages in a way that is very obvious visually. The screenshot will consist of the first screenful of the page.</p>
+
+<p>The URL visited to generate the screenshot will be determined based on the @-moz-document rules in the CSS. This URL will not always be a valid URL for the site. You can specify a different URL by providing an example URL on the edit page. The URL must be accessible from North America. The URL must not require a login, except for Facebook, GMail, Tumblr, and Orkut (a test account will be used with these services).</p>
+
+<p>Generating the screenshot will take a few days. The screenshot will be periodically updated by the site.</p>
+
+<h3>Manual screenshots</h3>
+
+<p>Providing your own screenshot is recommended for cases where automatic screenshots are not suitable. These include subtle changes, changes to sites that require logins, changes to sites that are not visible in the first screenful, and changes to the Firefox UI.</p>

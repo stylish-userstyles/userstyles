@@ -1,0 +1,29 @@
+<h2>Alternate ways of installing user styles</h2>
+
+<p><a href="/help/stylish">Stylish</a> is the recommended way to install user styles. There are other ways of using styles.</p>
+
+<p>Some styles are available as user scripts for use in browsers that support user scripts, or browsers that have extensions like <a href="https://addons.mozilla.org/en-US/firefox/addon/748/">Greasemonkey</a>.</p>
+
+<p>In Mozilla programs, the style code can be placed in userChrome.css (for app styles) or userContent.css (for everything else).</p>
+
+<p>Some browsers let you apply specify site-specific stylesheets through their UI. You can take a user styles, strip out the @-moz-document parts, and use it here.</p>
+
+<p>All methods of installing user styles depend on the browser supporting the CSS used in the style.</p>
+
+
+<h2>How user styles are different than user scripts</h2>
+
+<p>User styles exist mainly to change the way things look. They are written with CSS, the same language that web sites use to control their appearance. Most browsers allow for user styles out of the box (with varying degrees of ease).</p>
+
+<p>User scripts exist mainly to change the way things act. They are written with JavaScript, the same languages that web sites use to create certain dynamic behaviours. Most browsers do not allow for user scripts out of the box. <a href="https://addons.mozilla.org/firefox/addon/748">Greasemonkey</a> is a well-known extension that adds user script support to programs.</p>
+
+<p>There exists a fair bit of overlap between user scripts and user styles. Some things can be accomplished with either method. User styles can change the user interface in Mozilla-based programs such as Firefox and Thunderbird, while user scripts cannot. User scripts can add behaviour to web sites, while user styles cannot. In general, it is recommended that if something <em>can</em> be done with user styles instead of user scripts, it <em>should</em> be done with user styles instead of user scripts. This is because user scripts can cause a site to flicker, as they have to wait for sites to load completely before firing, while user styles are not under this restriction. User styles are also generally easier to write.</p>
+
+
+<h2>User style security concerns</h2>
+
+<p>User styles can cause security problems because they can contain XBL bindings, which can contain executable code. Styles posted on userstyles.org are not allowed to define XBL bindings.</p>
+
+<p>User styles can cause hangs at application startup if they contain @imports to servers that are slow to respond. Styles posted on userstyles.org are not allowed to use @import statements.</p>
+
+<p>User styles can change websites so much that what you do on them may be misleading. For example, they could move another field on top of a login field, which could potentially lead you to submit your login details to another place. Generally, this is unlikely to lead to a security issue, but it is possible.</p>

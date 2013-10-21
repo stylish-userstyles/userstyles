@@ -1,0 +1,7 @@
+<script type="text/javascript" src="/javascripts/posted-from-stylish.js"></script>
+
+<input type="hidden" id="old-uri" value="<%=h @stylish_uri%>">
+<input type="hidden" id="new-uri" value="<%=h url_for(:action => "show", :id => @style.id, :only_path => false)%>">
+<input type="hidden" id="new-update-uri" value="<%=h url_for(:action => "raw", :id => @style.id, :only_path => false)%>">
+
+<p>Your entry in Stylish has been updated to point <%=link_to("here", :action => "show", :id => @style.id, :only_path => false)%>.</p>

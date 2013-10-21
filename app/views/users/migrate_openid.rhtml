@@ -1,0 +1,7 @@
+<p>
+	<% if !@user_with_this_openid.nil? %>
+		The OpenID '<%=h @user_with_this_openid.openid_url%>' is already being used by <%=link_to(@user_with_this_openid.name, :controller => :users, :action => :show, :id => @user_with_this_openid.id)%>.
+	<% else %>
+		<%=@message%>
+	<% end %>
+</p>

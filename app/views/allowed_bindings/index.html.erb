@@ -1,0 +1,9 @@
+<p>The following XBL bindings are allowed in styles posted to this site. To request approval for more bindings, e-mail <a href="mailto:jason@userstyles.org">jason@userstyles.org</a>.</p>
+
+<p>Note that data uri bindings will only work in Firefox 3 and equivalent.</p>
+
+<ul>
+<% @allowed_bindings.each do |b| %>
+	<li><%=link_to(b.description, b.url)%></li>
+<% end %>
+</ul>

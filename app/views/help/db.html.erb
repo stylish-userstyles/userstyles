@@ -1,0 +1,49 @@
+<p>Stylish stores your styles in a database file on your computer to work. If it can't open this database file, it can't work. It'll complain about this every time you start Firefox.</p>
+
+<p>The instructions below should get you going again. If you have problems, you can ask on <a href="http://forum.userstyles.org">the forum</a>.</p>
+
+<h2>Deleting the Stylish database</h2>
+
+<p>Deleting the database should fix the issue, but you'll lose any styles you've installed. If you want to keep your styles, see the next section.</p>
+
+<p>To delete your database:</p>
+<ol>
+	<li>Start Firefox.</li>
+	<li>In Firefox, type about:support in the address bar and press Enter.</li>
+	<li>Click the button marked "Open Containing Folder". This should open a file browsing window.</li>
+	<li>Close all Firefox windows.</li>
+	<li>In the file browsing window, find "stylish.sqlite" and delete it.</li>
+</ol>
+
+<p>When you start Firefox, Stylish will create a new, empty database file and will be functional once again.</p>
+
+
+<h2>Fixing the Stylish database</h2>
+
+<p>This option is a little more complicated, but you'll be able to keep your installed styles.</p>
+
+<ol>
+	<li>Install <a href="http://sqlitebrowser.sourceforge.net/">SQLite Database Browser</a>.</li>
+	<li>Start Firefox.</li>
+	<li>In Firefox, type about:support in the address bar and press Enter.</li>
+	<li>Click the button marked "Open Containing Folder". This should open a file browsing window.</li>
+	<li>Close all Firefox windows.</li>
+	<li>In the file browsing window, find "stylish.sqlite" and open it with SQLite Database Browser.</li>
+	<li>In SQLite Database Browser, choose File, Compact Database.</li>
+	<li>Close SQLite Database Browser.</li>
+</ol>
+
+<p>When you start Firefox, things may be fixed. If not, you'll have to do something else.</p>
+
+
+<h2>Uninstalling Stylish</h2>
+
+<p>If you don't care to have Stylish any more, you can uninstall it.</p>
+
+<ol>
+	<li>Start Firefox.</li>
+	<li>Go to Tools, Add-ons.</li>
+	<li>Click on the Extensions panel.</li>
+	<li>Click on the entry for Stylish.</li>
+	<li>Click Uninstall.</li>
+</ol>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<bindings xmlns="http://www.mozilla.org/xbl">
+  <binding>
+		<implementation>
+	    <constructor>
+			alert("foo");
+			</constructor>
+		</implementation>
+  </binding>
+</bindings>

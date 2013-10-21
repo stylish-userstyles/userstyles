@@ -1,0 +1,28 @@
+<% if @style %>
+	<%= error_messages_for 'style' %>
+<% end %>
+<% form_tag(:action => 'admin_delete_save') do %>
+	<p>
+		<label for="admin_delete_reason_id">Reason</label>
+		<select id="admin_delete_reason_id" name="admin_delete_reason_id">
+			<% AdminDeleteReason.find(:all).each do |adr| %>
+				<option value="<%=h adr.id%>" <%= (!@style.admin_delete_reason_id.nil? and @style.admin_delete_reason.id == adr.id) ? 'selected' : ''%>><%=h adr.reason%></option>
+			<% end %>
+		</select>
+	</p>
+	
+	<p>
+		<label for="obsoletion-message">Message</label>
+		<textarea id="obsoletion-message" name="style[obsoletion_message]"><%=h @style.obsoletion_message%></textarea>
+	</p>
+	
+	<p>
+		<label for="obsoleting-style-id">Superceded by (ID)</label>
+		<input id="obsoleting-style-id" name="style[obsoleting_style_id]" value="<%=h @style.obsoleting_style_id%>">
+	</p>
+	
+	<p>
+		<input type="hidden" name="id" value="<%=@style.id%>">
+		<input type="submit" value="Delete">
+	</p>
+<% end %>

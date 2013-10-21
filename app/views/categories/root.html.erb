@@ -1,0 +1,25 @@
+<p>User styles are categorized by what they change.</p>
+
+<p><%=site_style_text%> <a href="/categories/site">There are <%=number_with_delimiter(@site_count)%> site styles.</a></p>
+
+<p><%=app_style_text%> <a href="/categories/app">There are <%=number_with_delimiter(@app_count)%> app styles.</a></p>
+
+<p><%=global_style_text%> <%=link_to('There are ' + number_with_delimiter(@global_count) + ' global styles.', :controller => 'styles', :action => 'browse', :category => 'global')%></p>
+
+<p>If you're feeling adventurous, you can also check out <a href="/styles/graveyard" rel="nofollow">the style graveyard</a>, where broken styles go when they die.</p>
+
+<div class="ad" style="max-width: 100%; overflow: hidden">
+	<div class="ad-note"><span>Advertisement</span></div>
+	<script type="text/javascript"><!--
+	google_ad_client = "ca-pub-2247465624637408";
+	/* Browse styles top of page */
+	google_ad_slot = "5085099206";
+	google_ad_width = 728;
+	google_ad_height = 90;
+	//-->
+	</script>
+	<script type="text/javascript"
+	src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+	</script>
+</div>
+

@@ -1,0 +1,134 @@
+<% if @user.hashed_password.nil? %>
+	<h2>Set a login name and password</h2>
+<% else %>
+	<h2>Change login name and password</h2>
+<% end %>
+
+<%= error_messages_for 'user' %>
+<% if params[:password_updated] %>
+	<p class="notice">Login and password updated.</p>
+<% end %>
+<% if params[:password_removed] %>
+	<p class="notice">Password-based login turned off.</p>
+<% end %>
+<% form_for(:user, :url => {:action => :update_password, :id => @user.id}) do |u| %>
+	<div class="form-controls">
+		<label for="login">Login</label> <span class="linking-note">Your displayed name may be different.</span><br>
+		<%= u.text_field(:login, :size => 20, :maxlength => 20, :required => 'required') %>
+	</div>
+
+	<div class="form-controls">
+		<% if @user.hashed_password.nil? %>
+			<label for="password">Password</label><br>
+		<% else %>
+			<label for="password">New password</label><br>
+		<% end %>
+		<%= password_field_tag 'password', '', :size => 20, :required => 'required' %>
+	</div>
+
+	<div class="form-controls">
+		<% if @user.hashed_password.nil? %>
+			<label for="password_confirmation">Confirm password</label><br>
+		<% else %>
+			<label for="password_confirmation">Confirm new password</label><br>
+		<% end %>	
+		<%= password_field_tag 'password_confirmation', '', :size => 20, :required => 'required' %>
+	</div>
+
+	<% if @user.hashed_password.nil? %>
+		<%= submit_tag "Set"%>
+	<% else %>
+		<%= submit_tag "Change"%>
+	<% end %>
+<% end %>
+
+
+<% if !@user.hashed_password.nil? and !@user.user_authenticators.empty? %>
+	<h2>Turn off password-based login</h2>
+	<p>You can turn off password-based login and rely only on third-party authenticators. It's recommended that if you do so, you have at least two third-party authenticators, so that if one goes down, you can still log in with the other.</p>
+		<% form_for(:user, :url => {:action => :remove_password, :id => @user.id}) do |u| %>
+			<input type="submit" value="Turn off password-based login">
+		<% end %>
+	</p>
+<% end %>
+
+
+<h2>Third-party authenticators</h2>
+
+<% if params[:authenticator_added] %>
+	<p class="notice">Authenticator added.</p>
+<% end %>
+
+<% if params[:authenticator_removed] %>
+	<p class="notice">Authenticator removed.</p>
+<% end %>
+
+<% if ['add_authenticator', 'add_authenticator_complete'].include?(params[:action]) %>
+	<%= error_messages_for 'user' %>
+	<%= error_messages_for 'ua' %>
+	<% if !@message.nil? %>
+		<div class="errorExplanation">
+			<%= h @message %>
+		</div>
+	<% end %>
+<% end %>
+
+<p>Authenticators let another service handle your login info. Currently the only supported authenticator is OpenID.</p>
+
+<% 
+google_open_id_set = false
+yahoo_open_id_set = false
+
+if @user.user_authenticators.empty? %>
+	<p>No third-party authenticators set.</p>
+<% else %>
+	<ul>
+	<% @user.user_authenticators.each do |ua| %>
+		<li>
+			<% if ua.provider_identifier.starts_with?('https://www.google.com/accounts/') 
+				google_open_id_set = true %>
+				OpenID (Google):
+			<% elsif ua.provider_identifier.starts_with?('https://me.yahoo.com/') 
+				yahoo_open_id_set = true %>
+				OpenID (Yahoo):
+			<% else %>
+				OpenID:
+			<% end %>
+			<a href="<%= h ua.provider_identifier %>"><%= h ua.provider_identifier %></a>
+			<% if @user.has_spare_login_methods
+				form_for(:user, :url => {:action => :remove_authenticator, :id => @user.id}) do |u| %>
+					<input type="hidden" name="provider_identifier" value="<%= h ua.provider_identifier %>">
+					<input type="submit" value="Remove">
+				<% end
+			end %>
+		</li>
+	<% end %>
+	</ul>
+<% end %>
+
+<p>Add OpenID:</p>
+<ul>
+	<% if !google_open_id_set %>
+		<li>
+			<% form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
+				<input type="hidden" name="provider_identifier" value="https://www.google.com/accounts/o8/id">
+				<input type="submit" value="Add your Google account as an OpenID provider">
+			<% end %>
+		</li>
+	<% end
+	if !yahoo_open_id_set %>
+		<li>
+			<% form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
+				<input type="hidden" name="provider_identifier" value="https://me.yahoo.com/">
+				<input type="submit" value="Add your Yahoo! account as an OpenID provider">
+			<% end %>
+		</li>
+	<% end %>
+	<li>
+		<% form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
+			Add a different provider:
+			<input type="url" name="provider_identifier" required>
+			<input type="submit" value="Add">
+		<% end %>
+	</li>
+</ul>

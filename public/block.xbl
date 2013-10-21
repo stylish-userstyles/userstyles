@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<bindings xmlns="http://www.mozilla.org/xbl">
+  <binding id="block">
+		<implementation>
+	    <constructor>
+				var ad = this;
+				var parent = ad.parentNode;
+				setTimeout(function() { parent.removeChild(ad) }, 0);
+			</constructor>
+		</implementation>
+  </binding>
+</bindings>

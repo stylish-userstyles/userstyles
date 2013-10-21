@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>userstyles.org</ShortName>
+  <Description>Find styles on userstyles.org.</Description>
+  <Tags>userstyles css stylish</Tags>
+  <Contact>jason@userstyles.org</Contact>
+  <Url type="text/html" 
+       method="get"
+       template="http://userstyles.org/styles/browse/all/{searchTerms}" />
+  <LongName>userstyles.org Search</LongName>
+  <Image height="16" width="16" type="image/png">http://userstyles.org/images/smallicon.png</Image>
+  <Image height="16" width="16" type="image/vnd.microsoft.icon">http://userstyles.org/images/stylish.ico</Image>
+  <Query role="example" searchTerms="Slashdot" />
+  <Developer>Jason Barnabe</Developer>
+  <Attribution>
+    Search data by userstyles.org contributors
+  </Attribution>
+  <SyndicationRight>open</SyndicationRight>
+  <AdultContent>false</AdultContent>
+  <Language>*</Language>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <InputEncoding>UTF-8</InputEncoding>
+</OpenSearchDescription>

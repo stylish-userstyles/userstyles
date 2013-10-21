@@ -1,0 +1,97 @@
+
+<!-- saved from url=(0063)chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/manage.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+		<title>Stylish</title>
+		<style>
+			body {
+				margin: 0px;
+				font: 12px arial,sans-serif;
+			}
+			a, a:visited {
+				color: #555;
+				-webkit-transition: color 0.5s;
+			}
+			a:hover {
+				color: #999;
+			}
+			#header {
+				height: 100%;
+				width: 250px;
+				position: fixed;
+				top: 0px;
+				padding: 15px;
+				border-right: 1px dashed #AAA;
+				-webkit-box-shadow: 0px 0px 50px -18px black;
+			}
+			#installed {
+				padding-left: 280px;
+			}
+			.enabled, .disabled {
+				margin: 10px;
+				padding: 0px 15px;
+				border-radius: 5px;
+				border: 3px solid white;
+				-webkit-box-shadow: 0px 0px 50px -18px black, inset 0px 0px 500px -118px black;
+			}
+			.applies-to, .actions {
+				padding-left: 15px;
+			}
+			.actions > * {
+				margin-right: 5px;
+			}
+			.applies-to-extra {
+				font-weight: bold;
+			}
+			.disabled h2::after {
+				content: " (Disabled)";
+			}
+			.disabled {
+				opacity: 0.6;
+			}
+			.disabled .disable {
+				display: none;
+			}
+			.enabled .enable {
+				display: none;
+			}
+			
+			/* Default, no update buttons */
+			.update, .check-update {
+				display: none;
+			}
+			/* Check update button for things that can*/
+			*[style-update-url] .check-update {
+				display: inline;
+			}
+			/* Update check in progress */
+			.checking-update .check-update {
+				display: none;
+			}
+			/* Updates available */
+			.can-update .update {
+				display: inline;
+			}
+			.can-update .check-update {
+				display: none;
+			}
+			/* Updates not available */
+			.no-update .check-update {
+				display: none;
+			}
+			/* Updates done */
+			.update-done .check-update {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="header">
+			<h1>Installed Styles</h1>
+			<p>Visit <a href="http://userstyles.org/">userstyles.org</a> for pre-made styles. Ask in <a href="http://userstyles.org/">the forum</a> if you need help.</p>
+			<a href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html"><button>Add style</button></a>
+			<button onclick="checkUpdateAll()">Check all for updates</button>
+		</div>
+		<div id="installed"><div class="disabled" style-id="25" style-update-url="http://userstyles.org/styles/chrome/11922.json"><h2 class="style-name">Facebook - Dark Shiny Blue, transparency <a href="http://userstyles.org/styles/11922" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: facebook.com, ilike.com, fb.familylink.com</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=25"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="disabled" style-id="26" style-update-url="http://userstyles.org/styles/chrome/27249.json"><h2 class="style-name">Perfect Dar1k Google for StrataDARK Remix <a href="http://userstyles.org/styles/27249" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: picasaweb.google.com, mail.google.com, googlelabs.com, gmodules.com, savedbythegoog.appspot.com, talkgadget.google.com, ig.ig.gmodules.com, http://www.google*, https://www.google*, https://encrypted.google*<span class="applies-to-extra"> and more</span></p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=26"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="disabled" style-id="56" style-update-url="http://userstyles.org/styles/chrome/35844.json"><h2 class="style-name">Hipster Fo Sho &#9650; (with space background) <a href="http://userstyles.org/styles/35844" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: http://www.tumblr.com/*</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=56"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="disabled" style-id="62" style-update-url="http://userstyles.org/styles/chrome/33785.json"><h2 class="style-name">Wikipedia Black/Dark Clean Minimal <a href="http://userstyles.org/styles/33785" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: wikipedia.org</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=62"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="disabled" style-id="66" style-update-url="http://userstyles.org/styles/chrome/15214.json"><h2 class="style-name">Facebook Skin - Spiderman skin 2010 <a href="http://userstyles.org/styles/15214" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: facebook.com, ilike.com, fb.familylink.com</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=66"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="disabled" style-id="67" style-update-url="http://userstyles.org/styles/chrome/6775.json"><h2 class="style-name">@bsolutely the best skin 4 Facebook - summer skin <a href="http://userstyles.org/styles/6775" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: facebook.com</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=67"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="disabled" style-id="69" style-update-url="http://userstyles.org/styles/chrome/35312.json"><h2 class="style-name">Under water blue userstyles.org <a href="http://userstyles.org/styles/35312" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: http://www.userstyles.org/*, http://userstyles.org/*</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=69"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="enabled" style-id="70" style-update-url="http://userstyles.org/styles/chrome/44977.json"><h2 class="style-name">AVClub remove wallpaper ads <a href="http://userstyles.org/styles/44977" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: avclub.com</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=70"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div><div class="enabled" style-id="71" style-update-url="http://userstyles.local/styles/chrome/15588.json"><h2 class="style-name">YouTube - Dark Shiny Blue, transparency <a href="http://userstyles.local/styles/15588" target="_blank"><img src="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/world_go.png" alt="*"></a></h2><p class="applies-to">Applies to: youtube.com</p><p class="actions"><a class="style-edit-link" href="chrome-extension://edffnibopghcdcfpcmaplcojejicknlo/edit.html?id=71"><button>Edit</button></a><button class="enable" onclick="enable(event, true)">Enable</button><button class="disable" onclick="enable(event, false)">Disable</button><button class="delete" onclick="doDelete(event)">Delete</button><button class="check-update" onclick="doCheckUpdate(event)">Check for update</button><button class="update" onclick="doUpdate(event)">Install update</button><span class="update-note"></span></p></div></div>
+	
+
+</body></html>

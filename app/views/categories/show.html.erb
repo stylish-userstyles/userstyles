@@ -1,0 +1,29 @@
+<% if @root_category == 'site' %>
+	<p><%=site_style_text%></p>
+	<p>Search for site styles on the left, or choose from the list of sites with the most styles.</p>
+<% elsif @root_category == 'app' %>
+	<p><%=app_style_text%></p>
+	<p>Search for app styles on the left, or choose a more specific category.</p>
+<% end %>
+
+<ul id="subcategory-list">
+<% @subcategory_counts.each do |sc| %>
+	<li><%=number_with_delimiter(sc['c'])%> <%=link_to(h((sc['subcategory'].nil? ? 'No subcategory' : sc['subcategory'].capitalize) + ' themes'), :controller => 'styles', :action => 'browse', :category => sc['subcategory'].nil? ? sc['category'] + 'none' : sc['subcategory'])%></li>
+<% end %>
+</ul>
+
+<div class="ad" style="max-width: 100%; overflow: hidden">
+	<div class="ad-note"><span>Advertisement</span></div>
+	<script type="text/javascript"><!--
+	google_ad_client = "ca-pub-2247465624637408";
+	/* Browse styles top of page */
+	google_ad_slot = "5085099206";
+	google_ad_width = 728;
+	google_ad_height = 90;
+	//-->
+	</script>
+	<script type="text/javascript"
+	src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+	</script>
+</div>
+

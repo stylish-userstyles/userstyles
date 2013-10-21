@@ -1,0 +1,32 @@
+<p>Customize Orkut by changing the background to suit your personality! Put a loved one, a movie poster, your favourite band, whatever.</p>
+
+<p>You will need <a href="https://addons.mozilla.org/firefox/addon/2108">Stylish</a> for this to work.</p>
+
+<table class="screenshot-table" style="width: auto;">
+	<tr>
+		<td class="screenshot-before">
+			<span class="screenshot-caption">Before</span><br />
+			<img src="/images/orkut_background_before.png" class="screenshot multiple-screenshot" alt="" />
+		</td>
+		<td class="screenshot-after">
+			<span class="screenshot-caption">After</span><br />
+			<img src="/images/orkut_background_after.png" class="screenshot multiple-screenshot" alt="" />
+		</td>
+	</tr>
+</table>
+
+<% if @error %>
+<p><%=@error%></p>
+<% end %>
+<form method="POST" action="orkut_generate" enctype="multipart/form-data">
+<p>
+<label for="image">Choose your image:</label> <input id="image" type="file" name="image">
+</p>
+<p>
+<input id="light" type="radio" name="type" value="light" checked="checked"><label for="light">My image is light</label><br>
+<input id="dark" type="radio" name="type" value="dark"><label for="dark">My image is dark</label>
+</p>
+<p>
+<input type="submit" value="Generate style">
+</p>
+</form>

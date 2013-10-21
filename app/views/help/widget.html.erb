@@ -1,0 +1,112 @@
+<%
+widget_url = params['listing-url']
+widget_style = params['widget-style'] || 'v1'
+widget_title = params['widget-title'] || 'User Styles'
+
+url_match = /(?:http:\/\/)?([^\/]+)(\/.*)/.match(widget_url)
+if !url_match.nil?
+	domain = url_match[1]
+	path = url_match[2]
+
+	if ['userstyles.org', 'static.userstyles.org', 'cdn.userstyles.org', 'widget.userstyles.org'].include?(domain)
+		domain = 'widget.userstyles.org'
+	elsif domain != 'userstyles.local'
+		domain = nil
+	end
+
+	path = nil unless path.starts_with?('/styles/browse') or path.starts_with?('/users/')
+end
+
+domain = 'widget.userstyles.org' if domain.nil?
+path = '/styles/browse' if path.nil?
+
+pathParts = path.split("?");
+jsonQueryString = "?callback=userstyles.handleData";
+queryString = "";
+if pathParts.length == 2
+	queryString = "?" + pathParts[1];
+	jsonQueryString += "&" + pathParts[1];
+end
+extensionParts = pathParts[0].split(".");
+
+json_url = 'http://' + domain + extensionParts[0] + '.jsonp' + jsonQueryString
+html_url = 'http://userstyles.org' + extensionParts[0] + queryString
+
+%>
+
+<p>The userstyles.org widget lets you put a dynamic list of user styles on your site. You can show off your own user styles, suggest user styles that change your site, or just spread the word about user styles.</p>
+
+<p>The generated code is HTML and JS. You are free to modify the generated code as you see fit, with one exception: don't modify the subdomain of the referenced JS scripts (you're free to download them and host them yourself, though). <a href="widget_details">You can also create completely new code based on the data feed.</a> If you have suggestions for new widget styles or changes to the existing formats, please <a href="mailto:jason.barnabe@gmail.com">send me an e-mail</a>.</p>
+
+<form action="widget">
+	<table class="form-controls" style="width: 400px">
+		<tbody>
+			<tr>
+				<th>
+					<label for="listing-url">Listing URL (search results or user page)</label>
+				</th>
+				<td>
+					<input id="listing-url" name="listing-url" type="url" value="<%=h html_url%>" required size="50">
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<label for="widget-style">Widget style</label>
+				</th>
+				<td>
+					<select id="widget-style" name="widget-style">
+						<option value="v1">Skyscraper</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<label for="widget-title">Title</label>
+				</th>
+				<td>
+					<input id="widget-title" name="widget-title" required value="<%=h widget_title%>">
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<input type="submit" value="Generate">
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</form>
+
+<% if !json_url.nil?
+		code = <<-END_OF_STRING
+<div id="userstyles-container">
+<h3>#{h widget_title}</h3>
+<script>
+if (window.addEventListener)
+	window.addEventListener("load", userstylesLoad, false);
+else if (window.attachEvent)
+	window.attachEvent("onload", userstylesLoad);
+function userstylesLoad() {
+	var c = document.getElementById("userstyles-container");
+	var s1 = document.createElement("script");
+	s1.setAttribute("async", "true");
+	var s2 = s1.cloneNode(false);
+	s1.src = "http://#{STATIC_DOMAIN}/widgets/#{h widget_style}.js";
+	c.appendChild(s1);
+	s2.src = "#{h json_url}";
+	c.appendChild(s2);
+}
+</script>
+<noscript>
+Check out <a href="#{h html_url}">#{h widget_title}</a>
+</noscript>
+</div>
+END_OF_STRING
+%>
+	Code:<br>
+	<pre id="widget-code"><%=h code%></pre>
+
+	Preview:<br>
+	<div id="widget-preview"><%=code%></div>
+<% end %>
+

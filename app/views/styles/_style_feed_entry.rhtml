@@ -1,0 +1,7 @@
+<%=format_user_text(style.long_description)%>
+<%=format_user_text(style.additional_info)%>
+<% if style.after_screenshot_thumbnail_path != nil %>
+	<div class="screenshot-box">
+		<img src="http://<%=STATIC_DOMAIN%><%=h(style.after_screenshot_thumbnail_path)%>" alt="">
+	</div>
+<% end %>

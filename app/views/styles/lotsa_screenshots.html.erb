@@ -1,0 +1,11 @@
+<% @styles.each do |style| 
+	if !style.after_screenshot_thumbnail_path.nil? %>
+		<a href="/styles/<%=style.id%>"><img src="http://<%=STATIC_DOMAIN%><%=style.after_screenshot_thumbnail_path%>" title="<%=h style.name%>"></a>
+	<% end
+end %>
+<p>
+	<% if params[:page].to_i >= 1 %>
+		<a href="/styles/lotsa_screenshots/?page=<%=params[:page].to_i - 1%>">Prev</a>
+	<% end %>
+	<a href="/styles/lotsa_screenshots/?page=<%=params[:page].to_i + 1%>">Next</a>
+</p>

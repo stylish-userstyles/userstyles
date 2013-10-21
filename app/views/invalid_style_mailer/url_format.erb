@@ -1,0 +1,19 @@
+Hello,
+
+You are receiving this e-mail because a style you posted to userstyles.org has been flagged as potentially containing non-functional code. Specifically, a check was performed on content referenced with a url() construct. For compatiblity reasons, only URLs for the http, https, chrome, moz-icon, or data protocols are now allowed in url() references on userstyles.org. Relative URLs, whitespace, empty strings, and local URLs are not allowed inside url() references.
+
+Here is a list of your styles that have been flagged:
+
+<%@styles.each do |style|
+%>-<%=style.full_pretty_url%>
+<%end%>
+There are a number of potential remedies for this situation:
+
+-If the URLs are relative, make them absolute.
+-Verify that the URLs do not contain superfluous characters, like whitespace or extra quotation marks.
+-If your intention is that there is no image (i.e. you are removing the site's existing image), use the format "background-image: none".
+-If your intention is that the user provide their own image, use style settings (see http://userstyles.org/help/coding#help-style-settings).
+
+Please edit the styles listed above to comply with the new compatiblity rules. If you do not fix the styles within 7 days, they will be marked as deleted and no longer appear in search results. You will still be able to fix the style at a later date and then "undelete" it.
+
+If you have any questions, please post on the forum at http://forum.userstyles.org/discussion/32349/doing-a-site-wide-url-reference-check or e-mail jason.barnabe@gmail.com.

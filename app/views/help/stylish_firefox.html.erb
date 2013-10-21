@@ -1,0 +1,66 @@
+<p>This is a quick video tutorial of Stylish for Firefox's basic features. A textual version of the same information, along with some more detailed topics, are covered below the video.</p>
+
+<iframe width="560" height="315" src="http://www.youtube.com/embed/pQb0RZE6KM8?rel=0" frameborder="0" allowfullscreen></iframe>
+
+<h3>Installation</h3>
+
+<ol>
+	<li>With Firefox (or other Mozilla programs... just assume I always mean that when I say Firefox), go to the <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-userstylesorghelp">Stylish install page</a>.</li>
+	<li>Click Add To Firefox.</li>
+	<li>Click Install Now.</li>
+	<li>Click Restart Now.</li>
+</ol>
+
+<h3>Finding styles</h3>
+
+<p>To find styles to install, visit <a href="http://userstyles.org">userstyles.org</a> and browse or search from there. Alternatively, you can go to a site you wish to change, click the Stylish icon, and choose "Find styles for this site".</p>
+
+<p>For details on how styles are organized on userstyles.org, see <a href="http://userstyles.local/help/userstylesorg">here</a>.
+
+<h3>Installing styles</h3>
+
+<p>Find a style you like on <a href="/">userstyles.org</a>. Click "Install with Stylish" in the green box. Click Install on the prompt. That's it, the style is installed and active.</p>
+
+<p>User styles only take effect on your computer; others can't see what you've changed unless they also use the same user style.</p>
+
+<h3>Managing styles</h3>
+
+<p>You can activate, deactivate, edit, and remove styles in the User Styles pane of Firefox's Add-ons Manager. To access the Add-ons Manager, click the Firefox button in the top left of the window (or the Tools menu) and choose Add-ons.</p>
+
+<h3>Stylish toolbar button</h3>
+
+<p>Stylish will install a toolbar button in the Add-ons bar (on the bottom left of the screen) after installation to provide quick access to Stylish functions. This button can be <a href="http://support.mozilla.org/en-US/kb/how-do-i-customize-toolbars">moved or removed just like any other button</a>.</p>
+
+<h3>Uninstallation</h3>
+
+<p>Stylish can be removed <a href="http://support.mozilla.com/en-US/kb/Uninstalling%20add-ons">like any other extension</a>. To keep Stylish but remove individual styles, see "Managing styles" above.</p>
+
+<h3>Turning off all styles</h3>
+
+<p>Sometimes it's useful to temporarily turn off all styles to see if a style is causing a problem with the display of the site. Rather than disabling all styles or disabling Stylish itself, you can tell Stylish to turn everything off by clicking the Stylish icon and choosing Turn all styles off. To turn them back on, click on the Stylish icon and choose Turn all styles on.</p>
+
+<h3>How to recover if a style makes Firefox unusable</h3>
+
+<p>If you installed a style that makes Firefox unusable, start Firefox with the command line parameter --stylish-disable. This will make Stylish not apply any styles. You can then remove the offending style, and then turn Stylish back on by clicking the Stylish icon and choosing Turn all styles on.</p>
+
+<h3>How to fix a corrupted Stylish database</h3>
+
+<p><a href="/help/db">See here</a>.</p>
+
+<h3>Hidden Stylish preferences</h3>
+
+<p>Stylish has preferences to customize its behaviour which are not exposed to the UI. These prefs can be changed in about:config.</p>
+<dl>
+	<dt>extensions.stylish.dbFile</dt>
+	<dd>Path to the stylish.sqlite database which stores installed style info. Default is blank, meaning look for "stylish.sqlite" in the profile folder.</dd>
+	<dt>extensions.stylish.editor</dt>
+	<dd>Text editor to use when editing styles. 0 - Orion (with syntax highlighting) (default), 1 - plain old textbox. Orion is not available in all applications and versions.</dd>
+	<dt>extensions.stylish.install.allowedDomains</dt>
+	<dd>Space-seperated list of domains that can bring up install boxes and detect style install status. Default: userstyles.org.</dd>
+	<dt>extensions.stylish.manageView</dt>
+	<dd>Default manage interface. 0 - add-ons dialog (default), 1 - stand-alone dialog, 2 - sidebar. Add-ons dialog is not available in all applications and versions.</dd>
+	<dt>extensions.stylish.promptOnInstall</dt>
+	<dd>Whether to prompt before installing a style. Default: true.</dd>
+	<dt>extensions.stylish.updatesEnabled</dt>
+	<dd>Whether to check for updates for styles. Default: true.</dd>
+</dl>

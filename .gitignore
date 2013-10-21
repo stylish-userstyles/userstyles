@@ -1,0 +1,16 @@
+doc
+script
+README
+db
+log
+config/boot.rb
+config/database.yml
+config/development.sphinx.conf
+refresh_cdn.log
+log.txt
+thumb.log
+vendor/rails
+vendor/railties
+config/locales/
+public/style_screenshots/
+public/style_screenshot_thumbnails/

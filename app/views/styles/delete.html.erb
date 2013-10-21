@@ -1,0 +1,29 @@
+<% if @style %>
+	<%= error_messages_for 'style' %>
+<% end %>
+<p>"Deleting" your style doesn't truly delete it, it just hides it so it won't appear in listings or searches. For people who reach the style anyway (like current users of the style), you can optionally include a message and the ID of the style that they should be using instead.</p>
+<% form_tag(:action => "delete_save") do %>
+	<table class="form-controls">
+		<tbody>
+			<tr>
+				<th>
+					<label for="obsoletion-message">Message</label>
+				</th>
+				<td>
+					<textarea id="obsoletion-message" name="style[obsoletion_message]"><%=h @style.obsoletion_message%></textarea>
+				</td>
+			</tr>
+			<tr>
+				<th>
+					<label for="obsoleting-style-id">Superceded by (ID)</label>
+				</th>
+				<td>
+					<input id="obsoleting-style-id" name="style[obsoleting_style_id]" value="<%=h @style.obsoleting_style_id%>" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<input type="hidden" name="style[id]" value="<%=@style.id%>" />
+	<input type="submit" name="type" value="Delete" />
+	<input type="submit" name="type" value="Undelete" />
+<% end %>

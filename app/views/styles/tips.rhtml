@@ -1,0 +1,48 @@
+<ul>
+	<li><a href="#no-ids">Styling sites that have few classes or IDs</a></li>
+	<li><a href="#moz-docs">-moz-document rules</a></li>
+	<li><a href="#namespaces">Namespaces</a></li>
+	<li><a href="#including-images">Including images</a></li>
+	<li><a href="#important">!important</a></li>
+	<li><a href="#categorization">Categorization</a></li>
+	<li><a href="#import">@import</a></li>
+	<li><a href="#naming">Naming your style</a></li>
+</ul>
+
+<h2 id="no-ids">Styling sites that have few classes or IDs</h2>
+<p>See <a href="http://blog.userstyles.org/?p=45">this blog post</a>.</p>
+
+<h2 id="moz-docs">-moz-document rules</h2>
+<p><a href="http://lists.w3.org/Archives/Public/www-style/2004Aug/0135.html">-moz-document rules</a> allow you to specify that a style should only apply to certain sites. There are three types of rules: domain (applies to all sites in the specified domain), url (applies to specified URL only), and url-prefix (apples to all URLs that begin with the given URL). Using these rules lets you avoid the crazy selectors that were necessary in the past. <a href="/stylish">Stylish</a> provides a nice UI to generate these rules.</p>
+
+<h2 id="namespaces">Namespaces</h2>
+<p>Specifying a namespace in your styles helps you avoid side effects. The namespace makes your style only apply to a certain XML namespace, such as XUL (primarily used in chrome) or HTML (primarily used in websites). Specifying a namespace also ensures that a style submitted to userstyles.org will be <a href="#categorization">categorized</a>a correctly. Again, <a href="/stylish">Stylish</a> provides a nice UI to generate these rules.</p>
+
+<h2 id="including-images">Including images</h2>
+<p>You can include images inline with your style by <a href="http://software.hixie.ch/utilities/cgi/data/data">creating data: URIs</a>. This eliminates the need for users to download additional images or for you to have the images hosted somewhere.</p>
+
+<h2 id="important">!important</h2>
+<p>Using !important rules is usually necessary when creating user styles. Failure to include !important may result in the style being applied inconsistently.</p>
+
+<h2 id="categorization">Categorization</h2>
+<p>Styles are categorized on this site according to these criteria:</p>
+<dl>
+	<dt>Site styles</dt>
+	<dd>A portion of the style is contained in a -moz-doc that applies to a non-chrome, non-about protocol, and is not simply a protocol prefix (such as http://*</dd>
+
+	<dt>Global styles</dt>
+	<dd>A portion of the style is contained in a protocol prefix -moz-doc (such as http://*) or a portion of the style is not contained in any -moz-doc and the default namespace is not XUL.</dd>
+
+	<dt>App styles</dt>
+	<dd>A portion of the style is contained in a chrome: or about: -moz-doc or the default namespace is XUL.</dd>
+</dl>
+
+<h2 id="import">@import</h2>
+<p>@import statements are not allowed. This is because if a user has installed a style with an @imported URL, and the URL goes down, <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=356503">the user's app will <em>hang</em></a>.</p>
+
+<h2 id="naming">Naming your style</h2>
+<ul>
+	<li>Do not include version numbers in your style. Style names aren't updated when the user updates the style.</li>
+	<li>Do not include a prefix such as "Website cleaner:...". Styles are categorized automatically by the site.</li>
+	<li>Put the most relevant word first - for example, "Google - remove the ads" rather than "Remove the ads from Google".</li>
+</ul>

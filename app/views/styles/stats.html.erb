@@ -1,0 +1,48 @@
+<% sources = ['stylish-fx', 'stylish-ch', 'stylish-op', 'userjs', 'css-opera'] %>
+<table>
+	<caption>Install counts</caption>
+	<thead>
+		<tr>
+			<th>Date</th>
+			<th>Stylish (FX)</th>
+			<th>Stylish (CH)</th>
+			<th>Stylish (OP)</th>
+			<th>User JS</th>
+			<th>Opera CSS</th>
+			<th>Total</th>
+		</tr>
+	</thead>
+	<tbody>
+		<% d = @style.created.to_date
+		source_totals = {}
+		sources.each do |s|
+			source_totals[s] = 0
+		end
+		source_totals['total'] = 0
+		until d > 8.days.ago.to_date
+			c = @counts[d] %>
+			<tr>
+				<th><%=h d.strftime('%F')%></th>
+				<% day_total = 0
+				sources.each do |s|
+					day_source_count = (c.nil? or c[s].nil?) ? 0 : c[s]
+					source_totals[s] += day_source_count
+					day_total += day_source_count %>
+					<td class="numeric-value"><%=number_with_delimiter(day_source_count)%></td>
+				<% end
+				source_totals['total'] += day_total %>
+				<td class="numeric-value"><%=number_with_delimiter(day_total)%></td>
+			</tr>
+		<% d = d + 1.day
+		end %>
+	</tbody>
+	<tfoot>
+		<tr>
+			<th>Total</th>
+			<% sources.each do |s| %>
+				<td class="numeric-value"><%=number_with_delimiter(source_totals[s])%></td>
+			<% end %>
+			<td class="numeric-value"><%=number_with_delimiter(source_totals['total'])%></td>
+		</tr>
+	</tfoot>
+</table>

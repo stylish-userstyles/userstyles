@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>You've Installed Stylish</title>
+<style>
+body {
+	font-family: Verdana, sans-serif;
+}
+.logo {
+	margin-top: 1em;
+	margin-left: 1em;
+	float: left;
+	font-size: smaller;
+	min-height: 500px;
+	margin-right: 2em;
+}
+.main {
+	margin-right: 2em;
+}
+.main p {
+	margin-bottom: 2em;
+}
+body {
+	max-width: 1024px;
+	margin-left: auto;
+	margin-right: auto;
+}
+.language {
+	font-size: smaller;
+}
+
+.style1 {font-size: 16px;color: #CCFFFF;}
+.install-bg {position : absolute;width : 100%;height: 1500px;z-index: 1000;top: 0px; left: 0px; opacity: 0; background-color : #000000; }
+.install-bag {position : absolute;width : 100%;z-index: 1001;top: 0px; }
+.install-img {float:right; opacity: 0; margin-right:10px; margin-top:10px; }
+</style>
+</head>
+
+<body>
+	<div class="logo">
+    	 <a href="/"><img src="http://<%=STATIC_DOMAIN%>/images/159.png"></a><br>
+         Restyle the web with Stylish!<br>
+         <p> <a href="/">userstyles.org home »</a></p>
+	</div>
+
+<% if false %>
+
+	<script>
+		// http://www.quirksmode.org/js/detect.html
+		var BrowserDetect = {
+			init: function () {
+				this.browser = this.searchString(this.dataBrowser) || "An unknown browser";
+				this.version = this.searchVersion(navigator.userAgent)
+					|| this.searchVersion(navigator.appVersion)
+					|| "an unknown version";
+				this.OS = this.searchString(this.dataOS) || "an unknown OS";
+			},
+			searchString: function (data) {
+				for (var i=0;i<data.length;i++)	{
+					var dataString = data[i].string;
+					var dataProp = data[i].prop;
+					this.versionSearchString = data[i].versionSearch || data[i].identity;
+					if (dataString) {
+						if (dataString.indexOf(data[i].subString) != -1)
+							return data[i].identity;
+					}
+					else if (dataProp)
+						return data[i].identity;
+				}
+			},
+			searchVersion: function (dataString) {
+				var index = dataString.indexOf(this.versionSearchString);
+				if (index == -1) return;
+				return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
+			},
+			dataBrowser: [
+				{
+					string: navigator.userAgent,
+					subString: "Chrome",
+					identity: "Chrome"
+				},
+				{ 	string: navigator.userAgent,
+					subString: "OmniWeb",
+					versionSearch: "OmniWeb/",
+					identity: "OmniWeb"
+				},
+				{
+					string: navigator.vendor,
+					subString: "Apple",
+					identity: "Safari",
+					versionSearch: "Version"
+				},
+				{
+					prop: window.opera,
+					identity: "Opera"
+				},
+				{
+					string: navigator.vendor,
+					subString: "iCab",
+					identity: "iCab"
+				},
+				{
+					string: navigator.vendor,
+					subString: "KDE",
+					identity: "Konqueror"
+				},
+				{
+					string: navigator.userAgent,
+					subString: "Firefox",
+					identity: "Firefox"
+				},
+				{
+					string: navigator.vendor,
+					subString: "Camino",
+					identity: "Camino"
+				},
+				{		// for newer Netscapes (6+)
+					string: navigator.userAgent,
+					subString: "Netscape",
+					identity: "Netscape"
+				},
+				{
+					string: navigator.userAgent,
+					subString: "MSIE",
+					identity: "Explorer",
+					versionSearch: "MSIE"
+[6~				},
+				{
+					string: navigator.userAgent,
+					subString: "Gecko",
+					identity: "Mozilla",
+					versionSearch: "rv"
+				},
+				{ 		// for older Netscapes (4-)
+					string: navigator.userAgent,
+					subString: "Mozilla",
+					identity: "Netscape",
+					versionSearch: "Mozilla"
+				}
+			],
+			dataOS : [
+				{
+					string: navigator.platform,
+					subString: "Win",
+					identity: "Windows"
+				},
+				{
+					string: navigator.platform,
+					subString: "Mac",
+					identity: "Mac"
+				},
+				{
+					   string: navigator.userAgent,
+					   subString: "iPhone",
+					   identity: "iPhone/iPod"
+				},
+				{
+					string: navigator.platform,
+					subString: "Linux",
+					identity: "Linux"
+				}
+			]
+
+		};
+		BrowserDetect.init();
+
+
+		// foxlingo install thingy
+		function guide(imgUrl) {
+			var body = document.getElementsByTagName("body")[0];
+			var div = document.createElement("div");
+			div.setAttribute("class", "install-bg")
+			body.appendChild(div);
+			var div_container = document.createElement("div");
+			div_container.setAttribute("class", "install-bag")
+			var img = document.getElementById("install-img");
+			if (!img) {
+				img = document.createElement("img");
+				img.setAttribute("src", imgUrl);
+				img.setAttribute("class", "install-img")
+				img.setAttribute("id", "install-img")
+				img.addEventListener("mousedown",function(e) { body.removeChild(div); div_container.removeChild(e.currentTarget); },false);
+				div_container.appendChild(img);
+				img.style.display ="block"
+				body.appendChild(div_container);
+				var baseMargin = 10;
+				if (BrowserDetect.version != "3.6") {
+					// Fx 4, doorhanger
+					img.setAttribute("style", "float: none; margin-left: 60px");
+					baseMargin = 135;
+				}
+				img.style.marginTop = (document.documentElement.scrollTop+12 + baseMargin) + "px"
+			}
+			var interval;
+			var opacity = 0;
+			var opacityDelta = 0.03
+			var sizeInterval = function(div) {
+				opacity += opacityDelta;
+				div.style['opacity'] = opacity;
+				finalOpacity = 0.8;
+				if (div.id=="install-img")
+				finalOpacity = 1
+				if (opacity>=finalOpacity) {
+					clearInterval(interval)
+					interval = null;
+					if (div.id!="install-img") {
+						opacity = 0;
+						interval = setInterval(sizeInterval, 1, img);
+					}
+				}
+			}
+			interval = setInterval(sizeInterval, 1, div);
+		} 
+
+		/*
+		* downloadParams = {"AddonFox":downloadLink, "AddonFox":downloadLink}
+		*/
+		function install (aEvent, downloadParams,img) {
+			InstallTrigger.install(downloadParams);
+			if (BrowserDetect.browser == "Firefox") {
+				guide(img);
+			}
+			return false;
+		}
+	</script>
+
+	<h1><strong>Congratulations</strong>, you've installed Stylish!</h1>
+
+	<p style="font-size:larger;">Before you start styling...</p>
+
+	<a href="http://www.addonfox.com/download/?s=82" rel="nofollow" onclick='return install(event, {"AddonFox": "http://www.addonfox.com/download/?s=82"}, "http://<%=STATIC_DOMAIN%>/images/install-img.png");'><img src="http://<%=STATIC_DOMAIN%>/images/ads/addonfox.png" width="600"></a>
+
+	<p style="margin-top: 2em">You can now use styles like <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, and <%=link_to h(@best[2].short_description), @best[2]%>. <a href="/categories">Start browsing the site to find other styles.</a></p>
+
+	<p>After installing styles, you can turn them off by going to Tools, Add-ons, User Styles. For more info, see <a href="/help">the help docs</a> (but really, just start using it, you'll probably figure it out). If you need help, ask in <a href="http://forum.userstyles.org">the forum</a> or <a href="/contact">send me an e-mail</a>.</p>
+
+<% elsif false %>
+
+	<h1><strong>Congratulations</strong>, you've installed Stylish!</h1>
+
+	<p style="font-size:larger;">Before you start styling...</p>                                                                   
+                                             
+<div id="ytwebmoptionpanel" style="width: 723px; border: medium none; background-image: url('http://cdn.barisderin.com/wp-content/themes/barisderin/images/stylish/rmap.jpg'); position: relative; height: 359px; z-index: 2147483647; margin: 0pt auto 0pt 250px; border-radius: 91em 91em 91em 91em / 28em 28em 28em 28em; box-shadow: 0pt 0pt 7em #F90840;"><div style="z-index: 2147483647; border: medium none; background-color: black; box-shadow: 0pt 0pt 12px black; background-image: url('http://barisderin.com/wp-content/themes/barisderin/images/stylish/progress-bar-background.png'); height: 339px; width: 703px; margin-left: 0px; margin-top: 0px; position: relative; top: 10px; left: 10px; border-radius: 91em 91em 91em 91em / 28em 28em 28em 28em; padding: 1px;"><div style="text-shadow: 0pt 0pt 1em black; margin-top: 32px; outline: medium none; text-align: center; color: rgb(150, 66, 80); font-size: 37px ! important;"><a style="text-decoration: none; outline: medium none; font-size: 36px ! important; text-shadow: 0pt 0pt 1em rgb(248, 19, 19); color: rgb(244, 226, 230); font-family: arial;" href="https://addons.mozilla.org/en-US/firefox/addon/wordpress-toolbar/" target="_blank">Wordpress Toolbar</a></div><div style="height: 156px;"><div style="height: 150px; width: 250px; margin-top: -2px; float: left; background-repeat: no-repeat; background-position: 67px 7px; background-image: url('http://barisderin.com/skitch/Skitch.png');"></div><div style="margin-right: 20px; font-family: arial; color: rgb(254, 244, 233); text-shadow: 0pt 10px 4px rgba(0, 0, 0, 0.3); padding-top: 12px; font-size: 24px ! important; margin-top: 21px;"><span style="font-weight: bold; text-decoration: none; color: rgb(249, 179, 18); outline: medium none;" target="_blank">WordPress Toolbar</span> is a new companion for <span style="font-weight: bold; text-decoration: none; outline: medium none; color: rgb(17, 128, 231);">Firefox</span> users to open up  <span style="font-weight: bold; text-decoration: none; outline: medium none; color: rgb(234, 34, 74);">Wordpress</span> admin dashboard options on any web site.</div></div><p style="text-align: center; margin-top: 14px;"><a onclick="var params = new Object; params['Wordpress Toolbar'] = {URL: 'https://addons.mozilla.org/firefox/downloads/latest/256706/addon-256706-latest.xpi?src=dp-btn-primary', IconURL: 'http://barisderin.com/skitch/Skitch.png', toString: function () {return this.URL;}}; var res = InstallTrigger.install(params); if (!res) {  } return false" href="" title="Install Wordpress Toolbar" style="border-radius: 15px 15px 15px 15px; padding: 4px 64px 6px; font-size: 2em; text-decoration: none; color: rgb(254, 244, 233); text-shadow: 0pt 2px 2px rgba(0, 0, 0, 0.3); font-family: arial; background: -moz-linear-gradient(center top , rgb(255, 0, 76), rgb(129, 1, 18)) repeat scroll 0pt 0pt transparent; border: 1px solid rgb(78, 5, 17); outline: medium none;">TRY IT!</a></p></div></div>
+
+	<p style="margin-top: 2em">You can now use styles like <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, and <%=link_to h(@best[2].short_description), @best[2]%>. <a href="/categories">Start browsing the site to find other styles.</a></p>
+
+	<p>After installing styles, you can turn them off by going to Tools, Add-ons, User Styles. For more info, see <a href="/help">the help docs</a> (but really, just start using it, you'll probably figure it out). If you need help, ask in <a href="http://forum.userstyles.org">the forum</a> or <a href="/contact">send me an e-mail</a>.</p>
+
+
+<% elsif false %>
+
+	<div id="english" class="main">
+		<p class="language">English | <a href="#" onclick="switchLanguage('deutsch');return false;">Deutsch</a> | <a href="#" onclick="switchLanguage('espanol');return false">Espanol</a> | <a href="#" onclick="switchLanguage('francais');return false;">Français</a></p>
+
+		<h1><strong>Congratulations</strong>, you've installed Stylish!</h1>
+
+		<p style="font-size:larger;margin-bottom:0.5em;">Before you start styling...</p>
+
+		<p>Did you know you can boost your system's performance and fix crashes with <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL1&aff=7637&xat=userstylesRBL1" target="_blank">a free scan</a>? You can <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL2&aff=7637&xat=userstylesRBL2" target="_blank">run the free scan now</a> and use <b>Stylish</b> while you wait.</p>
+
+		<p style="text-align: center"><a href="http://www.liutilities.com/affcb/?id=RBuserstyles&aff=7637&xat=userstylesRBafterdownload" target="_blank"><img src="/images/ads/uniblue4.gif" alt="Free PC Scan"></a></p>
+
+		<p>You can now use styles like <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, and <%=link_to h(@best[2].short_description), @best[2]%>. <a href="/categories">Start browsing the site to find other styles.</a></p>
+
+		<p>After installing styles, you can turn them off by going to Tools, Add-ons, User Styles. For more info, see <a href="/help">the help docs</a> (but really, just start using it, you'll probably figure it out). If you need help, ask in <a href="http://forum.userstyles.org">the forum</a> or <a href="/contact">send me an e-mail</a>.</p>
+	</div>                                          
+
+	<div id="deutsch" class="main" style="display:none">
+		<p class="language"><a href="#" onclick="switchLanguage('english');return false;">English</a> | Deutsch | <a href="#" onclick="switchLanguage('espanol');return false">Espanol</a> | <a href="#" onclick="switchLanguage('francais');return false;">Français</a></p>
+
+		<h1><strong>Glückwunsch</strong>, Sie haben Stylish installiert!</h1>
+
+		<p style="font-size:larger;margin-bottom:0.5em;">Bevore Sie mit dem Stylen starten...</p>
+
+		<p>Wussten Sie, dass Sie die Leistung Ihres Systems mit einem <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL1&aff=7637&xat=userstylesRBL1" target="_blank">kostenlosen Scan</a> verbessern können? Sie können den <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL2&aff=7637&xat=userstylesRBL2" target="_blank">Gratisscan</a> durchführen und Stylish nutzen, während Sie warten.</p>
+
+		<p style="text-align: center"><a href="http://www.liutilities.com/affcb/?id=RBuserstyles&aff=7637&xat=userstylesRBafterdownload" target="_blank"><img src="/images/ads/uniblue_de.gif" alt="Kostenfreier Scan Ihres PC"></a></p>
+
+		<p>Sie können jetzt Styles wie <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, und <%=link_to h(@best[2].short_description), @best[2]%> nutzen. <a href="/categories">Verwenden Sie die Seite zum Browsen, um andere Styles zu finden.</a></p>
+
+		<p>Nachdem Sie Styles installiert haben, können Sie sie abschalten, indem Sie zu Tools, Add-ons, User Styles gehen. Um weitere Informationen zu erhalten, kontrollieren Sie <a href="/help">die Help Docs</a> (Ernsthaft: Nutzen Sie es einfach und Sie werden es selbst herausfinden). Falls Sie Hilfe benötigen, fragen Sie im <a href="http://forum.userstyles.org">Forum</a> oder <a href="/contact">senden Sie mir eine Email</a>.</p>
+	</div>                                          
+
+	<div id="espanol" class="main" style="display: none">
+		<p class="language"><a href="#" onclick="switchLanguage('english');return false;">English</a> | <a href="#" onclick="switchLanguage('deutsch');return false">Deutsch</a> | Espanol | <a href="#" onclick="switchLanguage('francais');return false;">Français</a></p>
+
+		<h1><strong>Felicitaciones</strong>, has instalado Stylish!</h1>
+
+		<p style="font-size:larger;margin-bottom:0.5em;">Antes de empezar a diseñar...</p>
+
+		<p>¿Sabes que puedes mejorar el rendimiento de tu sistema y solucionar los bloqueos con <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL1&aff=7637&xat=userstylesRBL1" target="_blank">una exploración libre</a>? Puedes <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL2&aff=7637&xat=userstylesRBL2" target="_blank">ejecutar la exploración libre ahora</a> y usar <b>Stylish</b> mientras esperas.</p>
+
+		<p style="text-align: center"><a href="http://www.liutilities.com/affcb/?id=RBuserstyles&aff=7637&xat=userstylesRBafterdownload" target="_blank"><img src="/images/ads/uniblue_es.gif" alt="Escaneo gratis del PC"></a></p>
+
+		<p>Ahora puedes utilizar estilos como el <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, y <%=link_to h(@best[2].short_description), @best[2]%>. <a href="/categories">Comienza a navegar por las paginas internet para encontrar otros estilos.</a></p>
+
+		<p>Después de la instalación de estilos, puedes desactivarles en Tools, Add-ons, User Styles. Para obtener más información, consulta <a href="/help">the help docs</a> (en realidad, empieces a usarlo, es probable que lo entenderás). Si necesitas ayuda, pregunta en <a href="http://forum.userstyles.org">el foro</a> o <a href="/contact">envíame un e-mail</a>.</p>
+	</div> 
+
+	<div id="francais" class="main" style="display: none">
+		<p class="language"><a href="#" onclick="switchLanguage('english');return false;">English</a> | <a href="#" onclick="switchLanguage('deutsch');return false">Deutsch</a> | <a href="#" onclick="switchLanguage('espanol');return false">Espanol</a> | Français</p>
+
+		<h1><strong>Félicitations</strong>, vous venez d'installer Stylish!</h1>
+
+		<p style="font-size:larger;margin-bottom:0.5em;">Avant de commencer à personnaliser...</p>
+
+		<p>Saviez-vous que vous pouvez améliorer les performances de votre système et réparer les pannes grâce à  <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL1&aff=7637&xat=userstylesRBL1" target="_blank">un scan gratuit</a>? Vous pouvez <a href="http://www.liutilities.com/affcb/?id=RBuserstylesL2&aff=7637&xat=userstylesRBL2" target="_blank">exécuter le scan gratuit maintenant</a> et utiliser <b>Stylish</b> en attendant.</p>
+
+		<p style="text-align: center"><a href="http://www.liutilities.com/affcb/?id=RBuserstyles&aff=7637&xat=userstylesRBafterdownload" target="_blank"><img src="/images/ads/uniblue_fr.gif" alt="Scan Gratuit du PC"></a></p>
+
+		<p>Vous pouvez utiliser des styles tels que <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, et <%=link_to h(@best[2].short_description), @best[2]%>. <a href="/categories">Naviguez sur le site pour trouver d'autres styles.</a></p>
+
+		<p>Après avoir installé les styles, vous pouvez les désactiver en allant dans Outils &gt; Compléments &gt; Styles utilisateur. Pour en savoir plus, consultez <a href="/help">les documents d'aide</a> mais, honnêtement, dès que vous commencerez à l'utiliser tout sera très clair). Si vous avez besoin d'aide, posez vos questions sur <a href="http://forum.userstyles.org">le forum</a> ou <a href="/contact">envoyez-moi un e-mail</a>.</p>
+	</div> 
+
+	<script>
+		function switchLanguage(lang) {
+			document.getElementById('english').style.display='none';
+			document.getElementById('deutsch').style.display='none';
+			document.getElementById('espanol').style.display='none';
+			document.getElementById('francais').style.display='none';
+			document.getElementById(lang).style.display='block';
+		}
+
+		if (navigator.language.substring(0,2) == "de") {
+			switchLanguage("deutsch");
+		} else if (navigator.language.substring(0,2) == "es") {
+			switchLanguage("espanol");
+		}
+	</script>
+
+<% else %>
+
+	<h1><strong>Congratulations</strong>, you've installed Stylish!</h1>
+
+	<p>Maybe you want to watch a tutorial screencast or read <a href="/help">the help docs</a>?</p>
+
+	<iframe width="560" height="315" src="http://www.youtube.com/embed/pQb0RZE6KM8?rel=0" frameborder="0" allowfullscreen></iframe>
+
+	<p style="margin-top: 2em">Or jump right in with styles like <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, and <%=link_to h(@best[2].short_description), @best[2]%>. <a href="/categories">Start browsing the site to find other styles.</a></p>
+
+
+<% end %>
+
+<iframe scrolling="no" frameborder="0" allowtransparency="true" height="90" width="728" style="border:0;" src="http://d.delivery45.com/widget/render/hash/d5ba532c48b8fefe472063266b0c10c3"></iframe>
+
+	<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-8246384-1']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+		var ga = document.createElement('script');
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		ga.setAttribute('async', 'true');
+		document.documentElement.firstChild.appendChild(ga);
+	  })();
+	</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<p><a href="widget">The userstyles.org widget</a> consists of two parts: the data feed and the script that turns that data feed into HTML.</p>
+
+<p>The data feed URLs are based on style listing URLs on userstyles.org. For example, the feed for http://userstyles.org/styles/browse is http://widget.userstyles.org/styles/browse.jsonp. The feed is in <a href="http://en.wikipedia.org/wiki/JSONP">JSONP</a> format. The default callback function is handleUserstylesData. You can use a different callback function by passing the "callback" parameter; for example, http://widget.userstyles.org/styles/browse.jsonp?callback=anotherFunction.</p>
+
+<p>The HTML generating script defines the callback function. This function receives a JSON array of all the styles as an argument. The idea is to generate content on your page based on this data. Make sure you properly escape HTML; the contents of the JSON are not HTML-escaped.</p>
+
+<p>If you make something really cool, <a href="mailto:jason.barnabe@gmail.com">let me know about it</a> and I can post it for others to use.</p>
