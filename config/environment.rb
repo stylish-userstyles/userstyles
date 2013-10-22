@@ -5,7 +5,9 @@
 
 RAILS_ENV = 'development'
 
-ENV['GEM_PATH'] = '/var/lib/gems/1.8'
+#ENV['GEM_PATH'] = '/var/lib/gems/1.8'
+ENV['GEM_PATH'] = '/home/jason/.rvm/gems/ruby-1.8.7-p374/gems/'
+
 
 #RAILS_GEM_VERSION = '2.0.1' unless defined? RAILS_GEM_VERSION
 RAILS_GEM_VERSION = '2.3.15' unless defined? RAILS_GEM_VERSION
@@ -85,7 +87,7 @@ DOMAIN = "userstyles.local"
 FORUM_DOMAIN = "forum.userstyles.local"
 #STATIC_DOMAIN = "static.userstyles.org"
 #STATIC_DOMAIN = "cdn.userstyles.org"
-STATIC_DOMAIN = "userstyles.local"
+STATIC_DOMAIN = "userstyles.local:3000"
 UPDATE_DOMAIN = "update.userstyles.org"
 MD5_PATH = '/home/jason/md5test/'
 
