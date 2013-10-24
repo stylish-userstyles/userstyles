@@ -184,6 +184,7 @@ class LoginController < ApplicationController
 	end
 
 	def lost_password_start
+		@page_title = 'Lost password recovery'
 		user = User.where(:email => params[:email]).first
 		if !user.nil?
 			# login might be nil if they started with openid
@@ -204,7 +205,7 @@ class LoginController < ApplicationController
 			user.save!
 			return
 		end
-		render :text => "Sorry, didn't work."
+		render :text => "Sorry, didn't work.", :layout => true
 	end
 
 	def single_sign_on
