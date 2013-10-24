@@ -3,7 +3,7 @@
 	<head profile='http://microformats.org/profile/rel-license'>
 		<title>
 			<% if @page_title != nil %>
-				<%=h @page_title%> - userstyles.org
+				<%=@page_title%> - userstyles.org
 			<% else %>
 				userstyles.org - Restyle the web!
 			<% end %>
@@ -14,10 +14,10 @@
 			<meta name="robots" content="noindex,follow">
 		<% end %>
 		<% if !@canonical.nil? %>
-			<link rel="canonical" href="<%=h @canonical%>">
+			<link rel="canonical" href="<%= @canonical%>">
 		<% end %>
 		<% if @meta_description %>
-			<meta name="description" content="<%=h @meta_description%>">
+			<meta name="description" content="<%=@meta_description%>">
 		<% end %>
 		<meta property="fb:admins" content="1319443195">
 		<link rel="stylesheet" href="http://<%=STATIC_DOMAIN%>/stylesheets/standard.css" type="text/css">
@@ -25,7 +25,7 @@
 		<link rel="icon" href="http://<%=STATIC_DOMAIN%>/images/s3-16.png" type="image/png">
 		<% if not @feeds.nil?
 			for feed in @feeds-%>
-		<link rel="alternate" type="<%=h feed[:type]%>" href="<%=h feed[:href]%>" title="<%=h feed[:title]%>">
+		<link rel="alternate" type="<%=feed[:type]%>" href="<%=feed[:href]%>" title="<%=feed[:title]%>">
 			<%- end
 		end %>
 		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe">
@@ -75,16 +75,16 @@
 			<h1>
 				<a href="/">userstyles.org</a> -
 				<% if @page_header != nil %>
-					<%=h @page_header%>
+					<%=@page_header%>
 				<% elsif @page_title != nil %>
-					<%=h @page_title%>
+					<%=@page_title%>
 				<% end %>
 			</h1>
 		</header>
 
 		<div id="content-wrapper">
 			<article id="main-article">
-				<%=@content_for_layout%>
+				<%=yield%>
 			</article>
 		</div>
 
@@ -95,7 +95,7 @@
 					<li>
 						<form action="<%=url_for(:action => 'browse_r', :controller => 'styles')%>" method="get"<% if !params[:as].nil? %> class="advanced-search-active"<%end%>>
 							<div id="simple-search">
-								<input id="search-terms" placeholder="Search" type="search" title="Enter search words or a URL" name="search_terms" size="7" value="<%=h params[:search_terms]%>"><input type="submit" id="search-submit" value="→"<% if !params[:as].nil? %> name="as"<%end%>>
+								<input id="search-terms" placeholder="Search" type="search" title="Enter search words or a URL" name="search_terms" size="7" value="<%=params[:search_terms]%>"><input type="submit" id="search-submit" value="→"<% if !params[:as].nil? %> name="as"<%end%>>
 							</div>
 							<div id="show-advanced-search" style="" onclick="this.parentNode.className+=' advanced-search-active';document.getElementById('search-submit').name = 'as'">Advanced</div>
 							<div id="advanced-search">
@@ -105,7 +105,7 @@
 									<option value="global"<%=@bc_category=='global' ? ' selected="selected"' : ''%>>Global</option>
 									<option value="site"<%=(@bc_category=='site' and @bc_subcategory.nil?) ? ' selected="selected"' : ''%>>Site</option>
 									<% if !@bc_subcategory.nil? %>
-										<option value="<%=h @bc_subcategory%>" selected="selected"><%=h @bc_subcategory.capitalize%></option>
+										<option value="<%=@bc_subcategory%>" selected="selected"><%=@bc_subcategory.capitalize%></option>
 									<% end %>
 								</select> styles, sorted by
 								<% if @chosen_sort.nil? and @direction.nil?
@@ -114,7 +114,7 @@
 								end %>
 								<select name="sort" id="sort-select">
 									<% $sorts_map.keys.each do |sort| %>
-										<option<%=@chosen_sort == sort ? ' selected="selected"' : ''%> value="<%=h sort%>"><%=h sort.gsub('_', ' ')%></option>
+										<option<%=@chosen_sort == sort ? ' selected="selected"' : ''%> value="<%=sort%>"><%=sort.gsub('_', ' ')%></option>
 									<% end %>
 								</select><select name="sort_direction">
 									<option value="asc"<%=@direction == 'asc' ? ' selected="selected"' : ''%>>asc</option>
@@ -135,13 +135,13 @@
 						</form>
 					</li>
 					<li><%=link_to_unless_current('Browse', :action => "index", :controller => "categories") %></li>
-					<li><%=link_to_unless_current("<script type='text/javascript'>
+					<li><%=link_to_unless_current(raw("<script type='text/javascript'>
 						if (getUserFromCookie() != null) {
 							document.write('My Account');
 						} else {
 							document.write('Log in');
 						}
-					</script><noscript>My Account</noscript>", {:action => "index", :controller => "login"}, :rel => 'nofollow') %></li>
+					</script><noscript>My Account</noscript>"), {:action => "index", :controller => "login"}, :rel => 'nofollow') %></li>
 					<li><%=link_to_unless_current('Help', {:action => "index", :controller => "help"}, :rel => 'nofollow') %></li>
 					<li><a href="http://forum.userstyles.org" rel="nofollow">Forum</a></li>
 				</ul>

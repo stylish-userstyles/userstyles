@@ -2,7 +2,7 @@
 	<%= error_messages_for 'style' %>
 <% end %>
 <p>"Deleting" your style doesn't truly delete it, it just hides it so it won't appear in listings or searches. For people who reach the style anyway (like current users of the style), you can optionally include a message and the ID of the style that they should be using instead.</p>
-<% form_tag(:action => "delete_save") do %>
+<%= form_tag(:action => "delete_save") do %>
 	<table class="form-controls">
 		<tbody>
 			<tr>

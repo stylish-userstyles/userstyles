@@ -32,7 +32,7 @@ class StylesController < ApplicationController
 				begin
 					@style = Style.find(params["id"], :include => [:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason])
 				rescue ActiveRecord::RecordNotFound
-					render :file => "#{RAILS_ROOT}/public/404.html", :status => 404, :layout => true
+					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true
 					return
 				end
 				if !@style.redirect_page.nil?
@@ -40,7 +40,7 @@ class StylesController < ApplicationController
 					return
 				end
 				if !@style.admin_delete_reason.nil? and @style.admin_delete_reason.locked
-					render :file => "#{RAILS_ROOT}/public/404.html", :status => 404, :layout => true
+					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true
 					return
 				end
 				bad_content = $bad_content_subcategories.include?(@style.subcategory)
@@ -59,20 +59,20 @@ class StylesController < ApplicationController
 				@page_title = @style.short_description
 				@page_header = @style.short_description
 				@page_title = @page_title + " - Themes and Skins for " + @style.subcategory.capitalize unless @style.subcategory.nil?
-				@header_include = "<link rel='stylish-code' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n<script>document.querySelector(\"link[rel='stylish-code']\").setAttribute('href', '#stylish-code');</script>\n<link rel='stylish-description' href='#stylish-description'/>\n"
+				@header_include = "<link rel='stylish-code' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n<script>document.querySelector(\"link[rel='stylish-code']\").setAttribute('href', '#stylish-code');</script>\n<link rel='stylish-description' href='#stylish-description'/>\n".html_safe
 				if @style.style_options.empty? 
-					@header_include += "<link rel='stylish-md5-url' href='http://#{UPDATE_DOMAIN}/#{@style.id}.md5'/>\n<link rel='stylish-update-url' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n"
+					@header_include += "<link rel='stylish-md5-url' href='http://#{UPDATE_DOMAIN}/#{@style.id}.md5'/>\n<link rel='stylish-update-url' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n".html_safe
 				else
 					@style.style_options.each do |option|
 						if option.option_type == "color"
-							@header_include += "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n"
+							@header_include += "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 							break
 						end
 					end
 				end
-				@header_include += "<link rel=\"stylish-install-ping-url\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN)}\">\n<link rel=\"stylish-install-ping-url-chrome\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN)}\">\n<link rel=\"stylish-install-ping-url-opera\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN)}\">\n<link rel=\"stylish-code-ie\" href=\"#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN))}\">\n<link rel=\"stylish-code-chrome\" href=\"#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}\">\n<link rel=\"stylish-code-opera\" href=\"#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}\">\n<link rel=\"stylish-id-url\" href=\"http://#{DOMAIN}/styles/#{@style.id}\">\n"
+				@header_include += "<link rel=\"stylish-install-ping-url\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN)}\">\n<link rel=\"stylish-install-ping-url-chrome\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN)}\">\n<link rel=\"stylish-install-ping-url-opera\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN)}\">\n<link rel=\"stylish-code-ie\" href=\"#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN))}\">\n<link rel=\"stylish-code-chrome\" href=\"#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}\">\n<link rel=\"stylish-code-opera\" href=\"#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}\">\n<link rel=\"stylish-id-url\" href=\"http://#{DOMAIN}/styles/#{@style.id}\">\n".html_safe
 				if !@style.screenshot_url.nil?
-					@header_include += "<link rel=\"stylish-example-url\" href=\"#{CGI.escapeHTML(@style.screenshot_url)}\">"
+					@header_include += "<link rel=\"stylish-example-url\" href=\"#{CGI.escapeHTML(@style.screenshot_url)}\">".html_safe
 				end
 				if @style.subcategory.nil?
 					@meta_description = "Customize your web browser with this user style." 
@@ -142,7 +142,7 @@ class StylesController < ApplicationController
                 @style["user_id"] = session[:user].id
 		@page_title = "New style"
 		@no_bots = true
-		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n"
+		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 		render :action => "edit"
 	end
 
@@ -154,7 +154,7 @@ class StylesController < ApplicationController
 			return
 		end
 		@page_title = "Editing " + @style.short_description
-		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/lightbox.js'></script>\n"
+		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/lightbox.js'></script>\n".html_safe
 	end
 
 	def create
@@ -314,7 +314,7 @@ class StylesController < ApplicationController
 			non_ar_errors.each do |attr, msg|
 				@style.errors.add(attr, msg)
 			end
-			@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n"
+			@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 			if new
 				@page_title = "New style"
 			else
@@ -594,7 +594,7 @@ class StylesController < ApplicationController
 		else
 			per_page = 100
 		end
-		@styles = Style.paginate(:all, :include => [:user, :admin_delete_reason], :conditions => 'obsolete = 1 and admin_delete_reasons.locked = false', :order => 'total_install_count desc, styles.id', :page => params[:page], :per_page => per_page)
+		@styles = Style.where('obsolete = 1 and admin_delete_reasons.locked = false').includes([:user, :admin_delete_reason]).order('total_install_count desc, styles.id').paginate(:page => params[:page], :per_page => per_page)
 	end
 
 	def delete
@@ -801,7 +801,7 @@ class StylesController < ApplicationController
 			render :nothing => true, :status => 404
 			return
 		end
-		@styles = Style.find_all_by_user_id_and_obsolete(@user_displayed.id, 0, :order => 'short_description')
+		@styles = Style.active.where(:user_id => @user_displayed.id).order('short_description')
 		@page_title = "Styles by #{ERB::Util::h(@user_displayed.name)}"
 		generic_list
 	end
@@ -814,19 +814,14 @@ class StylesController < ApplicationController
 
 	def screenshotable
 		bad_content_in = ($bad_content_subcategories.map { |c| "'#{c}'" }).join(',')
-		@styles = Style.find(:all, 
-			:conditions => 
-				'screenshot_url is not null ' +
-				'and obsolete = 0 ' + 
-				'and screenshot_type_preference = "auto" ' +
-				'and subcategory NOT IN (' + bad_content_in + ')', 
-			:order => 
-				'auto_screenshot_date IS NULL DESC, ' + #styles with no screenshot
-				'IF(updated >= auto_screenshot_date, DATEDIFF(updated, auto_screenshot_date), -1) DESC, ' + #anything that was updated since the screenshot was generated, the days between the update and the screenshot dates
-				'auto_screenshot_date, ' + #last time the screenshot was generated
-				'updated DESC', #last time the style was updated
-			:limit => 1000
-		)
+		@styles = Style.active.where('screenshot_url is not null ' +
+			'and screenshot_type_preference = "auto" ' +
+			'and subcategory NOT IN (' + bad_content_in + ')')
+			.order('auto_screenshot_date IS NULL DESC, ' + #styles with no screenshot
+			'IF(updated >= auto_screenshot_date, DATEDIFF(updated, auto_screenshot_date), -1) DESC, ' + #anything that was updated since the screenshot was generated, the days between the update and the screenshot dates
+			'auto_screenshot_date, ' + #last time the screenshot was generated
+			'updated DESC') #last time the style was updated
+			.limit(1000)
 		render :action => "screenshotable", :layout => false
 	end
 
@@ -864,7 +859,7 @@ class StylesController < ApplicationController
 		else
 			page = params[:page].to_i
 		end
-		@styles = Style.find(:all, :conditions => ["obsolete = 0 and id BETWEEN ? and ?", page * 1000 + 1, (page + 1) * 1000], :order => 'id')
+		@styles = Style.active.where(["id BETWEEN ? and ?", page * 1000 + 1, (page + 1) * 1000]).order('id')
 		@no_ads = true
 		@no_bots = true
 	end
@@ -876,7 +871,7 @@ class StylesController < ApplicationController
 			return
 		end
 		@page_title = @style.short_description + ' stats'
-		raw_counts = StyleInstallCount.find(:all, :conditions => ["style_id = ?", params[:id]])
+		raw_counts = StyleInstallCount.where(:style_id => params[:id])
 		# group by date and source
 		@counts = {}
 		raw_counts.each do |rc|
@@ -1004,7 +999,7 @@ protected
 			fixed = true
 		elsif keywords.size == 1 and (params[:category].nil? or params[:category] == 'all')
 			# one keyword without a category - see if it matches a common subcategory name
-			subcategory_styles = Style.find(:all, :conditions => ["subcategory = ? and !obsolete", keywords[0]], :limit => 10)
+			subcategory_styles = Style.active.where(:subcategory => keywords[0]).limit(10)
 			if subcategory_styles.size == 10
 				params[:category] = keywords[0]
 				params[:search_terms] = nil

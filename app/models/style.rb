@@ -4,6 +4,8 @@ require 'public_suffix'
 
 class Style < ActiveRecord::Base
 
+	scope :active, :conditions => { :obsolete => 0 }
+
 	PublicSuffix::List.private_domains = false
 
 	include ActionView::Helpers::JavaScriptHelper
@@ -62,71 +64,90 @@ class Style < ActiveRecord::Base
 	end
 
 	validates_each :style_code do |record, attr, value|
-		if true
-			e = record.get_parse_error
-			if !e.nil?
-				record.errors.add 'CSS', "has an error - #{e}.  If you need help, post your code at http://forum.userstyles.org/discussion/34614/new-css-parservalidator" unless e.nil?
-			else
-				record.errors.add 'CSS', "looks unintentionally global. Please read https://github.com/JasonBarnabe/stylish/wiki/Preventing-global-styles ." if record.calculate_unintentional_global
-				namespaces = record.calculate_namespaces
-				if !namespaces.nil?
-					bad_namespaces = namespaces - ['http://www.w3.org/1999/xhtml', 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'http://docbook.org/ns/docbook', 'http://www.w3.org/2000/svg', 'http://www.gribuser.ru/xml/fictionbook/2.0', 'http://vimperator.org/namespaces/liberator']
-					if bad_namespaces.length == 1
-						record.errors.add 'CSS', "has an invalid namespace: #{bad_namespaces.first}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces."
-					elsif bad_namespaces.length > 1
-						record.errors.add 'CSS', "has invalid namespaces: #{bad_namespaces.join(', ')}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces."
-					end
-				end
-				
-			end
+		# check validity, global, namespaces
+		e = record.get_parse_error
+		if !e.nil?
+			record.errors.add(attr, "has an error - #{e}. If you need help, post your code at http://forum.userstyles.org/discussion/34614/new-css-parservalidator .") unless e.nil?
 		else
-			code_error = nil
-			record.code_possibilities.each do |a|
-				p = a[0]
-				cp = a[1]
-				# first, check the parser. if it's cool, then we're cool. if it fails, then we'll do some manual checks
-				begin
-					CSSPool::CSS::Document.parse(cp)
-				#rescue Racc::ParseError => e
-				rescue Exception => e
-					potential_code_error = "has an error - #{e}"
-					# check the number of brackets
-					if cp.count("{") == 0 or cp.count("{") != cp.count("}")
-						code_error = potential_code_error
-						break
-					end
-					# must have at least one colon
-					if cp.count(":") == 0
-						code_error = potential_code_error
-						break
-					end
-					# can't be html (start with open bracket)
-					html_match = cp.match(/^\s*</)
-					if !html_match.nil? and html_match.begin(0) == 0
-						code_error = potential_code_error
-						break
-					end
-					# can't be JS (start with double slashes)
-					js_match = cp.match(/^\s*\/\//)
-					if !js_match.nil? and js_match.begin(0) == 0
-						code_error = potential_code_error
-						break
-					end
+			record.errors.add(attr, "looks unintentionally global. Please read https://github.com/JasonBarnabe/stylish/wiki/Preventing-global-styles .") if record.calculate_unintentional_global
+			namespaces = record.calculate_namespaces
+			if !namespaces.nil?
+				bad_namespaces = namespaces - ['http://www.w3.org/1999/xhtml', 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'http://docbook.org/ns/docbook', 'http://www.w3.org/2000/svg', 'http://www.gribuser.ru/xml/fictionbook/2.0', 'http://vimperator.org/namespaces/liberator']
+				if bad_namespaces.length == 1
+					record.errors.add(attr, "has an invalid namespace: #{bad_namespaces.first}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces.")
+				elsif bad_namespaces.length > 1
+					record.errors.add(attr, "has invalid namespaces: #{bad_namespaces.join(', ')}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces.")
 				end
 			end
-			record.errors.add attr, code_error if !code_error.nil?
+			
 		end
 		
+		# check @-moz-documents
 		record.calculate_moz_docs.each do |fn, value|
-			record.errors.add 'CSS', "has an invalid @-moz-document value: #{fn} #{value}. Read https://github.com/JasonBarnabe/stylish/wiki/Valid-@-moz-document-rules for more info." if !self.validate_moz_doc(fn, value)
+			record.errors.add(attr, "has an invalid @-moz-document value: #{fn} #{value}. Read https://github.com/JasonBarnabe/stylish/wiki/Valid-@-moz-document-rules for more info.") if !self.validate_moz_doc(fn, value)
 		end
+		
+		# URL references
+		allowed_reference_prefixes = ['http:', 'data:', 'moz-icon:', 'chrome:', 'https:']
+		references = record.calculate_external_references
+		references.each do |url|
+			# allow certain paths
+			allowed = false
+			allowed_reference_prefixes.each do |start|
+				if url.start_with?(start)
+					allowed = true
+					break
+				end
+			end
+			if url.empty?
+				display_url = '(empty string)'
+			else
+				# .. - rails fails with an ArgumentError in 118n.rb
+				# % - rails does other weird things
+				display_url = "'" + url.gsub('..', '').gsub('%', '') + "'"
+			end
+			message = "contains an invalid URL reference - #{display_url}. Only absolute URLs to one of the following protocols is allowed - " + allowed_reference_prefixes.join(', ') + '. For user-specified URLs, use style settings.'
+			record.errors.add(attr, message) unless allowed
+		end
+		
+		record.code_possibilities.each do |o, c|
+			# non-chrome @imports
+			import_match = /@import\s*(?:url\(\s*)?[\'\"]?\s*([^\'\"]+)[\'\"]?\s*\)?/
+			c.scan(import_match).each do |url|
+				if !begins_with?(url[0], /chrome:/)
+					record.errors.add attr, "cannot contain non-chrome imports (they cause UI hangs) - #{url[0]}"
+				end
+			end
+
+			# non-chrome bindings
+			binding_match = /-moz-binding\s*:\s*url\s*\(\s*[\'\"]?([^\'\"]+)[\'\"]?\s*\)/
+			c.scan(binding_match).each do |url|
+				if !begins_with?(url[0], /chrome:/)
+					if !AllowedBinding.is_allowed?(url[0])
+						record.errors.add attr, "cannot contain non-approved, non-chrome protocol bindings (mail jason.barnabe@gmail.com to get a new binding approved) - #{url[0]}"
+					end
+				end
+			end
+
+			# orkut autogenerated styles
+			if !c.index('orkut').nil? and !c.index('cool edit').nil? and !c.index('ancoras').nil?
+				record.errors.add attr, "appears to be an auto-generated Orkut style. Since people can use http://userstyles.org/style_generator/orkut instead, we don't accept these styles."
+			end
+			if !c.index('http://userstyles.org/style_generator/orkut').nil?
+				record.errors.add attr, "appears to be an auto-generated Orkut style from http://userstyles.org/style_generator/orkut . Don't post these generated styles."
+			end
+		end
+		
+		lengths = record.code_possibilities.map { |o, c| c.length }
+		record.errors.add(attr, 'is too short') if lengths.min < 5
+		allowed_length = record.allow_long_code? ? 400000 : 100000
+		record.errors.add(attr, "is too long. Code is #{lengths.max} bytes - max is #{allowed_length} bytes.") if lengths.max > allowed_length
 	end
 	
 	# Move child record errors onto main
 	validate do |style|
-		style_filtered_errors = style.errors.reject{ |attr, msg| ['style_options', 'style_option_values', 'style_code', 'screenshots'].include?(attr) and msg.include?('is invalid') }
-		style.errors.clear
-		style_filtered_errors.each { |err| style.errors.add(*err) }
+		style.errors.delete(:style_options)
+		style.errors.delete(:style_option_values)
 		style.style_options.each do |so|
 			so.errors.each do |attr, msg|
 				style.errors.add("Style option #{attr}", msg) unless attr == 'style_option_values'
@@ -137,12 +158,21 @@ class Style < ActiveRecord::Base
 				end
 			end
 		end
-		style.style_code.errors.each do |attr, msg|
-			style.errors.add("Code", msg)
-		end
+		style.errors.delete(:screenshots)
 		style.screenshots.each do |screenshot|
 			screenshot.errors.each do |attr, msg|
 				style.errors.add("Screenshot", msg)
+			end
+		end
+	end
+
+	# Make errors unique
+	validate do |style|
+		style.errors.keys.each do |key|
+			msgs = style.errors.delete(key)
+			msgs.uniq!
+			msgs.each do |msg|
+				style.errors.add(key, msg)
 			end
 		end
 	end
@@ -188,7 +218,7 @@ class Style < ActiveRecord::Base
 	end
 
 	attr_accessor :rating_avg, :rating_count
-
+	
 	def is_css_valid?
 		if self.style_code.code.count("{") > 0 and self.style_code.code.count("{") == self.style_code.code.count("}") and self.style_code.code.count(":") > 0
 			return true
@@ -197,7 +227,7 @@ class Style < ActiveRecord::Base
 	end
 
 	def self.newly_added(category, limit)
-		return Style.find(:all, :order => "created DESC", :limit => limit, :conditions => "created > #{1.week.ago.strftime('%Y-%m-%d')} AND obsolete = 0 " + (category.nil? ? "" : " AND category = '#{category}'"))
+		return Style.order("created DESC").limit(limit).where("created > #{1.week.ago.strftime('%Y-%m-%d')} AND obsolete = 0 " + (category.nil? ? "" : " AND category = '#{category}'"))
 	end
 
 	def related
@@ -208,7 +238,7 @@ class Style < ActiveRecord::Base
 		else
 			conditions += "category = '#{Style.connection.quote_string(category)}'"
 		end
-		return Style.find(:all, :conditions => conditions, :order => "user_id = #{user.id} DESC, popularity_score DESC", :limit => 3)
+		return Style.where(conditions).order("user_id = #{user.id} DESC, popularity_score DESC").limit(3)
 	end
 
 	def self.top_styles(limit, choose_from)
@@ -221,7 +251,7 @@ class Style < ActiveRecord::Base
 		#return Style.find(:all,	 :conditions => "styles.id IN (#{style_ids.join(',')})", :order=> "RAND() DESC")
 
 		#grab the top n
-		possibilities = Style.find(:all, :conditions => "obsolete = 0", :order => "popularity_score DESC", :limit => choose_from)
+		possibilities = Style.where(:obsolete => 0).order("popularity_score DESC").limit(choose_from)
 		#randomize
 		a = possibilities.dup
 	    possibilities = possibilities.collect { a.slice!(rand(a.length)) }
@@ -786,7 +816,7 @@ Replace = "$STOP()"
 		#delete the existing one
 		if is_update
 			begin
-				File.delete("#{RAILS_ROOT}/public/style_screenshots/#{get_screenshot_name_by_type(type)}")
+				File.delete("#{Rails.root}/public/style_screenshots/#{get_screenshot_name_by_type(type)}")
 			rescue Errno::ENOENT
 				#no file. meh.
 			rescue Errno::EISDIR
@@ -794,7 +824,7 @@ Replace = "$STOP()"
 			end
 			if type == :after
 				begin
-					File.delete("#{RAILS_ROOT}/public/style_screenshot_thumbnails/#{get_screenshot_name_by_type(type)}")
+					File.delete("#{Rails.root}/public/style_screenshot_thumbnails/#{get_screenshot_name_by_type(type)}")
 				rescue Errno::ENOENT
 					#no file. meh.
 				rescue Errno::EISDIR
@@ -803,10 +833,10 @@ Replace = "$STOP()"
 			end
 		end
 		filename = "#{self.id}_#{prefix}.#{screenshot.content_type.strip.split('/')[1]}"
-		File.open("#{RAILS_ROOT}/public/style_screenshots/#{filename}", "w") { |f| f.write(screenshot.read) }
+		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "w") { |f| f.write(screenshot.read) }
 		refresh_cdn "/style_screenshots/#{filename}" if is_update
 		if type == :after
-			`#{RAILS_ROOT}/thumbnail.sh #{RAILS_ROOT}/public/style_screenshots/#{filename} #{RAILS_ROOT}/public/style_screenshot_thumbnails/#{filename} &> #{RAILS_ROOT}/thumb.log`
+			`#{Rails.root}/thumbnail.sh #{Rails.root}/public/style_screenshots/#{filename} #{Rails.root}/public/style_screenshot_thumbnails/#{filename} &> #{Rails.root}/thumb.log`
 			refresh_cdn "/style_screenshot_thumbnails/#{filename}" if is_update
 		end
 		set_screenshot_name_by_type(type, filename)
@@ -821,19 +851,19 @@ Replace = "$STOP()"
 		filename = "#{self.id}_additional_#{screenshot.id}.#{data.content_type.strip.split('/')[1]}"
 		screenshot.path = filename
 		screenshot.save!
-		full_path = "#{RAILS_ROOT}/public/style_screenshots/#{filename}"
+		full_path = "#{Rails.root}/public/style_screenshots/#{filename}"
 		is_update = File.exists?(full_path)
 		File.open(full_path, "w") { |f| f.write(data.read) }
 		refresh_cdn "/style_screenshots/#{filename}" if is_update
 	end
 
 	def refresh_cdn(path)
-		`#{RAILS_ROOT}/refresh_cdn.sh http://#{STATIC_DOMAIN}#{path} >> #{RAILS_ROOT}/refresh_cdn.log 2>> #{RAILS_ROOT}/refresh_cdn.log`
+		`#{Rails.root}/refresh_cdn.sh http://#{STATIC_DOMAIN}#{path} >> #{Rails.root}/refresh_cdn.log 2>> #{Rails.root}/refresh_cdn.log`
 	end
 
 	def delete_additional_screenshot(screenshot)
 		begin
-			File.delete("#{RAILS_ROOT}/public/style_screenshots/#{screenshot.path}", "w")
+			File.delete("#{Rails.root}/public/style_screenshots/#{screenshot.path}", "w")
 		rescue Errno::ENOENT
 			#no file. meh.
 		end
@@ -842,14 +872,14 @@ Replace = "$STOP()"
 
 	def change_additional_screenshot(screenshot, data)
 		begin
-			File.delete("#{RAILS_ROOT}/public/style_screenshots/#{screenshot.path}", "w")
+			File.delete("#{Rails.root}/public/style_screenshots/#{screenshot.path}", "w")
 		rescue Errno::ENOENT
 			#no file. meh.
 		end
 		filename = "#{self.id}_additional_#{screenshot.id}.#{data.content_type.strip.split('/')[1]}"
 		screenshot.path = filename
 		screenshot.save!
-		File.open("#{RAILS_ROOT}/public/style_screenshots/#{filename}", "w") { |f| f.write(data.read) }
+		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "w") { |f| f.write(data.read) }
 	end
 
 	# applies the style options to this style. the parameter is a hash of string style option id to (string style value id | text value)
@@ -1256,6 +1286,14 @@ Replace = "$STOP()"
 		self.unintentional_global = self.calculate_unintentional_global
 	end
 
+	def calculate_external_references
+		references = Set.new
+		code_possibilities.each do |o, c|
+			references.merge(Style.calculate_external_references_for_code(c))
+		end
+		return references
+	end
+
  private
 
 	# Returns an array of all docs for this style, or nil if any are invalid
@@ -1371,6 +1409,43 @@ Replace = "$STOP()"
 		return true if PublicSuffix.valid?(domain)
 		# tld only
 		return (PublicSuffix.valid?('example.' + domain) or PublicSuffix.valid?('example.com.' + domain)) && !publicly_accessible_only
+	end
+
+	# returns a set of references in the code to external resources (things references via url(), minus namespaces and -moz-documents)
+	def self.calculate_external_references_for_code(code)
+		
+		references = Set.new
+		code = code.gsub(/[\r\n]+/, '')
+
+		code = StyleCode.strip_comments(code)
+
+		matches = code.scan(/url\s*\(\s*['"]?[^'")]*['"]?\s*\)/i)
+		matches.each do |url_statement|
+			# get the actual url, stripping out the url(' and ') parts
+			url = url_statement.sub(/^url\s*\(\s*['"]?/i, '')
+			url.sub!(/['"]?\s*\)$/i, '')
+
+			# check what came immediately before the url (up to start of file, ;, {, or }).
+			start_of_url = code.index(url_statement)
+			start_of_statement = code.rindex(/;|\}|\{/, start_of_url)
+			start_of_statement = 0 if start_of_statement.nil?
+			before_statement = code[start_of_statement..start_of_url]
+			next if before_statement.include?('namespace') or before_statement.include?('moz-document')
+
+			# look to see if the a [ or a ] is closer before the url. a [ closer indicates we may be in an attribute selector
+			close_bracket = code.rindex(/\]/, start_of_url)
+			open_bracket = code.rindex(/\[/, start_of_url)
+			next if !open_bracket.nil? and (close_bracket.nil? or open_bracket > close_bracket)
+
+			references << url
+		end
+
+		return references
+	end
+
+	def self.begins_with?(str, re)
+		m = str.match(re)
+		return !m.nil?# and m.begin(0) == 0
 	end
 
 end

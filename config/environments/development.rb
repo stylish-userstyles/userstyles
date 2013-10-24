@@ -1,19 +1,38 @@
-# Settings specified here will take precedence over those in config/environment.rb
+Userstyles::Application.configure do
+  # Settings specified here will take precedence over those in config/application.rb
 
-# In the development environment your application's code is reloaded on
-# every request.  This slows down response time but is perfect for development
-# since you don't have to restart the webserver when you make code changes.
-config.cache_classes     = false
+  # In the development environment your application's code is reloaded on
+  # every request.  This slows down response time but is perfect for development
+  # since you don't have to restart the webserver when you make code changes.
+  config.cache_classes = false
 
-# Log error messages when you accidentally call methods on nil.
-config.whiny_nils        = true
+  # Log error messages when you accidentally call methods on nil.
+  config.whiny_nils = true
 
-# Show full error reports and disable caching
-config.action_controller.consider_all_requests_local = true
-config.action_controller.perform_caching             = false
-ActionController::Base.cache_store = :file_store, "#{RAILS_ROOT}/tmp/cache"
-ActionMailer::Base.delivery_method = :test
+  # Show full error reports and disable caching
+  config.consider_all_requests_local       = true
+  config.action_view.debug_rjs             = true
+  config.action_controller.perform_caching = false
+
+  # Don't care if the mailer can't send
+  config.action_mailer.raise_delivery_errors = false
+
+  # Print deprecation notices to the Rails logger
+  config.active_support.deprecation = :log
+
+  # Only use best-standards-support built into browsers
+  config.action_dispatch.best_standards_support = :builtin
+end
+
 
 CSS_PRE_CACHE = false
 COOKIE_DOMAIN = '0.0.0.0'
 USE_ALL_LOCAL = true
+DOMAIN = "userstyles.local"
+FORUM_DOMAIN = "forum.userstyles.local"
+STATIC_DOMAIN = "userstyles.local:3000"
+UPDATE_DOMAIN = "update.userstyles.org"
+MD5_PATH = '/home/jason/md5test/'
+
+ActionController::Base.cache_store = :file_store, "#{Rails.root}/tmp/cache"
+ActionMailer::Base.delivery_method = :test

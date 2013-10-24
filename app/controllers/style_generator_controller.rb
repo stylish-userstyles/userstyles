@@ -15,7 +15,7 @@ class StyleGeneratorController < ApplicationController
 				render :action => 'orkut'
 				return
 			end
-			@header_include = "<link rel='stylish-code' href='#stylish-code'/>\n<link rel='stylish-description' href='#stylish-description'/>"
+			@header_include = "<link rel='stylish-code' href='#stylish-code'/>\n<link rel='stylish-description' href='#stylish-description'/>".html_safe
 			@description = 'Orkut Custom Background'
 			if params[:type] == 'dark'
 				@code = orkut_template_dark(to_base_64(params[:image]))

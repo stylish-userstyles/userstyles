@@ -1,0 +1,69 @@
+== StripAttributes
+
+StripAttributes is a Rails plugin that automatically strips all ActiveRecord
+model attributes of leading and trailing whitespace before validation. If the
+attribute is blank, it strips the value to +nil+.
+
+It works by adding a before_validation hook to the record.  By default, all
+attributes are stripped of whitespace, but <tt>:only</tt> and <tt>:except</tt>
+options can be used to limit which attributes are stripped.  Both options accept
+a single attribute (<tt>:only => :field</tt>) or arrays of attributes (<tt>:except =>
+[:field1, :field2, :field3]</tt>).
+
+=== Examples
+
+  class DrunkPokerPlayer < ActiveRecord::Base
+    strip_attributes!
+  end
+
+  class SoberPokerPlayer < ActiveRecord::Base
+    strip_attributes! :except => :boxers
+  end
+
+  class ConservativePokerPlayer < ActiveRecord::Base
+    strip_attributes! :only => [:shoe, :sock, :glove]
+  end
+
+=== Installation
+
+Option 1. Use the standard Rails plugin install.
+
+  ./script/plugin install http://stripattributes.rubyforge.org/svn/tags/strip_attributes
+
+Option 2. Use piston[http://piston.rubyforge.org/] (my preferred choice).
+
+  cd vendor/plugins
+  piston import http://stripattributes.rubyforge.org/svn/tags/strip_attributes
+
+=== Other
+
+If you want to use this outside of Rails, extend StripAttributes in your
+ActiveRecord model after putting strip_attributes in your <tt>$LOAD_PATH</tt>:
+
+  require 'strip_attributes'
+  class SomeModel < ActiveRecord::Base
+    extend StripAttributes
+    strip_attributes!
+  end
+
+=== Support
+
+The StripAttributes homepage is http://stripattributes.rubyforge.org. You can
+find the StripAttributes RubyForge progject page at
+http://rubyforge.org/projects/stripattributes.
+
+Feel free to submit suggestions or feature requests. If you send a patch,
+remember to update the corresponding unit tests.  In fact, I prefer new features
+to be submitted in the form of new unit tests.
+
+=== Credits
+
+The idea was triggered by the information at
+http://wiki.rubyonrails.org/rails/pages/HowToStripWhitespaceFromModelFields
+but was modified from the original to include more idiomatic ruby and rails
+support.
+
+=== License
+
+Copyright (c) 2007 Ryan McGeary released under the MIT license
+http://en.wikipedia.org/wiki/MIT_License

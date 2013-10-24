@@ -11,7 +11,7 @@
 <% if params[:password_removed] %>
 	<p class="notice">Password-based login turned off.</p>
 <% end %>
-<% form_for(:user, :url => {:action => :update_password, :id => @user.id}) do |u| %>
+<%= form_for(:user, :url => {:action => :update_password, :id => @user.id}) do |u| %>
 	<div class="form-controls">
 		<label for="login">Login</label> <span class="linking-note">Your displayed name may be different.</span><br>
 		<%= u.text_field(:login, :size => 20, :maxlength => 20, :required => 'required') %>
@@ -46,7 +46,7 @@
 <% if !@user.hashed_password.nil? and !@user.user_authenticators.empty? %>
 	<h2>Turn off password-based login</h2>
 	<p>You can turn off password-based login and rely only on third-party authenticators. It's recommended that if you do so, you have at least two third-party authenticators, so that if one goes down, you can still log in with the other.</p>
-		<% form_for(:user, :url => {:action => :remove_password, :id => @user.id}) do |u| %>
+		<%= form_for(:user, :url => {:action => :remove_password, :id => @user.id}) do |u| %>
 			<input type="submit" value="Turn off password-based login">
 		<% end %>
 	</p>
@@ -95,8 +95,8 @@ if @user.user_authenticators.empty? %>
 				OpenID:
 			<% end %>
 			<a href="<%= h ua.provider_identifier %>"><%= h ua.provider_identifier %></a>
-			<% if @user.has_spare_login_methods
-				form_for(:user, :url => {:action => :remove_authenticator, :id => @user.id}) do |u| %>
+			<% if @user.has_spare_login_methods %>
+				<%=form_for(:user, :url => {:action => :remove_authenticator, :id => @user.id}) do |u| %>
 					<input type="hidden" name="provider_identifier" value="<%= h ua.provider_identifier %>">
 					<input type="submit" value="Remove">
 				<% end
@@ -110,7 +110,7 @@ if @user.user_authenticators.empty? %>
 <ul>
 	<% if !google_open_id_set %>
 		<li>
-			<% form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
+			<%= form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
 				<input type="hidden" name="provider_identifier" value="https://www.google.com/accounts/o8/id">
 				<input type="submit" value="Add your Google account as an OpenID provider">
 			<% end %>
@@ -118,14 +118,14 @@ if @user.user_authenticators.empty? %>
 	<% end
 	if !yahoo_open_id_set %>
 		<li>
-			<% form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
+			<%= form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
 				<input type="hidden" name="provider_identifier" value="https://me.yahoo.com/">
 				<input type="submit" value="Add your Yahoo! account as an OpenID provider">
 			<% end %>
 		</li>
 	<% end %>
 	<li>
-		<% form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
+		<%= form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
 			Add a different provider:
 			<input type="url" name="provider_identifier" required>
 			<input type="submit" value="Add">

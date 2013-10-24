@@ -1,104 +1,77 @@
-ActionController::Routing::Routes.draw do |map|
-  # Add your own custom routes here.
-  # The priority is based upon order of creation: first created -> highest priority.
-  
-  # Here's a sample route:
-  # map.connect 'products/:id', :controller => 'catalog', :action => 'view'
-  # Keep in mind you can assign values other than :controller and :action
-
-  # You can have the root of your site routed by hooking up '' 
-  # -- just remember to delete public/index.html.
-  map.connect '', :controller => "index"
-
-	map.connect 'categories/:id', :controller => 'categories', :action => 'show'
-
-	map.resources :users
-	map.connect 'user/list', :controller => 'users', :action => 'index'
-	map.connect 'user/show/:id', :controller => 'users', :action => 'show'
-	map.connect 'user/comments/:id', :controller => 'users', :action => 'comments_redirect', :format => "html"
-	map.connect 'user/comments_on/:id', :controller => 'users', :action => 'comments_on_redirect', :format => "html"
-	map.connect 'user/comments/:id/:mode', :controller => 'users', :action => 'comments_redirect'
-	map.connect 'user/comments_on/:id/:mode', :controller => 'users', :action => 'comments_on_redirect'
-	map.connect 'users/:id/styles', :controller => 'styles', :action => 'by_user', :format => "html"
-	map.connect 'users/:id/styles.:format', :controller => 'styles', :action => 'by_user'
-
-	map.connect 'styles/browse/:category/:search_terms.:format', :controller => 'styles', :action => 'browse', :requirements => {:search_terms => /[^\.\/]+/, :category => /[^\/\.]+/}
-	map.connect 'styles/browse/:category/:search_terms', :controller => 'styles', :action => 'browse', :requirements => {:search_terms => /[^\.\/]+/, :category => /[^\/\.]+/}
-	map.connect 'styles/browse/:category.:format', :controller => 'styles', :action => 'browse', :requirements => {:category => /[^\/\.]+/}
-	map.connect 'styles/browse/:category', :controller => 'styles', :action => 'browse', :requirements => {:category => /[^\/\.]+/}
-	map.connect 'styles/browse.:format', :controller => 'styles', :action => 'browse'
-	map.connect 'styles/browse', :controller => 'styles', :action => 'browse'
-	map.connect 'styles/browse_r/', :controller => 'styles', :action => 'browse_r'
-	map.connect 'styles/', :controller => 'styles', :action => 'browse_r'
-
-	# used for POSTs to make GM ignore
-	map.connect 'styles/userjs/:id', :controller => 'styles', :action => 'js', :conditions => { :method => :post }
-	# used for GETs to make GM trigger
-	map.connect 'styles/userjs/:id/:foo.user.js', :controller => 'styles', :action => 'js', :requirements => { :foo => /.*/ }
-	map.connect 'styles/js/:id/:foo.js', :controller => 'styles', :action => 'js', :requirements => { :foo => /.*/ }
-	map.connect 'styles/ieuserjs/:id/:foo.ieuser.js', :controller => 'styles', :action => 'js', :requirements => { :foo => /.*/ }
-	map.connect 'styles/operacss/:id/:foo.css', :controller => 'styles', :action => 'opera_css', :requirements => { :foo => /.*/ }
-	map.connect 'styles/iecss/:id/:foo.css', :controller => 'styles', :action => 'ie_css', :requirements => { :foo => /.*/ }
-	map.connect 'styles/chrome/:id.json', :controller => 'styles', :action => 'chrome_json'
-
-	map.connect 'styles/delete/:id', :controller => 'styles', :action => 'delete'
-	map.connect 'styles/admin_delete/:id', :controller => 'styles', :action => 'admin_delete'
-	map.connect 'styles/validate/:id', :controller => 'styles', :action => 'validate'
-	map.connect 'styles/stats/:id', :controller => 'styles', :action => 'stats'
-	map.connect 'styles/screenshotable', :controller => 'styles', :action => 'screenshotable'
-	map.connect 'styles/bad_stuff', :controller => 'styles', :action => 'bad_stuff'
-	map.connect 'styles/automation_page/:id', :controller => 'styles', :action => 'automation_page'
-	map.connect 'styles/lotsa_screenshots', :controller => 'styles', :action => 'lotsa_screenshots'
-	map.connect 'styles/reviewable', :controller => 'styles', :action => 'reviewable'
-	map.connect 'styles/graveyard', :controller => 'styles', :action => 'graveyard'
-
-	#legacy style listing urls
-	map.connect 'styles/updated', :controller => 'styles', :action => 'browse_r', :sort => 'updated_date', :sort_direction => 'desc'
-	map.connect 'styles/updated.:format', :controller => 'styles', :action => 'browse_r', :sort => 'updated_date', :sort_direction => 'desc'
-	map.connect 'styles/new_styles', :controller => 'styles', :action => 'browse_r', :sort => 'created_date', :sort_direction => 'desc'
-	map.connect 'styles/new_styles.:format', :controller => 'styles', :action => 'browse_r', :sort => 'created_date', :sort_direction => 'desc'
-	map.connect 'style/new_list', :controller => 'styles', :action => 'browse_r', :sort => 'created_date', :sort_direction => 'desc'
-	map.connect 'style/new_list/:format', :controller => 'styles', :action => 'browse_r', :sort => 'created_date', :sort_direction => 'desc'
-	map.connect 'style/new_feed', :controller => 'styles', :action => 'browse_r', :sort => 'created_date', :sort_direction => 'desc', :format => 'atom'
-	map.connect 'style/new_feed/rss', :controller => 'styles', :action => 'browse_r', :sort => 'created_date', :sort_direction => 'desc', :format => 'rss'
-	map.connect 'style/new_feed/atom', :controller => 'styles', :action => 'browse_r', :sort => 'created_date', :sort_direction => 'desc', :format => 'atom'
-	map.connect 'style/updated_list', :controller => 'styles', :action => 'browse_r', :sort => 'updated_date', :sort_direction => 'desc'
-	map.connect 'style/updated_list/:format', :controller => 'styles', :action => 'browse_r', :sort => 'updated_date', :sort_direction => 'desc'
-	map.connect 'style/updated_feed', :controller => 'styles', :action => 'browse_r', :sort => 'updated_date', :sort_direction => 'desc', :format => 'atom'
-	map.connect 'style/updated_feed/rss', :controller => 'styles', :action => 'browse_r', :sort => 'updated_date', :sort_direction => 'desc', :format => 'rss'
-	map.connect 'style/updated_feed/atom', :controller => 'styles', :action => 'browse_r', :sort => 'updated_date', :sort_direction => 'desc', :format => 'atom'
-	map.connect 'styles/:category/all', :controller => 'styles', :action => 'browse_r'
-	map.connect 'styles/site/:category', :controller => 'styles', :action => 'browse_r', :requirements => {:category => /.*/}
-	map.connect 'styles;app', :controller => 'styles', :action => 'browse_r', :category => 'app'
-	map.connect 'styles;site', :controller => 'styles', :action => 'browse_r', :category => 'site'
-	map.connect 'styles;global', :controller => 'styles', :action => 'browse_r', :category => 'global'
-	map.connect 'style/search/:search_terms', :controller => 'styles', :action => 'browse_r', :requirements => { :search_terms => /.*/ }
-	map.connect 'styles/search/:search_terms', :controller => 'styles', :action => 'browse_r', :requirements => { :search_terms => /.*/ }
-	map.connect 'style/search_text/:search_terms', :controller => 'styles', :action => 'browse_r', :requirements => { :search_terms => /.*/ }
-	map.connect 'styles/browse/:category/:search_terms/:sort/:sort_direction/:page_o', :controller => 'styles', :action => 'browse', :requirements => {:sort_direction => /(ASC|DESC)/i, :page_o => /\d+/, :search_terms => /.+/, :category => /[^\/\.]+/}
-	map.connect 'styles/browse/:category/:search_terms/:sort/:sort_direction/:page_o.:format', :controller => 'styles', :action => 'browse', :requirements => {:sort_direction => /(ASC|DESC)/i, :page_o => /\d+/, :search_terms => /.+/, :category => /[^\/\.]+/}
-	map.connect 'styles/browse/all/:search_terms', :controller => 'styles', :action => 'browse_r', :requirements => { :search_terms => /.*/ }
-
-	map.resources :styles
-
-	# support getting code with post
-	map.connect 'styles/:id.:format', :controller => 'styles', :action => 'show', :requirements => { :id => /[0-9]+/ }, :conditions => { :method => :post }
-
-	map.connect 'styles/:id/:foo', :controller => 'styles', :action => 'show', :requirements => { :foo => /[0-9a-z-]+/, :id => /[0-9]+/ }
-	map.connect 'styles/:id/:foo.:format', :controller => 'styles', :action => 'show', :requirements => { :foo => /[0-9a-z-]+/, :id => /[0-9]+/ }
-	map.connect 'style/show/:id', :controller => 'styles', :action => 'show_redirect'
-	map.connect 'style/raw/:id', :controller => 'styles', :action => 'show', :format => 'css'
-	map.connect 'styles/raw/:id', :controller => 'styles', :action => 'show', :format => 'css'
-
-	map.resources :allowed_bindings
-
-	map.connect 'stylish', :controller => 'index', :action => 'index'
-	map.connect 'firstrun', :controller => 'index', :action => 'firstrun'
-	map.connect 'contact', :controller => 'index', :action => 'contact'
-
-	# Install the default route as the lowest priority.
-	map.connect ':controller/:action/:id'
-	map.connect ':controller/:action/:id.:format'
-
-	map.connect '*path', :controller => 'index', :action => 'rescue_404'
+Userstyles::Application.routes.draw do
+  match '' => 'index#index'
+  match 'categories' => 'categories#show'
+  match 'categories/:id' => 'categories#show'
+  resources :users
+  match 'user/list' => 'users#index'
+  match 'user/show/:id' => 'users#show'
+  match 'user/comments/:id' => 'users#comments_redirect', :format => 'html'
+  match 'user/comments_on/:id' => 'users#comments_on_redirect', :format => 'html'
+  match 'user/comments/:id/:mode' => 'users#comments_redirect'
+  match 'user/comments_on/:id/:mode' => 'users#comments_on_redirect'
+  match 'users/:id/styles' => 'styles#by_user', :format => 'html'
+  match 'users/:id/styles.:format' => 'styles#by_user'
+  match 'styles/browse/:category/:search_terms.:format' => 'styles#browse', :constraints => { :search_terms => /[^\.\/]+/, :category => /[^\/\.]+/ }
+  match 'styles/browse/:category/:search_terms' => 'styles#browse', :constraints => { :search_terms => /[^\.\/]+/, :category => /[^\/\.]+/ }
+  match 'styles/browse/:category.:format' => 'styles#browse', :constraints => { :category => /[^\/\.]+/ }
+  match 'styles/browse/:category' => 'styles#browse', :constraints => { :category => /[^\/\.]+/ }
+  match 'styles/browse.:format' => 'styles#browse'
+  match 'styles/browse' => 'styles#browse'
+  match 'styles/browse_r/' => 'styles#browse_r'
+  match 'styles/' => 'styles#browse_r'
+  match 'styles/userjs/:id' => 'styles#js', :via => :post
+  match 'styles/userjs/:id/:foo.user.js' => 'styles#js', :constraints => { :foo => /.*/ }
+  match 'styles/js/:id/:foo.js' => 'styles#js', :constraints => { :foo => /.*/ }
+  match 'styles/ieuserjs/:id/:foo.ieuser.js' => 'styles#js', :constraints => { :foo => /.*/ }
+  match 'styles/operacss/:id/:foo.css' => 'styles#opera_css', :constraints => { :foo => /.*/ }
+  match 'styles/iecss/:id/:foo.css' => 'styles#ie_css', :constraints => { :foo => /.*/ }
+  match 'styles/chrome/:id.json' => 'styles#chrome_json'
+  match 'styles/delete/:id' => 'styles#delete'
+  match 'styles/admin_delete/:id' => 'styles#admin_delete'
+  match 'styles/validate/:id' => 'styles#validate'
+  match 'styles/stats/:id' => 'styles#stats'
+  match 'styles/screenshotable' => 'styles#screenshotable'
+  match 'styles/bad_stuff' => 'styles#bad_stuff'
+  match 'styles/automation_page/:id' => 'styles#automation_page'
+  match 'styles/lotsa_screenshots' => 'styles#lotsa_screenshots'
+  match 'styles/reviewable' => 'styles#reviewable'
+  match 'styles/graveyard' => 'styles#graveyard'
+  match 'styles/updated' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'updated_date'
+  match 'styles/updated.:format' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'updated_date'
+  match 'styles/new_styles' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'created_date'
+  match 'styles/new_styles.:format' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'created_date'
+  match 'style/new_list' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'created_date'
+  match 'style/new_list/:format' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'created_date'
+  match 'style/new_feed' => 'styles#browse_r', :sort_direction => 'desc', :format => 'atom', :sort => 'created_date'
+  match 'style/new_feed/rss' => 'styles#browse_r', :sort_direction => 'desc', :format => 'rss', :sort => 'created_date'
+  match 'style/new_feed/atom' => 'styles#browse_r', :sort_direction => 'desc', :format => 'atom', :sort => 'created_date'
+  match 'style/updated_list' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'updated_date'
+  match 'style/updated_list/:format' => 'styles#browse_r', :sort_direction => 'desc', :sort => 'updated_date'
+  match 'style/updated_feed' => 'styles#browse_r', :sort_direction => 'desc', :format => 'atom', :sort => 'updated_date'
+  match 'style/updated_feed/rss' => 'styles#browse_r', :sort_direction => 'desc', :format => 'rss', :sort => 'updated_date'
+  match 'style/updated_feed/atom' => 'styles#browse_r', :sort_direction => 'desc', :format => 'atom', :sort => 'updated_date'
+  match 'styles/:category/all' => 'styles#browse_r'
+  match 'styles/site/:category' => 'styles#browse_r', :constraints => { :category => /.*/ }
+  match 'styles;app' => 'styles#browse_r', :category => 'app'
+  match 'styles;site' => 'styles#browse_r', :category => 'site'
+  match 'styles;global' => 'styles#browse_r', :category => 'global'
+  match 'style/search/:search_terms' => 'styles#browse_r', :constraints => { :search_terms => /.*/ }
+  match 'styles/search/:search_terms' => 'styles#browse_r', :constraints => { :search_terms => /.*/ }
+  match 'style/search_text/:search_terms' => 'styles#browse_r', :constraints => { :search_terms => /.*/ }
+  match 'styles/browse/:category/:search_terms/:sort/:sort_direction/:page_o' => 'styles#browse', :constraints => { :sort_direction => /(ASC|DESC)/i, :page_o => /\d+/, :search_terms => /.+/, :category => /[^\/\.]+/ }
+  match 'styles/browse/:category/:search_terms/:sort/:sort_direction/:page_o.:format' => 'styles#browse', :constraints => { :sort_direction => /(ASC|DESC)/i, :page_o => /\d+/, :search_terms => /.+/, :category => /[^\/\.]+/ }
+  match 'styles/browse/all/:search_terms' => 'styles#browse_r', :constraints => { :search_terms => /.*/ }
+  resources :styles
+  match 'styles/:id.:format' => 'styles#show', :constraints => { :id => /[0-9]+/ }, :via => :post
+  match 'styles/:id/:foo' => 'styles#show', :constraints => { :id => /[0-9]+/, :foo => /[0-9a-z-]+/ }
+  match 'styles/:id/:foo.:format' => 'styles#show', :constraints => { :id => /[0-9]+/, :foo => /[0-9a-z-]+/ }
+  match 'style/show/:id' => 'styles#show_redirect'
+  match 'style/raw/:id' => 'styles#show', :format => 'css'
+  match 'styles/raw/:id' => 'styles#show', :format => 'css'
+  resources :allowed_bindings
+  match 'stylish' => 'index#index'
+  match 'firstrun' => 'index#firstrun'
+  match 'contact' => 'index#contact'
+  match '/:controller(/:action(/:id))'
+  match '*path' => 'index#rescue_404'
 end

@@ -1,0 +1,16 @@
+<p>Welcome to userstyles.org, the largest collection of user styles anywhere! User styles let you change the way websites look. We've got <%=link_to("Facebook themes", :controller => "styles", :action => "browse", :category => 'facebook') %>, <%=link_to("Tumblr themes", :controller => "styles", :action => "browse", :category => 'tumblr') %>, <%=link_to("Google themes", :controller => "styles", :action => "browse", :category => 'google') %>, <%=link_to("Firefox themes", :controller => "styles", :action => "browse", :category => 'app') %>, and more. There are tens of thousands of user styles, I'm sure you'll like at least a few.</p>
+
+<p>The easiest way to use user styles is to use <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-userstyleshome">Stylish for Firefox</a> or <a href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe">Stylish for Chrome</a>. It's all free, by the way.</p>
+
+<p>If you have Stylish already, or if you want to take a look around first, check out the styles below, try a search on the left, or <%=link_to_unless_current('browse by category', :action => "index", :controller => "categories") %>.</p>
+
+<div id="front-page-best">
+<h2>The Best</h2>
+<%=style_list(@best, '', false, nil, link_to("More themes", :controller => "styles", :action => "browse")) %>
+</div>
+
+<div id="front-page-newest">
+<h2>The Newest</h2>
+<%=style_list(@new, '', false, nil, link_to("More themes", :controller => "styles", :action => "browse", :sort => 'created_date', :sort_direction => 'desc')) %>
+</div>
+

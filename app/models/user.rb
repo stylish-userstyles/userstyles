@@ -84,7 +84,8 @@ class User < ActiveRecord::Base
 	def style_forum_stats
 		results = {}
 		User.connection.select_rows("SELECT gd.StyleID, MAX(IF(DateLastComment IS NULL, DateInserted, DateLastComment)) FROM GDN_Discussion gd JOIN styles on styles.id = gd.StyleID WHERE user_id = #{id} AND gd.Closed = 0 GROUP BY gd.StyleID").each do |k,v|
-			results[k] = Date.parse(v)
+			#results[k] = Date.parse(v)
+			results[k] = v
 		end
 		return results
 	end

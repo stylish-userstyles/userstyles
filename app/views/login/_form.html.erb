@@ -6,7 +6,7 @@ end %>
 		<% if login_reason.nil? %>
 			Login or create an account.
 		<% else %>
-			<%= login_reason %>
+			<%=login_reason%>
 		<% end %>
 	</p>
 	<% if @login_failed %>
@@ -26,7 +26,7 @@ end %>
 					#{:name => 'Windows Live ID', :class => 'windows', :url => ''},	
 				]
 				openid_logins.each do |provider| %>
-			    <a class="btn-auth btn-<%=provider[:class]%>" href="<%=h(url_for(:controller => 'login', :action => 'authenticate_openid', :openid => provider[:url]))%>" onclick="return logInWithOpenId('<%=h provider[:url]%>')"><%=provider[:name]%></a>
+			    <a class="btn-auth btn-<%=provider[:class]%>" href="<%=url_for(:controller => 'login', :action => 'authenticate_openid', :openid => provider[:url])%>" onclick="return logInWithOpenId('<%= provider[:url]%>')"><%=provider[:name]%></a>
 				<% end %>
 	    <a class="btn-auth btn-openid" href="?view=openid" onclick="return showOpenIdEntry();">OpenID</a>
 	    <a class="btn-auth btn-password" href="?view=password" onclick="return showPasswordEntry();">User name/password</a>
@@ -73,7 +73,7 @@ end %>
 			<input type="submit" value="Log in">
 		</div>
 		<% if !return_to.nil?%>
-			<input type="hidden" name="return_to" value="<%=h return_to%>">
+			<input type="hidden" name="return_to" value="<%=return_to%>">
 		<% end %>
 		<% if !skip_remember %>
 			<p>
@@ -90,7 +90,7 @@ end %>
 			<input id="remember-normal" name="remember" type="checkbox" value="true"><label for="remember-normal">Keep me logged in</label>
 		<% end %>
 		<% if !return_to.nil?%>
-			<input type="hidden" name="return_to" value="<%=h return_to%>">
+			<input type="hidden" name="return_to" value="<%=return_to%>">
 		<% end %>
 		<input type="hidden" name="view" value="password">
 		<input type="submit" value="Log in">
@@ -111,8 +111,8 @@ end %>
 				<tr><td></td><td><input id="remember-create" name="remember" type="checkbox" value="true"><label for="remember-create">Keep me logged in</label></td></tr>
 			<% end %>
 			<tr><td>
-				<% if !return_to.nil?%>
-					<input type="hidden" name="return_to" value="<%=h return_to%>">
+				<% if !return_to.nil? %>
+					<input type="hidden" name="return_to" value="<%=return_to%>">
 				<% end %>
 				<input type="hidden" name="view" value="create">
 				<input type="submit" value="Create account"></td></tr>

@@ -104,9 +104,8 @@ Check out <a href="#{h html_url}">#{h widget_title}</a>
 END_OF_STRING
 %>
 	Code:<br>
-	<pre id="widget-code"><%=h code%></pre>
+	<pre id="widget-code"><%=code%></pre>
 
 	Preview:<br>
-	<div id="widget-preview"><%=code%></div>
+	<div id="widget-preview"><%=raw(code)%></div>
 <% end %>
-

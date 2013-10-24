@@ -32,8 +32,8 @@ class StyleSweeper < ActionController::Caching::Sweeper
 	private
 
 	def delete_all_for_id(id)
-		FileUtils.rm_rf Dir.glob("#{RAILS_ROOT}/public/styles/#{id}.*"), :secure => true
-		FileUtils.rm_rf "#{RAILS_ROOT}/public/styles/#{id}/", :secure => true
+		FileUtils.rm_rf Dir.glob("#{Rails.root}/public/styles/#{id}.*"), :secure => true
+		FileUtils.rm_rf "#{Rails.root}/public/styles/#{id}/", :secure => true
 	end
 
 end

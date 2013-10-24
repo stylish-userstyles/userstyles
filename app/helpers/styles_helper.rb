@@ -29,14 +29,7 @@ module StylesHelper
 			code += "<li class='additional-link'>#{additional_link}</li>"
 		end
 		code += '</ul>'
-	end
-
-	def has_anchor_ancestor(node)
-		until node.nil?
-			return true if node.name == 'a'
-			node = node.parent
-		end
-		return false
+		code.html_safe
 	end
 
 	def format_user_text_plain(text)
@@ -191,8 +184,10 @@ module StylesHelper
 		config = Sanitize::Config::BASIC.merge({
 			:transformers => [linkify_urls, linkify_styles, linkify_users, yes_follow, fix_whitespace]
 		})
-		Sanitize.clean(text, config)
+		Sanitize.clean(text, config).html_safe
 	end
+
+private
 
 	def replace_text_with_link(node, original_text, link_text, url)
 			# the text itself becomes a link
@@ -213,5 +208,14 @@ module StylesHelper
 			node_to_insert.add_next_sibling(Nokogiri::XML::Text.new(original_content[start + text.size, original_content.size], node.document))
 			return [node, node.next_sibling, node.next_sibling.next_sibling]
 	end
+
+	def has_anchor_ancestor(node)
+		until node.nil?
+			return true if node.name == 'a'
+			node = node.parent
+		end
+		return false
+	end
+
 
 end

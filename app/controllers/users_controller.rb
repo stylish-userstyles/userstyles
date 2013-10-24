@@ -16,13 +16,13 @@ class UsersController < ApplicationController
 		else
 			per_page = 10
 		end
-		styles_public = Style.paginate(:all, :per_page => per_page, :order => 'short_description', :page => params[:page], :conditions => "obsolete = 0 and user_id = #{@user_displayed.id}")
+		styles_public = Style.active.where(:user_id => @user_displayed.id).order('short_description').paginate({:per_page => per_page, :page => params[:page]})
 		@no_ads = styles_public.empty?
 
 		respond_to do |format|
 			format.html {
 				if !session[:user].nil? and @user_displayed.id == session[:user].id
-					@styles = Style.find(:all, :conditions => "user_id = #{@user_displayed.id}", :order => 'obsolete, short_description')
+					@styles = Style.where(:user_id => @user_displayed.id).order('obsolete, short_description')
 					# prevent 2n loads
 					@style_forum_stats = @user_displayed.style_forum_stats
 				else
@@ -54,7 +54,7 @@ class UsersController < ApplicationController
 	end
 
 	def show_by_name
-		user = User.find_by_name(params[:id])
+		user = User.where(:name => params[:id]).first
 		if user.nil?
 			render :nothing => true, :status => 404
 		else
@@ -223,7 +223,7 @@ class UsersController < ApplicationController
 		end
 		sreg = OpenID::SReg::Response.from_success_response(response)
 
-		existing_ua = UserAuthenticator.find(:first, :conditions => ['provider_identifier = ? and provider = ?', response.identity_url, 'openid'])
+		existing_ua = UserAuthenticator.where(:provider_identifier => response.identity_url).where(:provider => 'openid')
 		user_with_this_openid = existing_ua.user unless existing_ua.nil?
 		if !user_with_this_openid.nil?
 			if user_with_this_openid.id == @user.id
@@ -279,7 +279,7 @@ class UsersController < ApplicationController
 			return
 		end
 		
-		existing_ua = UserAuthenticator.find(:first, :conditions => ['provider_identifier = ? and provider = ?', params[:provider_identifier], 'openid'])
+		existing_ua = UserAuthenticator.where(:provider_identifier => params[:provider_identifier]).where(:provider => 'openid').first
 		if existing_ua.nil? or existing_ua.user_id != @user.id
 			@message = 'OpenID remove failed - could not find authenticator.'
 			render :action => 'edit_login_methods'

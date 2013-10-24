@@ -1,7 +1,7 @@
 <% if @style %>
 	<%= error_messages_for 'style' %>
 <% end %>
-<% form_tag(:action => 'admin_delete_save') do %>
+<%= form_tag(:action => 'admin_delete_save') do %>
 	<p>
 		<label for="admin_delete_reason_id">Reason</label>
 		<select id="admin_delete_reason_id" name="admin_delete_reason_id">

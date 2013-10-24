@@ -56,13 +56,7 @@ class LoginController < ApplicationController
 	def authenticate_openid
 		session[:remember] = params[:remember] == "true"
 		session[:return_to] = params[:return_to]
-		openid = nil
-		params['openid'].each do |o|
-			if o.is_a?(String)
-				openid = o
-				break
-			end
-		end
+		openid = params['openid']
 		begin
 			start(openid, url_for(:controller => :login, :action => :authenticate_openid_complete));
 		rescue Exception => e
@@ -76,11 +70,10 @@ class LoginController < ApplicationController
 
 		response = self.complete(params, url_for(:controller => :login, :action => :authenticate_openid_complete));
 	    sreg = OpenID::SReg::Response.from_success_response(response)
-	    ua = UserAuthenticator.find(:first, :conditions => ['provider = ? AND provider_identifier = ?', 'openid', response.identity_url])
+	    ua = UserAuthenticator.where(:provider => 'openid').where(:provider_identifier => response.identity_url).first
 	    user = nil
 	    user = ua.user unless ua.nil?
-		#user = User.find_by_openid_url(response.identity_url)
-		if user == nil
+		if user.nil?
 			user = User.new
 			user.login = nil
 			user.password = nil
@@ -191,18 +184,18 @@ class LoginController < ApplicationController
 	end
 
 	def lost_password_start
-		user = User.find_by_email(params[:email])
+		user = User.where(:email => params[:email]).first
 		if !user.nil?
 			# login might be nil if they started with openid
 			user.login = user.name if user.login.nil?
 			user.create_lost_password_key
 			user.save!
-			LostPasswordMailer.deliver_password_reset(user)
+			LostPasswordMailer.password_reset(user).deliver
 		end
 	end
 
 	def lost_password_done
-		user = User.find_by_lost_password_key(params[:id])
+		user = User.where(:lost_password_key => params[:id]).first
 		if !user.nil?
 			user.lost_password_key = nil
 			@login = user.login
