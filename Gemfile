@@ -2,21 +2,20 @@ source 'http://rubygems.org'
 
 ruby '1.9.3'
 
-gem 'rails', '3.0.20'
+gem 'rails', '~> 3.1.3'
 
-#============= WARNING FROM mysql2 =============
-#This version of mysql2 (0.3.13) doesn't ship with the ActiveRecord adapter.
-#In Rails version 3.1.0 and up, the mysql2 ActiveRecord adapter is included with rails.
-#If you want to use the mysql2 gem with Rails <= 3.0.x, please use the latest mysql2 in the 0.2.x series.
-gem 'mysql2', '~> 0.2.0'
+gem 'mysql2', '~> 0.3.0'
 
 gem 'sanitize'
 
 gem 'csspool', '4.0.0'
 
 gem 'public_suffix'
-gem 'thinking-sphinx', '~> 2.0.14'
-gem 'ts-delayed-delta', '~> 1.1.2'
+gem 'thinking-sphinx', '~> 3.0.0'
+gem 'ts-delayed-delta', '~> 2.0.0'
+gem 'delayed_job', '~> 4.0.0'
+gem 'delayed_job_active_record', '~> 4.0.0'
+
 gem 'will_paginate', '~> 3.0'
 
 gem 'ruby-openid'

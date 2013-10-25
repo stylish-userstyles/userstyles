@@ -1,0 +1,7 @@
+# https://github.com/pat/thinking-sphinx/releases/tag/v3.0.6
+# remove in 3.1?
+development:
+  utf8: true
+  
+production:
+  utf8: true

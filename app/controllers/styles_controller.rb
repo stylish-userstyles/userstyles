@@ -443,39 +443,27 @@ class StylesController < ApplicationController
 			new_search_conditions[:category] = category
 		elsif category == 'appnone'
 			#condition += " AND category = 'app' AND subcategory IS NULL"
-			#@use_new_search = false
 			new_search_conditions[:category] = 'app'
 			new_search_conditions[:subcategory] = 'none'
 		elsif category == 'sitenone'
 			#condition += " AND category = 'site' AND subcategory IS NULL"
-			#@use_new_search = false
 			new_search_conditions[:category] = 'site'
 			new_search_conditions[:subcategory] = 'none'
 		elsif category == 'globalnone'
 			#condition += " AND category = 'global' AND subcategory IS NULL"
-			#@use_new_search = false
 			new_search_conditions[:category] = 'global'
 			new_search_conditions[:subcategory] = 'none'
 		else
 			@bc_category = 'site'
 			category = Style.get_subcategory_for_domain(category)
 			@bc_subcategory = category
-			#condition += " AND subcategory = '#{Style.connection.quote_string(category)}'"
 			new_search_conditions[:subcategory] = Riddle.escape(category)
 		end
-		#options[:conditions] = condition
 
-		#if @use_new_search
-			if !$new_sorts_map.keys.include?(params[:sort])
-				params[:sort] = nil
-			end
-			sort = $new_sorts_map[params[:sort] || 'relevance']
-		#else
-		#	if !$sorts_map.keys.include?(params[:sort])
-		#		params[:sort] = nil
-		#	end
-		#	sort = $sorts_map[params[:sort] || 'relevance']
-		#end
+		if !$new_sorts_map.keys.include?(params[:sort])
+			params[:sort] = nil
+		end
+		sort = $new_sorts_map[params[:sort] || 'relevance']
 
 		sort_direction = params[:sort_direction].nil? ? 'desc' : params[:sort_direction].downcase
 		if sort_direction != 'desc'
@@ -490,35 +478,33 @@ class StylesController < ApplicationController
 			params[:per_page] = nil
 		end
 
-		#if @use_new_search
-			# relevant is irrelevant when there are no terms
-			if keywords.nil? and sort == '@relevance DIR, popularity DIR'
-				new_sort = $new_sorts_map['popularity']
-			else
-				new_sort = sort
-			end
-			begin 
-				@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true
-				@no_ads = @styles.empty?
-			rescue ThinkingSphinx::SphinxError
-				# back to the main listing
-				redirect_to :controller => 'styles', :action => 'browse', :category => nil, :search_terms => nil
-				return
-			rescue Riddle::OutOfBoundsError
-				# same url, minus the page param
-				redirect_to :controller => 'styles', :action => 'browse', :search_terms => params[:search_terms], :category => params[:category], :format => params[:format], :sort => params[:sort], :sort_direction => params[:sort_direction]
-				return
-			end
-		#else
-		#	@styles = Style.paginate(:all, options)
-		#end
+		# weight is irrelevant when there are no terms
+		if keywords.nil? and sort == 'myweight DIR, popularity DIR'
+			new_sort = $new_sorts_map['popularity']
+		else
+			new_sort = sort
+		end
+		begin 
+			@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true, :select => 'weight() myweight'
+			@no_ads = @styles.empty?
+		#rescue ThinkingSphinx::SphinxError => e
+			# back to the main listing, unless we're already there
+		#	raise e if params[:category].nil? and params[:search_terms].nil? and params[:page].nil? and params[:order].nil? and params[:sort].nil? and params[:sort_direction].nil?
+		#	redirect_to :controller => 'styles', :action => 'browse', :category => nil, :search_terms => nil
+		#	return
+		rescue Riddle::OutOfBoundsError
+			# same url, minus the page param
+			redirect_to :controller => 'styles', :action => 'browse', :search_terms => params[:search_terms], :category => params[:category], :format => params[:format], :sort => params[:sort], :sort_direction => params[:sort_direction]
+			return
+		end
+			
 		if search_terms.nil?
 			if !category.nil?
 				c = category
 				c = 'app' if c == 'appnone'
 				@page_title = "#{c.capitalize} themes and skins"
 				@meta_description = "A listing of #{c.capitalize} user styles."
-			elsif sort == '@relevance DIR, popularity DIR' and sort_direction == 'desc'
+			elsif sort == 'myweight DIR, popularity DIR' and sort_direction == 'desc'
 				@page_title = 'Top themes and skins'
 				@meta_description = "A listing of the top user styles that you can customize your browser with." 
 			elsif sort == 'updated DIR' and sort_direction == 'desc'

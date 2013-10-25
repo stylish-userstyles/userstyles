@@ -6,14 +6,12 @@ class Style < ActiveRecord::Base
 
 	scope :active, :conditions => { :obsolete => 0 }
 
-	PublicSuffix::List.private_domains = false
-
 	include ActionView::Helpers::JavaScriptHelper
 	include ActionView::Helpers::DateHelper
 
 	strip_attributes!
 
-	has_many :discussions, :class_name => 'ForumDiscussion', :finder_sql => 'SELECT gd.*, u.id user_id, u.name user_name FROM GDN_Discussion gd INNER JOIN GDN_UserAuthentication gu ON gu.UserId = gd.InsertUserID INNER JOIN users u ON u.id = gu.ForeignUserKey WHERE gd.StyleID = #{id} AND gd.Closed = 0 ORDER BY gd.DateInserted'
+	has_many :discussions, :class_name => 'ForumDiscussion', :finder_sql => proc {"SELECT gd.*, u.id user_id, u.name user_name FROM GDN_Discussion gd INNER JOIN GDN_UserAuthentication gu ON gu.UserId = gd.InsertUserID INNER JOIN users u ON u.id = gu.ForeignUserKey WHERE gd.StyleID = #{id} AND gd.Closed = 0 ORDER BY gd.DateInserted"}
 	has_one :style_code
 	has_many :style_options, :order => 'ordinal'
 	belongs_to :user
@@ -177,34 +175,6 @@ class Style < ActiveRecord::Base
 		end
 	end
 
-	define_index do
-		# fields
-		indexes short_description, :as => :name, :sortable => true
-		indexes long_description, :as => :description
-		indexes additional_info
-		indexes category
-		indexes 'IF(ISNULL(subcategory), "none", subcategory)', :as => :subcategory
-		indexes user.name, :as => :author
-    
-		# attributes
-		has :popularity_score, :as => :popularity
-		has :created, :updated, :total_install_count, :weekly_install_count, :rating
-
-		where 'obsolete = 0'
-
-		set_property :field_weights => {
-			:subcategory => 10,
-			:name => 5,
-			:author => 5,
-			:description => 2,
-			:additional_info => 1
-		}
-
-		set_property :delta => :delayed
-	end
-
-	@search_columns = ["short_description", "long_description", "additional_info"]
-	
 	# used when validating, because setting on the real property saves immediately
 	@_tmp_style_options = nil
 	def tmp_style_options

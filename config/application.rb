@@ -38,6 +38,9 @@ module Userstyles
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
+
+    # Not sure if assets are useful/desirable considering I have a CDN, so disabled for now.
+    config.assets.enabled = false
     
   end
 end

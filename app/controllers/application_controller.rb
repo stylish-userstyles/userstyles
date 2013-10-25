@@ -70,9 +70,9 @@ class ApplicationController < ActionController::Base
                 return @consumer
         end
 
-        $sorts_map = {'name' => 'short_description', 'total_installs' => 'total_install_count', 'installs_this_week' => 'weekly_install_count', 'created_date' => 'created', 'updated_date' => 'updated', 'popularity' => 'popularity_score', 'relevance' => '@relevance, popularity_score'}
+        $sorts_map = {'name' => 'short_description', 'total_installs' => 'total_install_count', 'installs_this_week' => 'weekly_install_count', 'created_date' => 'created', 'updated_date' => 'updated', 'popularity' => 'popularity_score', 'relevance' => 'myweight, popularity_score'}
 
-        $new_sorts_map = {'name' => 'name DIR', 'total_installs' => 'total_install_count DIR', 'installs_this_week' => 'weekly_install_count DIR', 'created_date' => 'created DIR', 'updated_date' => 'updated DIR', 'popularity' => 'popularity DIR', 'relevance' => '@relevance DIR, popularity DIR'}
+        $new_sorts_map = {'name' => 'name DIR', 'total_installs' => 'total_install_count DIR', 'installs_this_week' => 'weekly_install_count DIR', 'created_date' => 'created DIR', 'updated_date' => 'updated DIR', 'popularity' => 'popularity DIR', 'relevance' => 'myweight DIR, popularity DIR'}
 
 
         private
