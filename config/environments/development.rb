@@ -21,17 +21,23 @@ Userstyles::Application.configure do
 
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
+  
+  # Raise exception on mass assignment protection for Active Record models
+  config.active_record.mass_assignment_sanitizer = :strict
+ 
+  # Log the query plan for queries taking more than this (works
+  # with SQLite, MySQL, and PostgreSQL)
+  config.active_record.auto_explain_threshold_in_seconds = 0.5
+  
 end
 
+# override domain set in config/initializers/session_store.rb
+Userstyles::Application.config.session_store :cookie_store, :key => '_session_id', :domain => '.userstyles.local'
 
-CSS_PRE_CACHE = false
-COOKIE_DOMAIN = '0.0.0.0'
-USE_ALL_LOCAL = true
 DOMAIN = "userstyles.local"
 FORUM_DOMAIN = "forum.userstyles.local"
 STATIC_DOMAIN = "userstyles.local:3000"
 UPDATE_DOMAIN = "update.userstyles.org"
 MD5_PATH = '/home/jason/md5test/'
 
-ActionController::Base.cache_store = :file_store, "#{Rails.root}/tmp/cache"
 ActionMailer::Base.delivery_method = :test

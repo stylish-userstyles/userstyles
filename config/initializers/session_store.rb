@@ -1,6 +1,6 @@
 # Be sure to restart your server when you modify this file.
 
-Userstyles::Application.config.session_store :cookie_store, :key => '_session_id'
+Userstyles::Application.config.session_store :cookie_store, :key => '_session_id', :domain => '.userstyles.org'
 
 # Use the database for sessions instead of the cookie-based default,
 # which shouldn't be used to store highly confidential information

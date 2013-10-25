@@ -29,13 +29,8 @@
 			<%- end
 		end %>
 		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe">
-		<% if USE_ALL_LOCAL %>
-			<script type="text/javascript" src="http://<%=STATIC_DOMAIN%>/javascripts/prototype.js"></script>
-			<script type="text/javascript" src="http://<%=STATIC_DOMAIN%>/javascripts/scriptaculous.js?load=builder,effects"></script>
-		<% else %>
-			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js"></script>
-			<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.1/scriptaculous.js?load=builder,effects"></script>
-		<% end %>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.0.3/prototype.js"></script>
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/scriptaculous/1.8.1/scriptaculous.js?load=builder,effects"></script>
 
 		<% if @header_include != nil %>
 			<%=@header_include%>

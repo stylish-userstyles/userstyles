@@ -48,12 +48,5 @@ Userstyles::Application.configure do
   config.active_support.deprecation = :notify
 end
 
-ActionController::Base.cache_store = :file_store, "#{RAILS_ROOT}/tmp/cache"
 ActionMailer::Base.delivery_method = :sendmail
 
-CSS_PRE_CACHE = false
-COOKIE_DOMAIN = '.userstyles.org'
-USE_ALL_LOCAL = false
-
-#config.action_controller.session[:domain] = '.userstyles.org'
-config.action_controller.session = {:domain => '.userstyles.org'}

@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '1.9.3'
 
-gem 'rails', '~> 3.1.3'
+gem 'rails', '~> 3.2.0'
 
 gem 'mysql2', '~> 0.3.0'
 
@@ -19,6 +19,10 @@ gem 'delayed_job_active_record', '~> 4.0.0'
 gem 'will_paginate', '~> 3.0'
 
 gem 'ruby-openid'
+
+gem "strip_attributes", "~> 1.2"
+
+gem 'dynamic_form'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
