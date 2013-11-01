@@ -4,6 +4,7 @@
 	<p>No styles found. Try <a href="/styles/browse">browsing from the top</a> or try a new search on the left.</p>
 
 <% else %>
+	
 	<%= render :partial => 'listing', :collection => @styles, :as => :style%>
 
 	<script>
@@ -60,9 +61,9 @@
 			<% end %>
 		</div>
 	<% end %>
-<% end %>
 
-<% if !@styles.empty? %>
-	<%= will_paginate @styles %>
-<% end %>
+	<% if !@styles.empty? %>
+		<%= will_paginate @styles %>
+	<% end %>
 
+<% end %>

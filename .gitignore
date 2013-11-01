@@ -4,3 +4,4 @@ log/*.log
 tmp/
 db
 log/development.sphinx.pid
+config/initializers/secret_token.rb

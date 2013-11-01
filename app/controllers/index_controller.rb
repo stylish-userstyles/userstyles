@@ -1,10 +1,5 @@
-require 'action_cache'
-
 class IndexController < ApplicationController
-	layout "standard_layout"
-#	after_filter OutputCompressionFilter
 	helper 'styles'
-	caches_action :index, :firstrun, :expires_in => 5.minutes
 
 	def index
 		@new = Style.newly_added(nil, 10)
@@ -27,6 +22,20 @@ class IndexController < ApplicationController
 
 	def contact
 		@page_title = "Contact the admin"
+	end
+
+private
+
+	def public_action?
+		true
+	end
+	
+	def admin_action?
+		false
+	end
+	
+	def verify_private_action(user_id)
+		false
 	end
 
 end

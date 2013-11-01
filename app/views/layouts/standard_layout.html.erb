@@ -130,35 +130,35 @@
 						</form>
 					</li>
 					<li><%=link_to_unless_current('Browse', :action => "index", :controller => "categories") %></li>
-					<li><%=link_to_unless_current(raw("<script type='text/javascript'>
-						if (getUserFromCookie() != null) {
-							document.write('My Account');
-						} else {
-							document.write('Log in');
-						}
-					</script><noscript>My Account</noscript>"), {:action => "index", :controller => "login"}, :rel => 'nofollow') %></li>
+					<% if session[:user_id].nil? %>
+						<li><%=link_to_unless_current('Log in', {:action => "index", :controller => "login"}, :rel => 'nofollow') %></li>
+					<% else %>
+						<li><%=link_to_unless_current('My account', user_path(session[:user_id]), :rel => 'nofollow') %></li>
+					<% end %>
 					<li><%=link_to_unless_current('Help', {:action => "index", :controller => "help"}, :rel => 'nofollow') %></li>
 					<li><a href="http://forum.userstyles.org" rel="nofollow">Forum</a></li>
 				</ul>
 			</nav>
 
-			<% if !@style.nil?
-				related = @style.related 
-				if !related.nil? and !related.empty? %>
-					<footer id="related">
-						<h2>Related Themes</h2>
-						<ul>
-							<% related.each do |r| %>
-								<li><%= link_to(h(r.short_description), "/styles/#{r.id}/#{r.url_snippet}") %></li>
-							<% end %>
-							<% if !@style.subcategory.nil? and @style.category == 'site'%>
-								 <li class="more">More <%=link_to(h("#{@style.subcategory.capitalize} themes"), :action => "browse", :controller => "styles", :category => @style.subcategory) %></li>
-							<% elsif !@style.category.nil? %>	
-								 <li class="more">More <%=link_to(h("#{@style.category.capitalize} themes"), :action => "browse", :controller => "styles", :category => @style.category) %></li>
-							<% end %>
-						</ul>
-					</footer>
+			<% if !@style.nil? and action_name == 'show'
+				cache([@style, 'related']) do
+					related = @style.related
+					if !related.nil? and !related.empty? %>
+						<footer id="related">
+							<h2>Related Themes</h2>
+							<ul>
+								<% related.each do |r| %>
+									<li><%= link_to(h(r.short_description), "/styles/#{r.id}/#{r.url_snippet}") %></li>
+								<% end %>
+								<% if !@style.subcategory.nil? and @style.category == 'site'%>
+									 <li class="more">More <%=link_to(h("#{@style.subcategory.capitalize} themes"), :action => "browse", :controller => "styles", :category => @style.subcategory) %></li>
+								<% elsif !@style.category.nil? %>	
+									 <li class="more">More <%=link_to(h("#{@style.category.capitalize} themes"), :action => "browse", :controller => "styles", :category => @style.category) %></li>
+								<% end %>
+							</ul>
+						</footer>
 				<% end 
+				end
 			end %>
 
 			<% if @no_ads.nil? or !@no_ads %>

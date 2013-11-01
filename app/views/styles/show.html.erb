@@ -1,3 +1,5 @@
+<% cache_unless(session[:user_id] == @style.user_id, @style) do %>
+
 <% if @style.obsolete > 0 %>
 	<section id="obsoletion-message">
 		<h2>Deleted!</h2>
@@ -27,7 +29,7 @@
 
 		if !after_thumb.nil? and @style.obsolete == 0 %>
 			<figure id="main-screenshot" class="screenshot-thumbnail">
-				<a href="http://<%=STATIC_DOMAIN%><%=after%>" rel="lightbox[screenshot] nofollow" title="With the style applied"><img src="http://<%=STATIC_DOMAIN%><%=after_thumb%>" class="screenshot" alt=""></a>
+				<a href="http://<%=SCREENSHOT_DOMAIN%><%=after%>" rel="lightbox[screenshot] nofollow" title="With the style applied"><img src="http://<%=SCREENSHOT_DOMAIN%><%=after_thumb%>" class="screenshot" alt=""></a>
 			</figure>
 		<% end 
 		has_more_screenshots = @style.obsolete == 0 && @style.screenshots.size > 0
@@ -36,7 +38,7 @@
 			<div id="more-screenshots">
 				<span>More screenshots:</span>
 				<% @style.screenshots.each do |screenshot| %>
-					<a href="http://<%=STATIC_DOMAIN%>/style_screenshots/<%=screenshot.path%><%=cache_param%>" rel="lightbox[screenshot] nofollow" title="<%=screenshot.description%>"><%=screenshot.description%></a><% if @style.screenshots.last != screenshot %>, <% end
+					<a href="http://<%=SCREENSHOT_DOMAIN%>/style_screenshots/<%=screenshot.path%><%=cache_param%>" rel="lightbox[screenshot] nofollow" title="<%=screenshot.description%>"><%=screenshot.description%></a><% if @style.screenshots.last != screenshot %>, <% end
 				end %>
 			</div>
 		<% end 
@@ -51,11 +53,6 @@
 <section id="style-info">
 
 	<div id="main-style-info">
-
-		<div id="control-panel" style="display:none">
-			<%=link_to "[Edit]", :action => "edit"%>
-			<%=link_to (@style.obsolete == 1 ? "[Undelete]" : "[Delete]"), :action => "delete"%>
-		</div>
 
 		<div id="long-description">
 			<%=format_user_text(@style.long_description[0, 1000])%>
@@ -134,6 +131,7 @@
 	<% end %>
 
 	<div id="info-tables">
+
 		<table id="style-author-info">
 			<tr>
 				<th>Author</th>
@@ -207,6 +205,15 @@
 	<div id="show-code">
 		<pre id="view-code"><code id="stylish-code"></code></pre>
 	</div>
+
+	<% if session[:user_id] == @style.user_id %>
+		<div id="control-panel">
+			<%=link_to "Edit", :action => "edit"%>
+			<%=link_to (@style.obsolete == 1 ? "Undelete" : "Delete"), :action => "delete"%>
+			<%=link_to 'Stats', :action => 'stats'%>
+		</div>
+	<% end %>
+
 </section>
 
 <% if !@style.additional_info.nil? && !@style.additional_info.empty? %>
@@ -284,7 +291,7 @@
 					when 3
 						rating_class = "good-rating"
 				end %>
-				<li class="<%=rating_class%>"><%=link_to h(discussion.name), discussion.url, {:rel => 'nofollow'}%> by <%=link_to h(discussion.user_name), {:controller => 'users', :action => 'show', :id => discussion.user_id}, {:rel => 'nofollow'}%><%if !discussion.created.nil?%>, <%=discussion.created.strftime('%B %e, %Y')%><% end %></li>
+				<li class="<%=rating_class%>"><%=link_to h(discussion.name), discussion.url, {:rel => 'nofollow'}%> by <%=link_to h(discussion.original_poster.name), {:controller => 'users', :action => 'show', :id => discussion.original_poster.id}, {:rel => 'nofollow'}%><%if !discussion.created.nil?%>, <%=discussion.created.strftime('%B %e, %Y')%><% end %></li>
 			<% end %>
 			<% if @style.discussions.size != @style.recent_discussions.size %>
 				<li><a href="http://<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See more discussions</a></li>
@@ -292,3 +299,5 @@
 		</ul>
 	<% end %>
 </section>
+
+<% end %>

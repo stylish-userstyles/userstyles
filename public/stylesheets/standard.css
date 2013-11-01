@@ -467,8 +467,8 @@ label.rating:hover {
 	float: right;
 }
 #control-panel {
-	display: none;
-	margin-bottom: 1em;
+	margin-left: 15px;
+	margin-top: 5px;
 }
 .paypal-donate-image {
 	width: 110px;
@@ -669,6 +669,9 @@ a.btn-twitter:visited {
 }
 .deletion-reason {
 	color: red;
+}
+.pagination .current {
+	font-style: normal;
 }
 
 .style1 {font-size: 16px;color: #CCFFFF;}

@@ -1,21 +1,12 @@
 require 'set'
 require 'will_paginate'
-require 'action_cache'
 
 class StylesController < ApplicationController
 
 	helper :users
 	helper :categories
 
-	layout "standard_layout"
-
-	caches_page :show, :if => Proc.new { |c| c.request.format.html? }
-	caches_action :browse, :expires_in => 30.minutes
-	#disabled - gives incorrect content type
-	#caches_action :show, :if => Proc.new { |c| c.request.format.css? }, :expires_in => 30.minutes
-
 	cache_sweeper :style_sweeper
-#	after_filter OutputCompressionFilter
 
 	$bad_content_subcategories = ["keezmovies", "xvideos", "jizzhut", "pornhub", "redtube", "tube8", "xnxx", "youjizz", "geisha-porn", "4tube", "xhamster", "youporn", "pussy", "imagefap", "pornbits", "xvideosadult", "youskbe", "moez-m", "dokidokibox", "emflix", "erogeba", "eromate", "xxeronetxx", "exploader", "hardsextube", "iqoo", "lovemake", "pornhost", "shufuni", "slutload", "spankwire", "xxxblog", "xvideosmovie", "free-sexvideosfc2", "yaaabooking", "yvhmovie", "oshirimania", "fakku", "e-hentai", "skins", "megaporn", "pussytorrents", "empflix", "xvideos-userporn", "xvideos-porn", "xvideos-collector", "exhentai", "sextube", "yobt", "asstr", "scor", "pornotube", "pornbb", "iafd", "artinude", "motherless", "keyboardporn", "empornium", "eporner", "freeporn", "fritchy", "lettherebeporn", "literotica", "masterporn", "mywebporno", "peniscult", "saff", "porn-w", "pornerbros", "porntown", "sexotorrent", "userporn", "vintage-erotica-forum", "wkdporn", "xxx-tracker", "livejasmin", "myfreecams", "cheggit", "dumparump", "fapomatic", "playboy", "bareback", "brazzers", "hentairules", "h-zip", "sankakucomplex",  "gelbooru", "konachan", "donmai", "gz-loader", "pinktower", "artemisweb", "suomi-neito", "tokyo-tube", "nukistream", "elog-ch", "adultghibli", "fleshbot", "ascii2d", "doujin-loli-school", "daimajin", "chaturbate", "cam4", "danshiryo", "yuvutu", "mcstories",  "storiesonline", "bestgfe", "stripclublist", "fuskator", "4gifs", "amateurindex", "freeones", "playboy", "adultfanfiction", "hi5", "minkch", "yande", "sexinsex", "eroino", "perfectgirls", "cpz", "ecchi", "eromodels", "erolight", "erolash", "nijie", "okazu24", "bravoteens", "tblop", "elephanttube", "pumbaporn", "pinkworld", "zegaporn", "abcpornsearch", "forhertube", "wtchporn", "1000mg", "sexfotka", 'yiff', 'fetlife', 'rule34']
 	$tld_specific_bad_domains = ["dmm.co.jp"]
@@ -30,7 +21,9 @@ class StylesController < ApplicationController
 					return
 				end
 				begin
-					@style = Style.find(params["id"], :include => [:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason])
+					@style = Rails.cache.fetch "styles/show/#{params[:id]}" do
+						Style.includes([:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason, {:discussions => :original_posters}]).find(params[:id])
+					end
 				rescue ActiveRecord::RecordNotFound
 					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true
 					return
@@ -93,7 +86,7 @@ class StylesController < ApplicationController
 					return
 				end
 				begin
-					style = Style.find(params[:id], :include => [:style_code, {:style_options => :style_option_values}])
+					style = Style.includes([:style_code, {:style_options => :style_option_values}]).find(params[:id])
 				rescue ActiveRecord::RecordNotFound
 					render :nothing => true, :status => 404
 					return
@@ -114,7 +107,7 @@ class StylesController < ApplicationController
 					return
 				end
 				begin
-					style = Style.find(params[:id], :include => [:user])
+					style = Style.includes([:user, :style_code, {:style_options => :style_option_values}]).find(params[:id])
 				rescue ActiveRecord::RecordNotFound
 					render :nothing => true, :status => 404
 					return
@@ -139,7 +132,7 @@ class StylesController < ApplicationController
 
 	def new
 		@style = Style.new
-                @style["user_id"] = session[:user].id
+		@style.user_id = session[:user_id]
 		@page_title = "New style"
 		@no_bots = true
 		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
@@ -147,12 +140,8 @@ class StylesController < ApplicationController
 	end
 
 	def edit
-		@style = Style.find(params["id"], :include => :style_code)
+		@style = Style.includes(:style_code, :screenshots, {:style_options => :style_option_values}).find(params["id"])
 		@no_bots = true
-		if session[:user] == nil or (session[:user].id != @style.user_id and session[:user].id != $admin_id)
-			render :text => "Access denied.", :layout => true
-			return
-		end
 		@page_title = "Editing " + @style.short_description
 		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/lightbox.js'></script>\n".html_safe
 	end
@@ -170,26 +159,18 @@ class StylesController < ApplicationController
 		# them when we're about to display
 		non_ar_errors = []
 
-		if session[:user] == nil
-			render :text => "Access denied.", :status => 403
-			return
-		end
 		@stylish_uri = params["stylish-uri"]
 		if params["style"]["id"].nil? or params["style"]["id"].size == 0
 			new = true
 			@style = Style.new
-			@style["user_id"] = session[:user].id
+			@style["user_id"] = session[:user_id]
 			now = DateTime.now
 			@style["created"] = now
 			@style["updated"] = now
 			@style.style_code = StyleCode.new
 		else
 			new = false
-			@style = Style.find(params["style"]["id"], :include => [{:style_options => :style_option_values}, :screenshots])
-			if session[:user].id != @style.user_id and session[:user].id != $admin_id
-				render :text => "Access denied.", :status => 403
-				return
-			end
+			@style = Style.includes([{:style_options => :style_option_values}, :screenshots]).find(params["style"]["id"])
 			#only mark it as updated if the css changed
 			if @style.style_code.code != params["style"]["css"]
 				@style.updated = DateTime.now
@@ -346,11 +327,8 @@ class StylesController < ApplicationController
 			@style.save_additional_screenshot(screenshot[:data], screenshot[:description])
 		end
 		@style.save!
-		
-		# expire the cache - the sweepers may not have picked up on it because style didn't change? not sure about this
-		StyleSweeper.instance.after_update(@style)
 
-		redirect_to "/styles/#{@style.id}/#{@style.url_snippet}?r=#{Time.now.to_i}"
+		redirect_to @style.pretty_url
 	end
 
 	def search_url
@@ -586,10 +564,6 @@ class StylesController < ApplicationController
 	def delete
 		@style = Style.find(params[:id])
 		@no_bots = true
-		if session[:user] == nil or (session[:user].id != @style.user_id and session[:user].id != $admin_id)
-			render :text => "Access denied.", :layout => true
-			return
-		end
 		@page_title = "Delete style"
 	end
 
@@ -597,17 +571,13 @@ class StylesController < ApplicationController
 		@no_bots = true
 		@style = Style.find(params["style"]["id"])
 		is_delete = params["type"] == "Delete"
-		if session[:user] == nil or (session[:user].id != @style.user_id and session[:user].id != $admin_id)
-			render :text => "Access denied."
-			return
-		end
 		# don't allow undeletion of invalid stuff
-		if !is_delete and (!@style.valid? or (session[:user].id != $admin_id and !@style.admin_delete_reason.nil? and @style.admin_delete_reason.locked))
+		if !is_delete and (!@style.valid? or (!verify_admin_action and !@style.admin_delete_reason.nil? and @style.admin_delete_reason.locked))
 			render :action => "edit"
 			return
 		end
 		# don't allow undeletion of locked stuff
-		if !is_delete and session[:user].id != $admin_id and !@style.admin_delete_reason.nil? and @style.admin_delete_reason.locked
+		if !is_delete and !verify_admin_action and !@style.admin_delete_reason.nil? and @style.admin_delete_reason.locked
 			render :text => "This style cannot be undeleted."
 			return
 		end
@@ -643,10 +613,6 @@ class StylesController < ApplicationController
 	def admin_delete
 		@style = Style.find(params[:id])
 		@no_bots = true
-		if session[:user] == nil or session[:user].id != $admin_id
-			render :text => "Access denied.", :layout => true
-			return
-		end
 		@page_title = 'Admin delete'
 	end
 	
@@ -654,10 +620,6 @@ class StylesController < ApplicationController
 		@style = Style.find(params[:id])
 		@no_ads = true
 		@no_bots = true
-		if session[:user] == nil or session[:user].id != $admin_id
-			render :text => "Access denied.", :layout => true
-			return
-		end
 		@style.obsolete = true
 		reason = AdminDeleteReason.find(params[:admin_delete_reason_id])
 		@style.admin_delete_reason = reason
@@ -812,15 +774,11 @@ class StylesController < ApplicationController
 	end
 
 	def automation_page
-		@style = Style.find(params["id"], :include => [:style_code])
+		@style = Style.includes(:style_code).find(params["id"])
 		render :action => "automation_page", :layout => false
 	end
 
 	def bad_stuff
-		if session[:user].nil? or session[:user].id != $admin_id
-			render :text => "Access denied.", :layout => true
-			return
-		end
 		search_columns = ['short_description', 'long_description', 'additional_info', 'users.name', 'users.homepage', 'users.about']
 		where = (search_columns.product($iffy_words).map {|c, w| "#{c} LIKE '%#{w}%'"}).join(' OR ')
 		ids = Style.connection.select_values("SELECT styles.id FROM styles JOIN users ON styles.user_id = users.id WHERE (#{where}) AND redirect_page IS NULL;")
@@ -836,10 +794,6 @@ class StylesController < ApplicationController
 	end
 
 	def lotsa_screenshots
-		if session[:user].nil? or session[:user].id != $admin_id
-			render :text => "Access denied.", :layout => true
-			return
-		end
 		if params[:page].nil?
 			page = 0
 		else
@@ -852,10 +806,6 @@ class StylesController < ApplicationController
 
 	def stats
 		@style = Style.find(params[:id])
-		if session[:user].nil? or (session[:user].id != $admin_id and session[:user].id != @style.user_id)
-			render :text => "Access denied.", :layout => true
-			return
-		end
 		@page_title = @style.short_description + ' stats'
 		raw_counts = StyleInstallCount.where(:style_id => params[:id])
 		# group by date and source
@@ -904,13 +854,29 @@ class StylesController < ApplicationController
 	end
 	
 
-# define the secure methods
 protected
-	
-	$admin_id = 1
 
-	def secure?
-  	["new", "edit", "update", "create", "obsolete", "obsolete_save", "refresh_category", "postfromstylish", "delete", "delete_save" ].include?(action_name)
+	def public_action?
+		['show', 'show_redirect', 'install', 'search_url', 'search_text', 'search', 'browse_r', 'browse', 'graveyard', 'updated', 'js', 'opera_css', 'ie_css', 'chrome_json', 'proxomitron', 'by_user', 'expire_by_id', 'screenshotable', 'automation_page'].include?(action_name)
+	end
+	
+	def admin_action?
+		['admin_delete', 'admin_delete_save', 'bad_stuff', 'lotsa_screenshots', 'reviewable'].include?(action_name)
+	end
+	
+	def verify_private_action(user_id)
+		# any user can do these
+		return true if ['new'].include?(action_name)
+		if ['update', 'delete_save'].include?(action_name)
+			style_id = params[:style][:id]
+		elsif ['edit', 'delete'].include?(action_name)
+			style_id = params[:id]
+		else
+			return false
+		end
+		style = Style.find(style_id)
+		return false if style.nil?
+		return style.user_id == user_id
 	end
 
 	def generic_list

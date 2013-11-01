@@ -1,9 +1,9 @@
 require 'digest/sha1'
 
 class User < ActiveRecord::Base
-	strip_attributes!
+	strip_attributes
 
-	has_many :styles, :order => "short_description"
+	has_many :styles, -> { order(:short_description) }
 	has_many :user_authenticators
 
 	validates_uniqueness_of :login, :allow_nil => true, :case_sensitive => false
@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
 
 	validates_length_of :homepage, :maximum => 255, :allow_blank => true
 	validates_length_of :about, :maximum => 4000, :allow_blank => true
-	validates_format_of :homepage, :with => /^(#{URI::regexp(%w(http https))})$/, :allow_blank => true
+	validates_format_of :homepage, :with => /\A(#{URI::regexp(%w(http https))})\z/, :allow_blank => true
 
 	validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i, :allow_blank => true
 	validates_format_of :paypal_email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i, :allow_blank => true
@@ -23,11 +23,9 @@ class User < ActiveRecord::Base
 
 	validates_inclusion_of :license, :in => %w( publicdomain ccby ccbysa ccbynd ccbync ccbyncsa ccbyncnd arr ), :allow_nil => true
 
-	attr_protected :id, :LUM_User_id, :lost_password_key, :salt, :hashed_password, :ip, :token
-
 	def self.authenticate(name, password)
 		return nil if name.nil? or password.nil?
-		user = find_by_login(name)
+		user = User.where(:login => name).first
 		if user
 			expected_password = encrypted_password(password, user.salt)
 			if user.hashed_password != expected_password

@@ -1,7 +1,7 @@
 #require 'allowed_binding'
 
 class StyleCode < ActiveRecord::Base
-	belongs_to :style
+	belongs_to :style, :touch => true
 
 	def old_style_rules
 		StyleCode.get_old_style_rules(self.code)

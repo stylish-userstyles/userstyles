@@ -4,19 +4,20 @@ require 'public_suffix'
 
 class Style < ActiveRecord::Base
 
-	scope :active, :conditions => { :obsolete => 0 }
+	scope :active, -> { where obsolete: 0 }
 
 	include ActionView::Helpers::JavaScriptHelper
 	include ActionView::Helpers::DateHelper
 
-	strip_attributes!
+	strip_attributes
 
-	has_many :discussions, :class_name => 'ForumDiscussion', :finder_sql => proc {"SELECT gd.*, u.id user_id, u.name user_name FROM GDN_Discussion gd INNER JOIN GDN_UserAuthentication gu ON gu.UserId = gd.InsertUserID INNER JOIN users u ON u.id = gu.ForeignUserKey WHERE gd.StyleID = #{id} AND gd.Closed = 0 ORDER BY gd.DateInserted"}
+	#has_many :discussions, :class_name => 'ForumDiscussion', :finder_sql => proc {"SELECT gd.*, u.id user_id, u.name user_name FROM GDN_Discussion gd INNER JOIN GDN_UserAuthentication gu ON gu.UserId = gd.InsertUserID INNER JOIN users u ON u.id = gu.ForeignUserKey WHERE gd.StyleID = #{id} AND gd.Closed = 0 ORDER BY gd.DateInserted"}
+	has_many :discussions, -> { readonly }, :class_name => 'ForumDiscussion', :foreign_key => 'StyleID'
 	has_one :style_code
-	has_many :style_options, :order => 'ordinal'
+	has_many :style_options, -> { order(:ordinal) }
 	belongs_to :user
 	has_many :screenshots
-	belongs_to :admin_delete_reason
+	belongs_to :admin_delete_reason, -> { readonly }
 
 	alias_attribute :name, :short_description
 	alias_attribute :description, :long_description
@@ -197,7 +198,9 @@ class Style < ActiveRecord::Base
 	end
 
 	def self.newly_added(category, limit)
-		return Style.order("created DESC").limit(limit).where("created > #{1.week.ago.strftime('%Y-%m-%d')} AND obsolete = 0 " + (category.nil? ? "" : " AND category = '#{category}'"))
+		return Rails.cache.fetch "styles/newly_added/#{category}/#{limit}" do
+			Style.order("created DESC").limit(limit).where("created > #{1.week.ago.strftime('%Y-%m-%d')} AND obsolete = 0 " + (category.nil? ? "" : " AND category = '#{category}'")).load
+		end
 	end
 
 	def related
@@ -212,44 +215,36 @@ class Style < ActiveRecord::Base
 	end
 
 	def self.top_styles(limit, choose_from)
-		#get the nth highest rated style
-		#rows = Style.find_by_sql("select id from styles where obsolete = 0 order by popularity_score DESC LIMIT #{choose_from};")
-		#style_ids = []
-		#rows.each do |row|
-		#	style_ids << row.id
-		#end
-		#return Style.find(:all,	 :conditions => "styles.id IN (#{style_ids.join(',')})", :order=> "RAND() DESC")
-
-		#grab the top n
-		possibilities = Style.where(:obsolete => 0).order("popularity_score DESC").limit(choose_from)
-		#randomize
-		a = possibilities.dup
-	    possibilities = possibilities.collect { a.slice!(rand(a.length)) }
-		#limit to a certain number per subcategory to avoid facebook craziness
-		limit_per_category = (limit / 5.0).ceil
-		styles = []
-		subcategory_counts = {}
-		possibilities.each do |style|
-			if style.subcategory.nil?
-				styles << style
-			elsif subcategory_counts[style.subcategory].nil?
-				styles << style
-				subcategory_counts[style.subcategory] = 1
-			elsif subcategory_counts[style.subcategory] < limit_per_category
-				styles << style
-				subcategory_counts[style.subcategory] = subcategory_counts[style.subcategory] + 1
+		return Rails.cache.fetch "styles/top_styles/#{limit}/#{choose_from}" do
+			#grab the top n
+			possibilities = Style.where(:obsolete => 0).order("popularity_score DESC").limit(choose_from)
+			#randomize
+			a = possibilities.dup
+			possibilities = possibilities.collect { a.slice!(rand(a.length)) }
+			#limit to a certain number per subcategory to avoid facebook craziness
+			limit_per_category = (limit / 5.0).ceil
+			styles = []
+			subcategory_counts = {}
+			possibilities.each do |style|
+				if style.subcategory.nil?
+					styles << style
+				elsif subcategory_counts[style.subcategory].nil?
+					styles << style
+					subcategory_counts[style.subcategory] = 1
+				elsif subcategory_counts[style.subcategory] < limit_per_category
+					styles << style
+					subcategory_counts[style.subcategory] = subcategory_counts[style.subcategory] + 1
+				end
+				break if styles.size >= limit
 			end
-			if styles.size >= limit
-				return styles
+			# fill in the rest with whatever
+			i = 0
+			while styles.size < limit
+				styles << possibilities[i] unless styles.include?(possibilities[i])
+				i = i + 1
 			end
+			styles
 		end
-		# fill in the rest with whatever
-		i = 0
-		while styles.size < limit
-			styles << possibilities[i] unless styles.include?(possibilities[i])
-			i = i + 1
-		end
-		return styles
 	end
 
 	def self.subcategories(category)

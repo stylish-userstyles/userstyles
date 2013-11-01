@@ -46,7 +46,19 @@ Userstyles::Application.configure do
 
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
+  
+  config.eager_load = false
+  
+  # setting in an initializer isn't working to configure Rails.cache, so set here
+  config.cache_store = :dalli_store, ['localhost:11211:10'], { :namespace => 'Userstyles', :expires_in => 1.hour, :compress => true }
 end
+
+DOMAIN = 'userstyles.org'
+FORUM_DOMAIN = 'forum.userstyles.org'
+STATIC_DOMAIN = 'cdn.userstyles.org'
+UPDATE_DOMAIN = 'update.userstyles.org'
+SCREENSHOT_DOMAIN = 'cdn.userstyles.org'
+MD5_PATH = '/home/jason/md5test/'
 
 ActionMailer::Base.delivery_method = :sendmail
 

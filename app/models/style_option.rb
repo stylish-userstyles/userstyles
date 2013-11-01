@@ -1,5 +1,6 @@
 class StyleOption < ActiveRecord::Base
-	has_many :style_option_values, :dependent => :destroy, :order => 'ordinal'
+	belongs_to :style, :touch => true
+	has_many :style_option_values, -> { order(:ordinal) }, :dependent => :destroy
 
 	validates_presence_of :name, :display_name
 	validates_length_of :style_option_values, :minimum =>2, :message => 'must have at least 2 options.', :if => Proc.new { |option| option.option_type == "dropdown" }

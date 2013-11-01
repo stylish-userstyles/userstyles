@@ -312,7 +312,7 @@ end %>
 		<% if !@style.nil? %>
 			<div style="margin-left: 2em">
 				<% if !@style.auto_after_screenshot_path.nil? %>
-					<a href="http://<%=STATIC_DOMAIN%><%=@style.auto_after_screenshot_path%>?r=<%=Time.now.to_i%>" rel="lightbox[screenshot] nofollow" title="Automatic primary screenshot"><img src="http://<%=STATIC_DOMAIN%><%=@style.auto_after_screenshot_thumbnail_path%>?r=<%=Time.now.to_i%>"></a><br>
+					<a href="http://<%=SCREENSHOT_DOMAIN%><%=@style.auto_after_screenshot_path%>?r=<%=Time.now.to_i%>" rel="lightbox[screenshot] nofollow" title="Automatic primary screenshot"><img src="http://<%=SCREENSHOT_DOMAIN%><%=@style.auto_after_screenshot_thumbnail_path%>?r=<%=Time.now.to_i%>"></a><br>
 					(Last generated <%=@style.auto_screenshot_date%>)
 				<% elsif @style.auto_screenshots_same%>
 					<strong>(No changes found after style was applied. Last check was on <%=@style.auto_screenshot_date%>. See <a href="/help/coding#screenshots-doc">screenshot documentation</a> for info.)</strong>
@@ -324,8 +324,8 @@ end %>
 		<input id="provide-screenshot" name="style[screenshot_type_preference]" type="radio" value="manual"  <%=@style.screenshot_type_preference == 'manual' ? 'checked' : ''%>> Use this screenshot (GIF, PNG, or JPG, &lt; 100KB):
 		<div style="margin-left: 2em">
 			<% if @style != nil and @style.after_screenshot_name != nil %>
-				<a href="http://<%=STATIC_DOMAIN%><%=@style.provided_after_screenshot_path%>?r=<%=Time.now.to_i%>" rel="lightbox[screenshot] nofollow" title="Provided primary screenshot"">
-					<img src="http://<%=STATIC_DOMAIN%><%=@style.provided_after_screenshot_thumbnail_path%>?r=<%=Time.now.to_i%>">
+				<a href="http://<%=SCREENSHOT_DOMAIN%><%=@style.provided_after_screenshot_path%>?r=<%=Time.now.to_i%>" rel="lightbox[screenshot] nofollow" title="Provided primary screenshot"">
+					<img src="http://<%=SCREENSHOT_DOMAIN%><%=@style.provided_after_screenshot_thumbnail_path%>?r=<%=Time.now.to_i%>">
 				</a><br>
 				<input name="remove_after_screenshot" type="checkbox"> Remove<br>
 				Change: <input name="style[after_screenshot]" type="file" accept="image/gif,image/png,image/jpeg" onchange="document.getElementById('provide-screenshot').checked = true">
