@@ -1,7 +1,8 @@
 .bundle
 db/*.sqlite3
-log/*.log
+log/
 tmp/
 db
-log/development.sphinx.pid
 config/initializers/secret_token.rb
+config/database.yml
+config/*.sphinx.conf
