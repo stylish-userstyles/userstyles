@@ -35,11 +35,11 @@ class CategoriesController < ApplicationController
 private
 
 	def public_action?
-		false
+		true
 	end
 	
 	def admin_action?
-		true
+		false
 	end
 	
 	def verify_private_action(user_id)
