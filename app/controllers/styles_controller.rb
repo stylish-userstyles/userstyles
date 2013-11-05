@@ -558,7 +558,7 @@ class StylesController < ApplicationController
 		else
 			per_page = 100
 		end
-		@styles = Style.where('obsolete = 1 and admin_delete_reasons.locked = false').includes([:user, :admin_delete_reason]).order('total_install_count desc, styles.id').paginate(:page => params[:page], :per_page => per_page)
+		@styles = Style.where('obsolete = 1 and admin_delete_reasons.locked = false').includes([:user, :admin_delete_reason]).references(:admin_delete_reason).order('total_install_count desc, styles.id').paginate(:page => params[:page], :per_page => per_page)
 	end
 
 	def delete
