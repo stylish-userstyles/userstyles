@@ -29,6 +29,7 @@ GEM
     atomic (1.1.14)
     builder (3.1.4)
     csspool (4.0.0)
+    daemons (1.1.9)
     dalli (2.6.4)
     delayed_job (4.0.0)
       activesupport (>= 3.0, < 4.1)
@@ -113,6 +114,7 @@ PLATFORMS
 
 DEPENDENCIES
   csspool (~> 4.0.0)
+  daemons
   dalli (~> 2.6.4)
   delayed_job (~> 4.0.0)
   delayed_job_active_record (~> 4.0.0)
