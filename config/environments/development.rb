@@ -36,5 +36,6 @@ STATIC_DOMAIN = 'userstyles.local:3000'
 UPDATE_DOMAIN = 'update.userstyles.org'
 SCREENSHOT_DOMAIN = 'cdn.userstyles.org'
 MD5_PATH = '/home/jason/md5test/'
+COOKIE_DOMAIN = '.userstyles.local'
 
 ActionMailer::Base.delivery_method = :test
