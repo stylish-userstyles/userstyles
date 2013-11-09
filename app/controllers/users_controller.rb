@@ -77,7 +77,6 @@ class UsersController < ApplicationController
 	def create
 		@page_title = "Register"
 		@user = User.new
-		@user.update_attributes!(user_params)
 		@user.name = @user.login if @user.name.nil? or @user.name = ''
 		@user.ip = request.remote_ip()
 		@return_to = params[:return_to]
@@ -89,9 +88,7 @@ class UsersController < ApplicationController
 			render :action => "new"
 			return
 		end
-		begin
-			@user.save!
-		rescue ActiveRecord::RecordInvalid
+		if !@user.update_attributes(user_params)
 			render :action => "new"
 			return
 		end
@@ -111,8 +108,7 @@ class UsersController < ApplicationController
 
 	def update
 		@user = User.find(params[:id])
-		@user.update_attributes!(user_params)
-		if !@user.save
+		if !@user.update_attributes(user_params)
 			render(:action => :edit)
 			return
 		end
@@ -293,7 +289,7 @@ class UsersController < ApplicationController
 private
 
 	def user_params
-		params.permit(:login, :email, :paypal_email, :show_email, :homepage, :about, :license)
+		params.require(:user).permit(:login, :email, :paypal_email, :show_email, :homepage, :about, :license, :name)
 	end
 
 end

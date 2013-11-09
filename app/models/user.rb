@@ -16,8 +16,8 @@ class User < ActiveRecord::Base
 	validates_length_of :about, :maximum => 4000, :allow_blank => true
 	validates_format_of :homepage, :with => /\A(#{URI::regexp(%w(http https))})\z/, :allow_blank => true
 
-	validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i, :allow_blank => true
-	validates_format_of :paypal_email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\Z/i, :allow_blank => true
+	validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, :allow_blank => true
+	validates_format_of :paypal_email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i, :allow_blank => true
 
 	validates_confirmation_of :password
 
