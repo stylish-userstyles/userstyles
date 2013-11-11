@@ -18,7 +18,7 @@ class LoginController < ApplicationController
 	end
 
 	def login_as
-		session[:user_id] = User.find(params[:id])
+		session[:user_id] = User.find(params[:id]).id
 		redirect_to '/'
 	end
 

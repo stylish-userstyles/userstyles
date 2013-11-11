@@ -77,20 +77,24 @@ class UsersController < ApplicationController
 	def create
 		@page_title = "Register"
 		@user = User.new
-		@user.name = @user.login if @user.name.nil? or @user.name = ''
+		@user.login = params[:user][:login]
+		@user.name = @user.login
+		@user.email = params[:user][:email]
+		@user.password = params[:user][:password]
+		@user.password_confirmation = params[:user][:password_confirmation]
 		@user.ip = request.remote_ip()
 		@return_to = params[:return_to]
-		if @return_to.nil?
-			@return_to = session[:return_to]
-		end
-		if @user.password.length <= 3
+		if params[:user][:password].length < 3
 			@user.errors.add('password', 'must be at least 3 characters.')
 			render :action => "new"
 			return
 		end
-		if !@user.update_attributes(user_params)
+		if !@user.save
 			render :action => "new"
 			return
+		end
+		if @return_to.nil?
+			@return_to = session[:return_to]
 		end
 		session[:user_id] = @user.id
 		if @return_to.nil?

@@ -13,7 +13,7 @@ end %>
 		<p class="error">Incorrect username/password.</p>
 	<% end %>
 
-	<form id="openid-login-form" method="POST" action="<%=url_for(:controller => 'login', :action => 'authenticate_openid')%>" style="<%=(params['view'].nil? or params['view'] == 'openid') ? '' : 'display:none'%>">
+	<%=form_tag({:controller => 'login', :action => 'authenticate_openid'}, {:id => 'openid-login-form', :style => (params['view'].nil? or params['view'] == 'openid') ? '' : 'display:none'}) do |f| %>
 		<div id="login-options" style="<%=params['view'].nil? ? '' : 'display:none'%>">
 			<p class="login-option-explanation">Log in with:</p>
 			<%
@@ -80,9 +80,9 @@ end %>
 				<input id="remember-openid" name="remember" type="checkbox" value="true"><label for="remember-openid">Keep me logged in</label>
 			</p>
 		<% end %>
-	</form>
+	<% end %>
 
-	<form id="password-login" method="POST" action="<%=url_for(:controller => 'login', :action => 'authenticate_normal')%>" style="<%=(!params['view'].nil? and params['view'] == 'password') ? '' : 'display:none'%>">
+	<%=form_tag({:controller => 'login', :action => 'authenticate_normal'}, {:id => 'password-login', :style => (!params['view'].nil? and params['view'] == 'password') ? '' : 'display:none'}) do |f| %>
 		<p><span class="login-option-explanation">Log in with my userstyles.org user name and password:</span> <a class="login-navigation" href="login" onclick="return showLoginStart()">Back</a></p>
 		<input id="login-existing" name="login" placeholder="User name">
 		<input id="password-existing" name="password" type="password" placeholder="Password">
@@ -98,9 +98,9 @@ end %>
 			<a href="?view=create" onclick="return showAccountCreate()">Create account</a> |
 			<%= link_to "Lost password", :controller => 'login', :action => 'lost_password' %>
 		</p>
-	</form>
+	<% end %>
 
-	<form id="password-create" method="POST" action="<%=url_for(:controller => 'users', :action => 'create')%>" style="<%=(!params['view'].nil? and params['view'] == 'create') ? '' : 'display:none'%>">
+	<%=form_tag({:controller => 'users', :action => 'create'}, {:style => (!params['view'].nil? and params['view'] == 'create') ? '' : 'display:none'}) do |f| %>
 		<p><span class="login-option-explanation">Create a userstyles.org account:</span> <a href="login" class="login-navigation" onclick="return showLoginStart()">Back</a></p>
 		<table>
 			<tr><td><label for="login-new" class="text-label">User name</label></td><td><input id="login-new" name="user[login]"></td></tr>
@@ -118,6 +118,6 @@ end %>
 				<input type="submit" value="Create account"></td></tr>
 			</td></tr>
 		</table>
-	</form>
+	<% end %>
 
 </div>

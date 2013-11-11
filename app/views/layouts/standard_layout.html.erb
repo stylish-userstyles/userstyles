@@ -20,6 +20,7 @@
 			<meta name="description" content="<%=@meta_description%>">
 		<% end %>
 		<meta property="fb:admins" content="1319443195">
+		<%= csrf_meta_tag %>
 		<link rel="stylesheet" href="http://<%=STATIC_DOMAIN%>/stylesheets/standard.css" type="text/css">
 		<link rel="search" href="http://<%=STATIC_DOMAIN%>/opensearch.xml" type="application/opensearchdescription+xml" title="userstyles Search">
 		<link rel="icon" href="http://<%=STATIC_DOMAIN%>/images/s3-16.png" type="image/png">
@@ -88,7 +89,7 @@
 			<nav>
 				<ul>
 					<li>
-						<form action="<%=url_for(:action => 'browse_r', :controller => 'styles')%>" method="get"<% if !params[:as].nil? %> class="advanced-search-active"<%end%>>
+						<%= form_tag('/styles/browse_r', {:method => 'get', :class => params[:as].nil? ? '' : 'advanced-search-active'}) do |f| %>
 							<div id="simple-search">
 								<input id="search-terms" placeholder="Search" type="search" title="Enter search words or a URL" name="search_terms" size="7" value="<%=params[:search_terms]%>"><input type="submit" id="search-submit" value="→"<% if !params[:as].nil? %> name="as"<%end%>>
 							</div>
@@ -127,7 +128,7 @@
 									<button onclick="this.parentNode.parentNode.parentNode.className='';document.getElementById('search-submit').name = '';return false">Back</button>
 									<input type="submit" name="as" value="Search">
 								</div>
-						</form>
+						<% end %>
 					</li>
 					<li><%=link_to_unless_current('Browse', :action => "index", :controller => "categories") %></li>
 					<% if session[:user_id].nil? %>
