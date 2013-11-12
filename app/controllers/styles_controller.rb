@@ -147,188 +147,11 @@ class StylesController < ApplicationController
 	end
 
 	def create
-		update
+		handle_change(true)
 	end
 
 	def update
-
-		@no_bots = true
-		
-		# some validations are happening outside of the activerecord. calling validation on an activerecord
-		# clears out the errors, so we can't store them there. instead, we'll store them in a local and add
-		# them when we're about to display
-		non_ar_errors = []
-
-		@stylish_uri = params["stylish-uri"]
-		if params["style"]["id"].nil? or params["style"]["id"].size == 0
-			new = true
-			@style = Style.new
-			@style["user_id"] = session[:user_id]
-			now = DateTime.now
-			@style["created"] = now
-			@style["updated"] = now
-			@style.style_code = StyleCode.new
-		else
-			new = false
-			@style = Style.includes([{:style_options => :style_option_values}, :screenshots]).find(params["style"]["id"])
-			#only mark it as updated if the css changed
-			if @style.style_code.code != params["style"]["css"]
-				@style.updated = DateTime.now
-			end
-		end
-
-		@style.short_description = params["style"]["short_description"]
-		@style.long_description = params["style"]["long_description"]
-		@style.additional_info = params["style"]["additional_info"]
-		@style.pledgie_id = params["style"]["pledgie_id"]
-		@style.style_code.code = params["style"]["css"]
-		@style.screenshot_type_preference = params["style"]["screenshot_type_preference"]
-		@style.screenshot_url_override = params["style"]["screenshot_url_override"]
-		@style.license = params["style"]["license"]
-
-		if @style.screenshot_type_preference == 'manual' && params["style"]["after_screenshot"].nil? && @style.after_screenshot_name.nil?
-			non_ar_errors << ['primary screenshot', 'must be provided with the chosen option']
-		end
-
-		#check for problems with the screenshots before saving them
-		if !params["style"]["after_screenshot"].nil?
-			@style.validate_screenshot(params["style"]["after_screenshot"], 'after').each do |attr, msg|
-				non_ar_errors << [attr, msg]
-			end
-		end
-		#existing screenshots
-		@style.screenshots.each do |screenshot|
-			screenshot.description = params["screenshot_description_#{screenshot.id}"]
-			non_ar_errors << ['screenshot', 'is missing a description'] if screenshot.description.nil? or screenshot.description.empty?
-			data = params["screenshot_#{screenshot.id}"]
-			if !data.nil?
-				@style.validate_screenshot(data, nil).each do |attr, msg|
-					non_ar_errors << [attr, msg]
-				end
-			end
-		end
-		#new screenshots
-		additional_screenshots = []
-		(1..5).each do |i|
-			description = params["new_screenshot_description_#{i}"]
-			data = params["new_screenshot_#{i}"]
-			# did the user submit anything?
-			if (!description.nil? and !description.empty?) or (!data.nil? and data.size > 0)
-				@style.validate_screenshot(data, nil).each do |attr, msg|
-					non_ar_errors << [attr, msg]
-				end
-				non_ar_errors << ['screenshot', 'is missing a description'] if description.nil? or description.empty?
-				additional_screenshots << {:description => description, :data => data}
-			end
-		end
-
-		# @new_style_options will be read by the edit page in case of a validation fail because setting 
-		# @style.style_options saves immediately.
-		@new_style_options = []
-		if !params['style_options_ids'].nil?
-			params['style_options_ids'].each do |style_option_id|
-				so = StyleOption.new
-				so.display_name = params["setting-display-name-#{style_option_id}"]
-				so.name = params["setting-name-#{style_option_id}"]
-				so.option_type = params["setting-type-#{style_option_id}"]
-				so.ordinal = style_option_id
-				if so.option_type == "dropdown" or so.option_type == "image"
-					if !params["option-display-name-#{style_option_id}"].nil?
-						(0..(params["option-display-name-#{style_option_id}"].size - 1)).each do |i|
-							sov = StyleOptionValue.new
-							sov.display_name = params["option-display-name-#{style_option_id}"][i]
-							sov.value = params["option-value-#{style_option_id}"][i]
-							sov.default = sov.display_name == params["option-default-#{style_option_id}"]
-							sov.ordinal = i
-							so.style_option_values << sov
-						end
-					end
-				else
-					sov = StyleOptionValue.new
-					sov.display_name = 'placeholder'
-					sov.value = params["option-default-#{style_option_id}"]
-					sov.default = true
-					sov.ordinal = 1
-					so.style_option_values << sov
-				end
-				@new_style_options << so
-			end
-		end
-
-		# let's also verify a name isn't reused. we can't rely on 
-		# rails validations because they only work after the style
-		# is saved
-		style_option_used_names = []
-		@new_style_options.each do |style_option|
-			if style_option_used_names.include?(style_option.name)
-				non_ar_errors << ["style options", "contain duplicate placeholder '#{style_option.name}'"]
-			else
-				style_option_used_names << style_option.name
-			end
-		end
-		
-		begin
-		
-			# db doesn't support transactions, so we can't use rails transactions.
-			# when we set the options just below, they will attempt to save immediately,
-			# which can result in the options being saved but the style itself not.
-			# to try to prevent this, check validity first. we'll set the options on a temp
-			# object for the code validator to use
-			@style.tmp_style_options = @new_style_options
-
-			@style.refresh_meta
-			
-			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or !$tld_specific_bad_domains.index{|d| @style.style_code.code.include?(d)}.nil?
-				@style.errors.add("Styles", "for adult sites are not allowed on userstyles.org.")
-			end
-
-			raise ActiveRecord::RecordInvalid.new(@style) if !@style.valid? or !non_ar_errors.empty?
-
-			@style.tmp_style_options = nil
-			@style.style_options.destroy_all
-			@style.style_options = @new_style_options
-
-			@style.save!
-			@style.style_code.save!
-			
-		rescue ActiveRecord::RecordInvalid
-			non_ar_errors.each do |attr, msg|
-				@style.errors.add(attr, msg)
-			end
-			@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
-			if new
-				@page_title = "New style"
-			else
-				@page_title = "Editing #{@style.short_description}"
-			end
-			render :action => 'edit'
-			return
-		end
-
-		#update the screenshots now that we have an id
-		if !params["style"]["after_screenshot"].nil?
-			@style.save_screenshot(params["style"]["after_screenshot"], :after)
-		elsif params["remove_after_screenshot"]
-			@style.after_screenshot_name = nil
-		end
-		@style.screenshots.each do |screenshot|
-			if params["remove_screenshot_#{screenshot.id}"]
-				@style.delete_additional_screenshot(screenshot)
-			else
-				data = params["screenshot_#{screenshot.id}"]
-				if !data.nil? and data.size > 0
-					@style.change_additional_screenshot(screenshot, data)
-				else
-					screenshot.save!
-				end
-			end
-		end
-		additional_screenshots.each do |screenshot|
-			@style.save_additional_screenshot(screenshot[:data], screenshot[:description])
-		end
-		@style.save!
-
-		redirect_to @style.pretty_url
+		handle_change(false)
 	end
 
 	def search_url
@@ -866,7 +689,7 @@ protected
 	
 	def verify_private_action(user_id)
 		# any user can do these
-		return true if ['new'].include?(action_name)
+		return true if ['new', 'create'].include?(action_name)
 		if ['update', 'delete_save'].include?(action_name)
 			style_id = params[:style][:id]
 		elsif ['edit', 'delete'].include?(action_name)
@@ -974,6 +797,185 @@ protected
 			end
 		end
 		return s
+	end
+	
+private
+
+	def handle_change(new)
+		@no_bots = true
+		
+		# some validations are happening outside of the activerecord. calling validation on an activerecord
+		# clears out the errors, so we can't store them there. instead, we'll store them in a local and add
+		# them when we're about to display
+		non_ar_errors = []
+
+		if new
+			@style = Style.new
+			@style["user_id"] = session[:user_id]
+			now = DateTime.now
+			@style["created"] = now
+			@style["updated"] = now
+			@style.style_code = StyleCode.new
+		else
+			@style = Style.includes([{:style_options => :style_option_values}, :screenshots]).find(params["style"]["id"])
+			#only mark it as updated if the css changed
+			if @style.style_code.code != params["style"]["css"]
+				@style.updated = DateTime.now
+			end
+		end
+
+		@style.short_description = params["style"]["short_description"]
+		@style.long_description = params["style"]["long_description"]
+		@style.additional_info = params["style"]["additional_info"]
+		@style.pledgie_id = params["style"]["pledgie_id"]
+		@style.style_code.code = params["style"]["css"]
+		@style.screenshot_type_preference = params["style"]["screenshot_type_preference"]
+		@style.screenshot_url_override = params["style"]["screenshot_url_override"]
+		@style.license = params["style"]["license"]
+
+		if @style.screenshot_type_preference == 'manual' && params["style"]["after_screenshot"].nil? && @style.after_screenshot_name.nil?
+			non_ar_errors << ['primary screenshot', 'must be provided with the chosen option']
+		end
+
+		#check for problems with the screenshots before saving them
+		if !params["style"]["after_screenshot"].nil?
+			@style.validate_screenshot(params["style"]["after_screenshot"], 'after').each do |attr, msg|
+				non_ar_errors << [attr, msg]
+			end
+		end
+		#existing screenshots
+		@style.screenshots.each do |screenshot|
+			screenshot.description = params["screenshot_description_#{screenshot.id}"]
+			non_ar_errors << ['screenshot', 'is missing a description'] if screenshot.description.nil? or screenshot.description.empty?
+			data = params["screenshot_#{screenshot.id}"]
+			if !data.nil?
+				@style.validate_screenshot(data, nil).each do |attr, msg|
+					non_ar_errors << [attr, msg]
+				end
+			end
+		end
+		#new screenshots
+		additional_screenshots = []
+		(1..5).each do |i|
+			description = params["new_screenshot_description_#{i}"]
+			data = params["new_screenshot_#{i}"]
+			# did the user submit anything?
+			if (!description.nil? and !description.empty?) or (!data.nil? and data.size > 0)
+				@style.validate_screenshot(data, nil).each do |attr, msg|
+					non_ar_errors << [attr, msg]
+				end
+				non_ar_errors << ['screenshot', 'is missing a description'] if description.nil? or description.empty?
+				additional_screenshots << {:description => description, :data => data}
+			end
+		end
+
+		# @new_style_options will be read by the edit page in case of a validation fail because setting 
+		# @style.style_options saves immediately.
+		@new_style_options = []
+		if !params['style_options_ids'].nil?
+			params['style_options_ids'].each do |style_option_id|
+				so = StyleOption.new
+				so.display_name = params["setting-display-name-#{style_option_id}"]
+				so.name = params["setting-name-#{style_option_id}"]
+				so.option_type = params["setting-type-#{style_option_id}"]
+				so.ordinal = style_option_id
+				if so.option_type == "dropdown" or so.option_type == "image"
+					if !params["option-display-name-#{style_option_id}"].nil?
+						(0..(params["option-display-name-#{style_option_id}"].size - 1)).each do |i|
+							sov = StyleOptionValue.new
+							sov.display_name = params["option-display-name-#{style_option_id}"][i]
+							sov.value = params["option-value-#{style_option_id}"][i]
+							sov.default = sov.display_name == params["option-default-#{style_option_id}"]
+							sov.ordinal = i
+							so.style_option_values << sov
+						end
+					end
+				else
+					sov = StyleOptionValue.new
+					sov.display_name = 'placeholder'
+					sov.value = params["option-default-#{style_option_id}"]
+					sov.default = true
+					sov.ordinal = 1
+					so.style_option_values << sov
+				end
+				@new_style_options << so
+			end
+		end
+
+		# let's also verify a name isn't reused. we can't rely on 
+		# rails validations because they only work after the style
+		# is saved
+		style_option_used_names = []
+		@new_style_options.each do |style_option|
+			if style_option_used_names.include?(style_option.name)
+				non_ar_errors << ["style options", "contain duplicate placeholder '#{style_option.name}'"]
+			else
+				style_option_used_names << style_option.name
+			end
+		end
+		
+		begin
+		
+			# db doesn't support transactions, so we can't use rails transactions.
+			# when we set the options just below, they will attempt to save immediately,
+			# which can result in the options being saved but the style itself not.
+			# to try to prevent this, check validity first. we'll set the options on a temp
+			# object for the code validator to use
+			@style.tmp_style_options = @new_style_options
+
+			@style.refresh_meta
+			
+			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or !$tld_specific_bad_domains.index{|d| @style.style_code.code.include?(d)}.nil?
+				@style.errors.add("Styles", "for adult sites are not allowed on userstyles.org.")
+			end
+
+			raise ActiveRecord::RecordInvalid.new(@style) if !@style.valid? or !non_ar_errors.empty?
+
+			@style.tmp_style_options = nil
+			@style.style_options.destroy_all
+			@style.style_options = @new_style_options
+
+			@style.save!
+			@style.style_code.save!
+			
+		rescue ActiveRecord::RecordInvalid
+			non_ar_errors.each do |attr, msg|
+				@style.errors.add(attr, msg)
+			end
+			@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
+			if new
+				@page_title = "New style"
+			else
+				@page_title = "Editing #{@style.short_description}"
+			end
+			render :action => 'edit'
+			return
+		end
+
+		#update the screenshots now that we have an id
+		if !params["style"]["after_screenshot"].nil?
+			@style.save_screenshot(params["style"]["after_screenshot"], :after)
+		elsif params["remove_after_screenshot"]
+			@style.after_screenshot_name = nil
+		end
+		@style.screenshots.each do |screenshot|
+			if params["remove_screenshot_#{screenshot.id}"]
+				@style.delete_additional_screenshot(screenshot)
+			else
+				data = params["screenshot_#{screenshot.id}"]
+				if !data.nil? and data.size > 0
+					@style.change_additional_screenshot(screenshot, data)
+				else
+					screenshot.save!
+				end
+			end
+		end
+		additional_screenshots.each do |screenshot|
+			@style.save_additional_screenshot(screenshot[:data], screenshot[:description])
+		end
+		@style.save!
+
+		redirect_to @style.pretty_url
 	end
 
 end

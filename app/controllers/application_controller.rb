@@ -73,7 +73,10 @@ protected
 	$new_sorts_map = {'name' => 'name DIR', 'total_installs' => 'total_install_count DIR', 'installs_this_week' => 'weekly_install_count DIR', 'created_date' => 'created DIR', 'updated_date' => 'updated DIR', 'popularity' => 'popularity DIR', 'relevance' => 'myweight DIR, popularity DIR'}
 
 	def handle_access_denied
-		render :text => "Access denied.", :status => 403, :layout => true
+		logger.warn "User from '#{request.remote_ip}' tried to '#{request.url}' and was denied. " +
+			(!session.nil? and !session[:user_id].nil? ? "User ID is #{session[:user_id]}. " : "User is not logged in. ") +
+			(params.to_s.length < 500 ? "Parameters are #{params}." : "Parameters are #{params.to_s.length} bytes long.")
+		render :text => 'Access denied.', :status => 403, :layout => true
 	end
 
 
