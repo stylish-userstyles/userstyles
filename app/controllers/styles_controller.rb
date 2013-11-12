@@ -692,7 +692,7 @@ protected
 		return true if ['new', 'create'].include?(action_name)
 		if ['update', 'delete_save'].include?(action_name)
 			style_id = params[:style][:id]
-		elsif ['edit', 'delete'].include?(action_name)
+		elsif ['edit', 'delete', 'stats'].include?(action_name)
 			style_id = params[:id]
 		else
 			return false
