@@ -352,10 +352,10 @@ class StylesController < ApplicationController
 				render :action => 'browse'
 			}
 			format.rss {
-				render(:action => "style_rss", :layout => false, :content_type => 'application/rss+xml')
+				render(:action => 'style_rss.xml.builder', :content_type => 'application/rss+xml')
 			}
 			format.atom {
-				render(:action => "style_atom", :layout => false, :content_type => 'application/atom+xml')
+				render(:action => 'style_atom.xml.builder', :content_type => 'application/atom+xml')
 			}
 			format.json {
 				render :text => @styles.to_json

@@ -3,7 +3,7 @@ xml.instruct!
 
 xml.feed "xmlns" => "http://www.w3.org/2005/Atom" do
 
-	xml.title   @page_title
+  xml.title   @page_title
   xml.link    "rel" => "self", "href" => url_for(:only_path => false)
   xml.link    "rel" => "alternate", "href" => url_for(:only_path => false, :controller => 'styles', :action => 'new_list')
   xml.id      url_for(:only_path => false, :controller => 'style', :action => 'new_feed')
@@ -18,7 +18,7 @@ xml.feed "xmlns" => "http://www.w3.org/2005/Atom" do
       xml.updated style.updated.strftime("%Y-%m-%dT%H:%M:%SZ")
       xml.author  { xml.name style.user.name }
       xml.content "type" => "html" do
-        xml.text! render(:partial => "style_feed_entry", :locals => {:style => style})
+        xml.text! render(:partial => "style_feed_entry.html.erb", :locals => {:style => style})
       end
     end
   end
