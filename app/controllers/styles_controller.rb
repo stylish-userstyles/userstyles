@@ -711,10 +711,10 @@ protected
 				render :action => "list"
 			}
 			format.atom {
-				render :action => "style_atom", :layout => false
+				render(:action => 'style_atom.xml.builder', :content_type => 'application/atom+xml')
 			}
 			format.rss {
-				render :action => "style_rss", :layout => false
+				render(:action => 'style_rss.xml.builder', :content_type => 'application/rss+xml')
 			}
 		end
 	end
