@@ -73,17 +73,17 @@ class LoginController < ApplicationController
 			ua.provider = 'openid'
 			ua.provider_identifier = response.identity_url
 			user.user_authenticators << ua
-			user.email = sreg["email"]
+			user.email = sreg['email']
 			begin
-				user.name = sreg["nickname"]
+				user.name = sreg['nickname']
 			rescue Exception => e
-				session[:temp_user_id] = user.id
-				redirect_to(:action => "name_required")
+				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email']}
+				redirect_to(:action => 'name_required')
 				return
 			end
 			if user.name.nil? or user.name.length == 0
-				session[:temp_user_id] = user.id
-				redirect_to(:action => "name_required")
+				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email']}
+				redirect_to(:action => 'name_required')
 				return
 			end
 			if user.save
@@ -97,14 +97,14 @@ class LoginController < ApplicationController
 				session[:user_id] = user.id
 				go_to_return_to()
 			else
-				session[:temp_user_id] = user.id
-				redirect_to(:action => "name_conflict")
+				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email'], :name => sreg['nickname']}
+				redirect_to(:action => 'name_conflict')
 			end
 			return
 		end
 		original_name = user.name
-		user.name = sreg["nickname"]
-		user.email = sreg["email"]
+		user.name = sreg['nickname']
+		user.email = sreg['email']
 		#the nickname might be in use
 		if !user.valid?
 			user.name = original_name
@@ -122,55 +122,91 @@ class LoginController < ApplicationController
 	end
 
 	def name_conflict
-		@page_title = "Display name conflict"
-		@taken_name = User.find(session[:temp_user_id]).name
+		@page_title = 'Display name conflict'
+		@taken_name = session[:temp_login_details][:name]
 	end
 
 	def name_required
-		@page_title = "Display name required"
+		@page_title = 'Display name required'
 	end
 
 	def resolve_name_conflict
-		@user = User.find(session[:temp_user_id])
-		@user.name = params[:name]
-		if @user.save
-			session[:temp_user_id] = nil
-			session[:user_id] = @user.id
-			go_to_return_to()
-		else
-			@taken_name = User.find(session[:temp_user_id]).name
-			render :action => "name_conflict"
-		end
-		return
-	end
-
-	def resolve_name_required
-		if params[:name] == nil
-			redirect_to(:action => "name_required")
-			return
-		end
-		@user = User.find(session[:temp_user_id])
-		if @user.nil?
+		if session[:temp_login_details].nil?
 			redirect_to :action => 'index'
 			return
 		end
+		
+		if params[:name] == nil or params[:name].empty?
+			redirect_to(:action => 'name_required')
+			return
+		end
+		
+		@user = User.new
+		@user.login = nil
+		@user.password = nil
+		@user.ip = request.remote_ip()
+		
+		@user[:email] = session[:temp_login_details][:email]
+		ua = UserAuthenticator.new
+		ua.provider = 'openid'
+		ua.provider_identifier = session[:temp_login_details][:provider_identifier]
+		@user.user_authenticators << ua
+		
 		@user.name = params[:name]
+		
 		if @user.save
-			session[:temp_user_id] = nil
+			session[:temp_login_details] = nil
 			session[:user_id] = @user.id
 			go_to_return_to()
-		else
-			@taken_name = User.find(session[:temp_user_id]).name
-			render :action => "name_conflict"
+			return
 		end
+		@taken_name = params[:name]
+		@page_title = 'Display name conflict'
+		render :action => 'name_conflict'
+	end
+
+	def resolve_name_required
+		if session[:temp_login_details].nil?
+			redirect_to :action => 'index'
+			return
+		end
+
+		if params[:name] == nil or params[:name].empty?
+			redirect_to(:action => 'name_required')
+			return
+		end
+
+		@user = User.new
+		@user.login = nil
+		@user.password = nil
+		@user.ip = request.remote_ip()
+		
+		@user[:email] = session[:temp_login_details][:email]
+		ua = UserAuthenticator.new
+		ua.provider = 'openid'
+		ua.provider_identifier = session[:temp_login_details][:provider_identifier]
+		@user.user_authenticators << ua
+		
+		@user.name = params[:name]
+
+		if @user.save
+			session[:temp_login_details] = nil
+			session[:user_id] = @user.id
+			go_to_return_to()
+			return
+		end
+
+		@taken_name = params[:name]
+		@page_title = 'Display name conflict'
+		render :action => 'name_conflict'
 	end
 
 	def policy
-		@page_title = "Privacy policy"
+		@page_title = 'Privacy policy'
 	end
 
 	def lost_password
-		@page_title = "Lost password recovery"
+		@page_title = 'Lost password recovery'
 	end
 
 	def lost_password_start
