@@ -429,7 +429,7 @@ class StylesController < ApplicationController
 			@style.obsolete = 0
 		end
 		# as above, we validated in the case of undelete, but it's ok to delete with validation errors
-		@style.save(false)
+		@style.save(validate: false)
 		redirect_to(:action => "show", :id => @style.id, :r => Time.now.to_i)
 	end
 	
@@ -468,7 +468,7 @@ class StylesController < ApplicationController
 			end
 		end
 		@style.obsoleting_style_id = params[:style][:obsoleting_style_id]
-		@style.save(false)
+		@style.save(validate: false)
 		redirect_to(:action => "show", :id => @style.id, :r => Time.now.to_i)
 	end
 	
