@@ -18,7 +18,7 @@ xml.feed "xmlns" => "http://www.w3.org/2005/Atom" do
       xml.updated style.updated.strftime("%Y-%m-%dT%H:%M:%SZ")
       xml.author  { xml.name style.user.name }
       xml.content "type" => "html" do
-        xml.text! render(:partial => "style_feed_entry.html.erb", :locals => {:style => style})
+        xml.text! render(:partial => "/styles/style_feed_entry.html.erb", :locals => {:style => style})
       end
     end
   end

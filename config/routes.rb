@@ -9,8 +9,8 @@ Userstyles::Application.routes.draw do
   get 'user/comments_on/:id' => 'users#comments_on_redirect', :format => 'html'
   get 'user/comments/:id/:mode' => 'users#comments_redirect'
   get 'user/comments_on/:id/:mode' => 'users#comments_on_redirect'
-  get 'users/:id/styles' => 'styles#by_user', :format => 'html'
-  get 'users/:id/styles.:format' => 'styles#by_user'
+  get 'users/:id/styles.:format', to: redirect('/users/%{id}.%{format}')
+  get 'users/:id/styles', to: redirect('/users/%{id}')
   get 'styles/browse/:category/:search_terms.:format' => 'styles#browse', :constraints => { :search_terms => /[^\.\/]+/, :category => /[^\/\.]+/ }
   get 'styles/browse/:category/:search_terms' => 'styles#browse', :constraints => { :search_terms => /[^\.\/]+/, :category => /[^\/\.]+/ }
   get 'styles/browse/:category.:format' => 'styles#browse', :constraints => { :category => /[^\/\.]+/ }

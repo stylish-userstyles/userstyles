@@ -348,6 +348,7 @@ class StylesController < ApplicationController
 				@feeds << {:title => @page_title, :href => url_for(:category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort], :sort_direction => params[:sort_direction], :format => "atom", :host => DOMAIN), :type => "application/atom+xml"}
 				@feeds << {:title => @page_title, :href => url_for(:category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort], :sort_direction => params[:sort_direction], :format => "rss", :host => DOMAIN), :type => "application/rss+xml"}
 				@feeds << {:title => @page_title, :href => url_for(:category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort], :sort_direction => params[:sort_direction], :format => "json", :host => DOMAIN), :type => "application/json"}
+				@feeds << {:title => @page_title, :href => url_for(:category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort], :sort_direction => params[:sort_direction], :format => "jsonp", :host => DOMAIN), :type => "text/javascript"}
 				@canonical = url_for(:controller => 'styles', :action => 'browse', :page => params[:page], :category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort] == 'relevance' ? nil : params[:sort], :sort_direction => params[:sort_direction], :per_page => params[:per_page], :format => nil, :host => DOMAIN)
 				render :action => 'browse'
 			}
@@ -566,17 +567,6 @@ class StylesController < ApplicationController
 		end
 	end
 
-	def by_user
-		@user_displayed = User.find(params[:id])
-		if @user_displayed.nil?
-			render :nothing => true, :status => 404
-			return
-		end
-		@styles = Style.active.where(:user_id => @user_displayed.id).order('short_description')
-		@page_title = "Styles by #{ERB::Util::h(@user_displayed.name)}"
-		generic_list
-	end
-
 	def expire_by_id
 		#expire_page(:controller => 'styles', :action => 'show', :id => params[:id])
 		StyleSweeper.instance.after_update(Style.find(params[:id]))
@@ -700,23 +690,6 @@ protected
 		style = Style.find(style_id)
 		return false if style.nil?
 		return style.user_id == user_id
-	end
-
-	def generic_list
-		respond_to do |format|
-			format.html {
-				#@feeds = []
-				#@feeds << {:title => @page_title, :href => url_for(:format => "atom", :category => params[:category]), :type => "application/atom+xml"}
-				#@feeds << {:title => @page_title, :href => url_for(:format => "rss", :category => params[:category]), :type => "application/rss+xml"}
-				render :action => "list"
-			}
-			format.atom {
-				render(:action => 'style_atom.xml.builder', :content_type => 'application/atom+xml')
-			}
-			format.rss {
-				render(:action => 'style_rss.xml.builder', :content_type => 'application/rss+xml')
-			}
-		end
 	end
 
 	def get_option_params

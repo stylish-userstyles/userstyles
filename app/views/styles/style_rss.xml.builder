@@ -13,7 +13,7 @@ xml.rss "version" => "2.0", "xmlns:dc" => "http://purl.org/dc/elements/1.1/" do
       xml.item do
         xml.title       style.short_description
         xml.link        url_for(:only_path => false, :controller => 'styles', :action => 'show', :id => style.id)
-        xml.description render(:partial => "style_feed_entry.html.erb", :locals => {:style => style})
+        xml.description render(:partial => "/styles/style_feed_entry.html.erb", :locals => {:style => style})
         xml.pubDate     CGI.rfc1123_date(style.updated)
         xml.guid        url_for(:only_path => false, :controller => 'styles', :action => 'show', :id => style.id)
         xml.author      "jason.barnabe@gmail.com (#{style.user.name})"

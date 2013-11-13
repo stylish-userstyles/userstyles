@@ -24,8 +24,10 @@ class UsersController < ApplicationController
 			format.html {
 				@page_title = @user_displayed.name
 				@feeds = []
-				@feeds << {:title => "Styles by this user", :href => "#{@user_displayed.id}/styles.rss", :type => "application/rss+xml"}
-				@feeds << {:title => "Styles by this user", :href => "#{@user_displayed.id}/styles.atom", :type => "application/atom+xml"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'rss'), :type => "application/rss+xml"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'atom'), :type => "application/atom+xml"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'json'), :type => "application/json"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'jsonp'), :type => "text/javascript"}
 			}
 			format.json {
 				render :text => @styles.to_json
@@ -34,6 +36,12 @@ class UsersController < ApplicationController
 				callback = params[:callback]
 				callback = 'handleUserstylesData' if callback.nil? or /^[$A-Za-z_][0-9A-Za-z_\.]*$/.match(callback).nil?
 				render :text => callback + '(' + @styles.to_json + ');'
+			}
+			format.atom {
+				render(:template => '/styles/style_atom.xml.builder', :content_type => 'application/atom+xml')
+			}
+			format.rss {
+				render(:template => '/styles/style_rss.xml.builder', :content_type => 'application/rss+xml')
 			}
 		end
 	end
