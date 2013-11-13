@@ -73,5 +73,5 @@ Userstyles::Application.routes.draw do
   get 'firstrun' => 'index#firstrun'
   get 'contact' => 'index#contact'
   match '/:controller(/:action(/:id))', via: [:get, :post]
-  get '*path' => 'index#rescue_404'
+  match '*path' => 'index#rescue_404', via: [:get, :post]
 end

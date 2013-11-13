@@ -12,7 +12,8 @@ class IndexController < ApplicationController
 
 	def rescue_404
 		@page_title = "404'd!"
-		render :status => "404", :layout => true
+		logger.warn "Request for #{request.original_url} resulted in 404."
+		render :status => '404', :layout => true
 	end
 
 	def firstrun
