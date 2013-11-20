@@ -552,7 +552,7 @@ Replace = "$STOP()"
 	def self.increment_installs(style_id, source, ip)
 		begin
 			Style.connection.execute("INSERT INTO daily_install_counts (style_id, ip, source) VALUES (#{Style.connection.quote_string(style_id)}, '#{Style.connection.quote_string(ip)}', '#{Style.connection.quote_string(source)}');")
-		rescue ActiveRecord::StatementInvalid
+		rescue Mysql2::Error
 			# user already installed
 		end
 	end
