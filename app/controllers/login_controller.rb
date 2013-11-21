@@ -24,6 +24,9 @@ class LoginController < ApplicationController
 
 	def authenticate_normal
 		if params[:login] and params[:password] and user = User.authenticate(params[:login], params[:password])
+			# Only validate if the user was previously valid. some people may have bad data and if we
+			# validate them, they can't log in.
+			user_was_valid = user.valid?
 			session[:user_id] = user.id
 			remember = params[:remember] == "true"
 			if remember
@@ -34,7 +37,7 @@ class LoginController < ApplicationController
 			end
 			user.ip = request.remote_ip()
 			user.lost_password_key = nil
-			user.save!
+			user.save(:validate => user_was_valid)
 			go_to_return_to
 			return
 		end
@@ -102,13 +105,25 @@ class LoginController < ApplicationController
 			end
 			return
 		end
-		original_name = user.name
-		user.name = sreg['nickname']
-		user.email = sreg['email']
-		#the nickname might be in use
-		if !user.valid?
-			user.name = original_name
+		# The user may already be invalid, we don't want to prevent logging in. If they're invalid,
+		# we can't tell if their new name and e-mail are good, so we won't update those.
+		user_was_valid = user.valid?
+		if user_was_valid
+			# Leave user name and e-mail alone if the passed value is invalid
+			
+			original_name = user.name
+			user.name = sreg['nickname']
+			if !user.valid?
+				user.name = original_name
+			end
+			
+			original_email = user.email
+			user.email = sreg['email']
+			if !user.valid?
+				user.email = original_email
+			end
 		end
+
 		if session[:remember]
 			if user.token.nil?
 				user.token = user.generate_login_token
@@ -116,7 +131,7 @@ class LoginController < ApplicationController
 			cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now}
 		end
 		user.ip = request.remote_ip()
-		user.save
+		user.save(:validate => user_was_valid)
 		session[:user_id] = user.id
 		go_to_return_to
 	end
