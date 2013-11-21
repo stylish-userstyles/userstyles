@@ -7,3 +7,4 @@ config/initializers/secret_token.rb
 config/database.yml
 config/*.sphinx.conf
 public/auto_style_screenshots/
+public/style_screenshots
