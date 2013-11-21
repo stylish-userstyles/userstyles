@@ -810,7 +810,7 @@ Replace = "$STOP()"
 		screenshot.save!
 		full_path = "#{Rails.root}/public/style_screenshots/#{filename}"
 		is_update = File.exists?(full_path)
-		File.open(full_path, "w") { |f| f.write(data.read) }
+		File.open(full_path, "wb") { |f| f.write(data.read) }
 		refresh_cdn "/style_screenshots/#{filename}" if is_update
 	end
 
@@ -836,7 +836,7 @@ Replace = "$STOP()"
 		filename = "#{self.id}_additional_#{screenshot.id}.#{data.content_type.strip.split('/')[1]}"
 		screenshot.path = filename
 		screenshot.save!
-		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "w") { |f| f.write(data.read) }
+		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "wb") { |f| f.write(data.read) }
 	end
 
 	# applies the style options to this style. the parameter is a hash of string style option id to (string style value id | text value)
