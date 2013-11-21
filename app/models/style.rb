@@ -790,7 +790,7 @@ Replace = "$STOP()"
 			end
 		end
 		filename = "#{self.id}_#{prefix}.#{screenshot.content_type.strip.split('/')[1]}"
-		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "w") { |f| f.write(screenshot.read) }
+		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "wb") { |f| f.write(screenshot.read) }
 		refresh_cdn "/style_screenshots/#{filename}" if is_update
 		if type == :after
 			`#{Rails.root}/thumbnail.sh #{Rails.root}/public/style_screenshots/#{filename} #{Rails.root}/public/style_screenshot_thumbnails/#{filename} &> #{Rails.root}/thumb.log`
