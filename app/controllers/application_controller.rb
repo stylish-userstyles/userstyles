@@ -17,6 +17,7 @@ protected
 		return unless session[:user_id].nil?
 		user = User.where(:token => cookies[:login]).first
 		if !user.nil?
+			session[:user_id] = user.id
 			#restart the clock
 			cookies[:login] = { :value => cookies[:login], :expires => 2.weeks.from_now}
 		end
