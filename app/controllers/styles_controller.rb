@@ -22,7 +22,7 @@ class StylesController < ApplicationController
 				end
 				begin
 					@style = Rails.cache.fetch "styles/show/#{params[:id]}" do
-						Style.includes([:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason, {:discussions => :original_posters}]).find(params[:id])
+						Style.includes([:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason, {:discussions => {:original_forum_poster => :users}}]).find(params[:id])
 					end
 				rescue ActiveRecord::RecordNotFound
 					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true

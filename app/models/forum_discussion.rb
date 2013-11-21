@@ -6,7 +6,7 @@ class ForumDiscussion < ActiveRecord::Base
 	# ignore this so we don't have to cache something we won't use
 	ignore_columns :Body
 	
-	has_and_belongs_to_many :original_posters, -> { readonly }, :class_name => 'User', :foreign_key => 'UserID', :association_foreign_key => 'ForeignUserKey', :join_table => 'GDN_UserAuthentication'
+	belongs_to :original_forum_poster, -> { readonly }, :class_name => 'ForumUser', :foreign_key => 'InsertUserID'
 
 	def created
 		return self.DateInserted
@@ -20,10 +20,9 @@ class ForumDiscussion < ActiveRecord::Base
 	def url
 		"http://#{FORUM_DOMAIN}/discussion/#{self.DiscussionID}/x"
 	end
-	
+
 	def original_poster
-		return nil if original_posters.empty?
-		original_posters.first
+		return original_forum_poster.user
 	end
 
 end
