@@ -32,7 +32,7 @@ end
 
 DOMAIN = 'userstyles.local'
 FORUM_DOMAIN = 'forum.userstyles.local'
-STATIC_DOMAIN = 'userstyles.local:3000'
+STATIC_DOMAIN = 'userstyles.local'
 UPDATE_DOMAIN = 'update.userstyles.org'
 SCREENSHOT_DOMAIN = 'cdn.userstyles.org'
 MD5_PATH = '/home/jason/md5test/'
