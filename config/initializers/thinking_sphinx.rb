@@ -2,3 +2,5 @@
 # remove in 3.1?
 ThinkingSphinx::Middlewares::DEFAULT.delete ThinkingSphinx::Middlewares::UTF8
 ThinkingSphinx::SphinxQL.functions!
+
+ThinkingSphinx::Connection.persistent = false

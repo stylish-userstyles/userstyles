@@ -7,7 +7,10 @@ gem 'mysql2', '~> 0.3.0'
 gem 'sanitize', '~> 2.0.6'
 gem 'csspool', '~> 4.0.0'
 gem 'public_suffix', '~> 1.3.1'
-gem 'thinking-sphinx', '~> 3.0.0'
+gem 'thinking-sphinx', '~> 3.0.6',
+	:git    => 'git://github.com/pat/thinking-sphinx.git',
+	:branch => 'develop',
+	:ref    => 'ed9b39ae84'
 gem 'ts-delayed-delta', '~> 2.0.0'
 gem 'delayed_job', '~> 4.0.0'
 gem 'delayed_job_active_record', '~> 4.0.0'
