@@ -600,18 +600,15 @@ a.btn-twitter:visited {
 #search select {
 	font-size: inherit;
 }
-.style-brief-control-links {
-	display: none;
-}
-.by-current-user .style-brief-control-links {
-	display: block;
-}
 .style-brief-stats {
 	font-size: smaller;
 }
 .style-brief-stats span {
 	display: inline-block;
 	min-width: 16em;
+}
+.style-brief-control-links {
+	padding-top: 0.5em;
 }
 .style-brief-text .style-brief-stats span:last-child {
 	min-width: auto;
