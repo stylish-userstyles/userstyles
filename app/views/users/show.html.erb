@@ -97,10 +97,10 @@
 							<% end %>
 						</td>
 						<td class="date-value">
-							<% if @style_forum_stats[style.id.to_s].nil? %>
+							<% if @style_forum_stats[style.id].nil? %>
 								-
 							<% else %>
-								<%=@style_forum_stats[style.id.to_s].strftime('%b %e, %Y')%>
+								<%=@style_forum_stats[style.id].strftime('%b %e, %Y')%>
 							<% end %>
 						</td>
 						<td>
