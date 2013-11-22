@@ -8,3 +8,5 @@ config/database.yml
 config/*.sphinx.conf
 public/auto_style_screenshots/
 public/style_screenshots
+public/style_screenshot_thumbnails
+public/auto_style_screenshots
