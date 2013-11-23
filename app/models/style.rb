@@ -793,7 +793,9 @@ Replace = "$STOP()"
 		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "wb") { |f| f.write(screenshot.read) }
 		refresh_cdn "/style_screenshots/#{filename}" if is_update
 		if type == :after
-			`#{Rails.root}/thumbnail.sh #{Rails.root}/public/style_screenshots/#{filename} #{Rails.root}/public/style_screenshot_thumbnails/#{filename} &> #{Rails.root}/thumb.log`
+			if !system("#{Rails.root}/shellscripts/thumbnail.sh #{Rails.root}/public/style_screenshots/#{filename} #{Rails.root}/public/style_screenshot_thumbnails/#{filename} >> #{Rails.root}/log/thumbnail.log 2>&1")
+				logger.error "Failed making thumbnail for #{filename}, exit code is #{$?}"
+			end
 			refresh_cdn "/style_screenshot_thumbnails/#{filename}" if is_update
 		end
 		set_screenshot_name_by_type(type, filename)
@@ -815,7 +817,10 @@ Replace = "$STOP()"
 	end
 
 	def refresh_cdn(path)
-		`#{Rails.root}/refresh_cdn.sh http://#{STATIC_DOMAIN}#{path} >> #{Rails.root}/refresh_cdn.log 2>> #{Rails.root}/refresh_cdn.log`
+		url_to_refresh = "http://#{SCREENSHOT_DOMAIN}#{path}"
+		if !system("#{Rails.root}/shellscripts/refresh_cdn.sh #{url_to_refresh} >> #{Rails.root}/log/refresh_cdn.log 2>&1")
+			logger.error "Failed refreshing CDN for URL #{url_to_refresh} - #{$?}"
+		end
 	end
 
 	def delete_additional_screenshot(screenshot)
