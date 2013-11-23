@@ -600,7 +600,7 @@ class StylesController < ApplicationController
 		else
 			per_page = 100
 		end
-		@styles = Style.paginate(:all, :conditions => "id IN (#{ids.join(',')})", :per_page => per_page, :order => 'updated DESC', :page => params[:page])
+		@styles = Style.where("id IN (#{ids.join(',')})").order('updated DESC').paginate(:per_page => per_page, :page => params[:page])
 		@no_ads = true
 		@no_bots = true
 		render :action => 'browse'
@@ -658,7 +658,7 @@ class StylesController < ApplicationController
 		if ids.empty?
 			@styles = []
 		else
-			@styles = Style.paginate(:all, :conditions => "id IN (#{ids.join(',')})", :per_page => per_page, :order => 'popularity_score DESC', :page => params[:page])
+			@styles = Style.where("id IN (#{ids.join(',')})").order('popularity_score DESC').paginate(:per_page => per_page, :page => params[:page])
 		end
 		@no_ads = true
 		@no_bots = true
