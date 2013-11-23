@@ -11,8 +11,7 @@ class Style < ActiveRecord::Base
 
 	strip_attributes
 
-	#has_many :discussions, :class_name => 'ForumDiscussion', :finder_sql => proc {"SELECT gd.*, u.id user_id, u.name user_name FROM GDN_Discussion gd INNER JOIN GDN_UserAuthentication gu ON gu.UserId = gd.InsertUserID INNER JOIN users u ON u.id = gu.ForeignUserKey WHERE gd.StyleID = #{id} AND gd.Closed = 0 ORDER BY gd.DateInserted"}
-	has_many :discussions, -> { readonly }, :class_name => 'ForumDiscussion', :foreign_key => 'StyleID'
+	has_many :discussions, -> { readonly.order('DateInserted') }, :class_name => 'ForumDiscussion', :foreign_key => 'StyleID'
 	has_one :style_code
 	has_many :style_options, -> { order(:ordinal) }
 	belongs_to :user
