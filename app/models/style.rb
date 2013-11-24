@@ -1321,14 +1321,9 @@ Replace = "$STOP()"
 				return true if !(value =~ $moz_doc_validate_exempt_protocols).nil?
 				return false if !(value =~ $moz_doc_validate_invalid_url_chars).nil?
 				# it could just be the protocol for url-prefix
-				return true if !(value =~ /^(http|https|file|ftp):?\/*/).nil?
+				return true if !(value =~ /\A(http|https|file|ftp):?\/*\z/).nil?
 				return false if (value =~ URI::regexp(%w(http https file ftp))).nil?
-				begin
-					url_value = URI.parse(value)
-				rescue
-					return false
-				end
-				return Style.validate_domain(url_value.host, false)
+				return Style.validate_url(value, false)
 			when 'regexp'
 				begin
 					re = Regexp.new(value)
@@ -1351,6 +1346,7 @@ Replace = "$STOP()"
 		rescue
 			return false
 		end
+		return false if ['http', 'https', 'ftp'].include?(url_value.scheme) and url_value.host.nil?
 		return Style.validate_domain(url_value.host, publicly_accessible_only)
 	end
 
