@@ -28,7 +28,7 @@ Userstyles::Application.routes.draw do
   get 'styles/ieuserjs/:id/:foo.ieuser.js' => 'styles#js', :constraints => { :foo => /.*/ }
   get 'styles/operacss/:id/:foo.css' => 'styles#opera_css', :constraints => { :foo => /.*/ }
   get 'styles/iecss/:id/:foo.css' => 'styles#ie_css', :constraints => { :foo => /.*/ }
-  get 'styles/chrome/:id.json' => 'styles#chrome_json'
+  match 'styles/chrome/:id.json' => 'styles#chrome_json', via: [:get, :post]
   get 'styles/delete/:id' => 'styles#delete'
   get 'styles/admin_delete/:id' => 'styles#admin_delete'
   get 'styles/validate/:id' => 'styles#validate'

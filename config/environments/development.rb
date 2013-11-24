@@ -25,8 +25,8 @@ Userstyles::Application.configure do
   config.session_store :cookie_store, :key => '_session_id', :domain => '.userstyles.local'
   
   # setting in an initializer isn't working to configure Rails.cache, so set here
-  #config.cache_store = :null_store
-  config.cache_store = :dalli_store, ['localhost:11211:10'], { :namespace => 'Userstyles', :expires_in => 1.hour, :compress => true }
+  config.cache_store = :null_store
+  #config.cache_store = :dalli_store, ['localhost:11211:10'], { :namespace => 'Userstyles', :expires_in => 1.hour, :compress => true }
 end
 
 
