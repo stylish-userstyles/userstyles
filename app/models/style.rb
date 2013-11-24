@@ -25,6 +25,7 @@ class Style < ActiveRecord::Base
 	before_save :truncate_values
 	def truncate_values
 		['moz_doc_error'].each do |column|
+			next if self[column].nil?
 			length = Style.columns_hash[column].limit
 			self[column] = self[column][0..length-1] if self[column].length > length
 		end
