@@ -10,4 +10,13 @@ class ActiveSupport::TestCase
   fixtures :all
 
   # Add more helper methods to be used by all tests here...
+	def get_style_template
+		return Style.new(
+			:id => 123,
+			:short_description => 'Style name',
+			:long_description => 'Style description',
+			:user => User.new(:name => 'me'),
+			:style_code => StyleCode.new
+		)
+	end
 end

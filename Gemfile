@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '2.0.0'
 
-gem 'rails', '~> 4.0.0'
+gem 'rails', '~> 4.0.1'
 gem 'mysql2', '~> 0.3.0'
 gem 'sanitize', '~> 2.0.6'
 gem 'csspool', '~> 4.0.0'

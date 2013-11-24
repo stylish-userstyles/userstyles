@@ -41,6 +41,7 @@ module Userstyles
 
     # Not sure if assets are useful/desirable considering I have a CDN, so disabled for now.
     config.assets.enabled = false
-    
+
+    config.active_record.schema_format = :sql
   end
 end

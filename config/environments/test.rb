@@ -7,9 +7,6 @@ Userstyles::Application.configure do
   # and recreated between test runs.  Don't rely on the data there!
   config.cache_classes = true
 
-  # Log error messages when you accidentally call methods on nil.
-  config.whiny_nils = true
-
   # Show full error reports and disable caching
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching = false
@@ -32,7 +29,15 @@ Userstyles::Application.configure do
 
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
-
-  # Raise exception on mass assignment protection for Active Record models
-  config.active_record.mass_assignment_sanitizer = :strict
 end
+
+
+DOMAIN = 'userstyles.local'
+FORUM_DOMAIN = 'forum.userstyles.local'
+STATIC_DOMAIN = 'userstyles.local'
+UPDATE_DOMAIN = 'update.userstyles.org'
+SCREENSHOT_DOMAIN = 'cdn.userstyles.org'
+MD5_PATH = '/home/jason/md5test/'
+COOKIE_DOMAIN = '.userstyles.local'
+
+ActionMailer::Base.delivery_method = :test
