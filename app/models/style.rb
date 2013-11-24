@@ -22,6 +22,14 @@ class Style < ActiveRecord::Base
 	alias_attribute :description, :long_description
 	alias_attribute :example_url, :screenshot_url_override
 
+	before_save :truncate_values
+	def truncate_values
+		['moz_doc_error'].each do |column|
+			length = Style.columns_hash[column].limit
+			self[column] = self[column][0..length-1] if self[column].length > length
+		end
+	end
+
 	validates_presence_of :name
 	validates_presence_of :description
 	validates_length_of :name, :maximum => 50, :allow_nil => true

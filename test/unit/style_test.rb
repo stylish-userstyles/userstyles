@@ -2,6 +2,11 @@ require 'test_helper'
  
 class StyleTest < ActiveSupport::TestCase
 
+	test 'valid is valid' do
+		style = get_valid_style()
+		assert style.valid?
+	end
+
 	# charsets always have to be first
 	test "charset is first on opera css" do
 		style = get_style_template()
@@ -71,6 +76,13 @@ class StyleTest < ActiveSupport::TestCase
 		assert style.code_possibilities[0][1] == '* { font-size: 12px }', style.code_possibilities[0][1]
 		assert style.code_possibilities[1][1] == '* { font-size: 13px }', style.code_possibilities[1][1]
 
+	end
+	
+	test 'long moz_doc_error' do
+		style = get_valid_style()
+		style.moz_doc_error = 'X' * 1000
+		style.save
+		assert style.moz_doc_error == 'X' * 100
 	end
 
 end
