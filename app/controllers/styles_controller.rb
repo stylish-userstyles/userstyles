@@ -147,6 +147,7 @@ class StylesController < ApplicationController
 	end
 
 	def test
+		render :layout => false
 	end
 
 	def create
