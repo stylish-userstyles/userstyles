@@ -3,7 +3,7 @@ require 'test_helper'
 class StyleMozDocValidationTest < ActiveSupport::TestCase
 
 	test 'HTTP URL OK' do
-		style = get_style_template()
+		style = get_valid_style()
 		style.style_code.code = <<-END_OF_STRING
 			@-moz-document url-prefix("http://example.com/") { * { color: blue; } }
 		END_OF_STRING
@@ -11,7 +11,7 @@ class StyleMozDocValidationTest < ActiveSupport::TestCase
 	end
 
 	test 'HTTP URL bad' do
-		style = get_style_template()
+		style = get_valid_style()
 		style.style_code.code = <<-END_OF_STRING
 			@-moz-document url-prefix("this is not a URL") { * { color: blue; } }
 		END_OF_STRING
@@ -19,10 +19,19 @@ class StyleMozDocValidationTest < ActiveSupport::TestCase
 	end
 
 	test 'HTTP URL missing slash' do
-		style = get_style_template()
+		style = get_valid_style()
 		style.style_code.code = <<-END_OF_STRING
 			@-moz-document url-prefix("http:/example.com/") { * { color: blue; } }
 		END_OF_STRING
 		assert !style.valid?
 	end
+
+	test 'HTTP URL prefix stops at period' do
+		style = get_valid_style()
+		style.style_code.code = <<-END_OF_STRING
+			@-moz-document url-prefix("http://example.") { * { color: blue; } }
+		END_OF_STRING
+		assert style.valid?
+	end
+	
 end

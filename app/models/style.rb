@@ -1331,8 +1331,10 @@ Replace = "$STOP()"
 				return false if !(value =~ $moz_doc_validate_invalid_url_chars).nil?
 				# it could just be the protocol for url-prefix
 				return true if !(value =~ /\A(http|https|file|ftp):?\/*\z/).nil?
-				return false if (value =~ URI::regexp(%w(http https file ftp))).nil?
-				return Style.validate_url(value, false)
+				# protocol://thenwhatever is ok, we can't validate it as a url because
+				# it could end at a weird spot
+				return true if !(value =~ /\A(http|https|file|ftp):\/\/.*/).nil?
+				return false
 			when 'regexp'
 				begin
 					re = Regexp.new(value)
