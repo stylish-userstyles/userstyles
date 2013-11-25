@@ -13,6 +13,7 @@ Userstyles::Application.routes.draw do
   get 'users/:id/styles.:format', to: redirect('/users/%{id}.%{format}')
   get 'users/:id/styles', to: redirect('/users/%{id}')
 
+  get 'styles/test' => 'styles#test'
   get 'styles/browse/all/:search_terms' => 'styles#browse_r', :constraints => { :search_terms => /.*/ }
   get 'styles/browse/:category/:search_terms.:format' => 'styles#browse', :constraints => { :search_terms => /[^\.\/]+/, :category => /[^\/\.]+/ }
   get 'styles/browse/:category/:search_terms' => 'styles#browse', :constraints => { :search_terms => /[^\.\/]+/, :category => /[^\/\.]+/ }

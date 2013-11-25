@@ -146,6 +146,9 @@ class StylesController < ApplicationController
 		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/lightbox.js'></script>\n".html_safe
 	end
 
+	def test
+	end
+
 	def create
 		handle_change(true)
 	end
@@ -671,7 +674,7 @@ class StylesController < ApplicationController
 protected
 
 	def public_action?
-		['show', 'show_redirect', 'install', 'search_url', 'search_text', 'search', 'browse_r', 'browse', 'graveyard', 'updated', 'js', 'opera_css', 'ie_css', 'chrome_json', 'proxomitron', 'by_user', 'expire_by_id', 'screenshotable', 'automation_page'].include?(action_name)
+		['show', 'show_redirect', 'install', 'search_url', 'search_text', 'search', 'browse_r', 'browse', 'graveyard', 'updated', 'js', 'opera_css', 'ie_css', 'chrome_json', 'proxomitron', 'by_user', 'expire_by_id', 'screenshotable', 'automation_page', 'test'].include?(action_name)
 	end
 	
 	def admin_action?
