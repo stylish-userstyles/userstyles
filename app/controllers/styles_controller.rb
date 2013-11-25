@@ -258,7 +258,8 @@ class StylesController < ApplicationController
 			@bc_category = 'site'
 			category = Style.get_subcategory_for_domain(category)
 			@bc_subcategory = category
-			new_search_conditions[:subcategory] = Riddle.escape(category)
+			# exact matches only
+			new_search_conditions[:subcategory] = '^' + Riddle.escape(category) + '$'
 		end
 
 		if !$new_sorts_map.keys.include?(params[:sort])
