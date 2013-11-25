@@ -1356,6 +1356,8 @@ Replace = "$STOP()"
 			return false
 		end
 		return false if ['http', 'https', 'ftp'].include?(url_value.scheme) and url_value.host.nil?
+		# don't validate domain for file:
+		return true if ['file'].include?(url_value.scheme)
 		return Style.validate_domain(url_value.host, publicly_accessible_only)
 	end
 
