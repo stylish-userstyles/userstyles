@@ -47,11 +47,13 @@ class Style < ActiveRecord::Base
 	end
 
 	validates_each :example_url do |record, attr, value|
-		if record.category == 'site' and record.subcategory.nil?
-			record.errors.add attr, 'must be provided; could not determine what site this affects.' if value.nil?
-			record.errors.add attr, 'does not match the sites specified in the code.' if !value.nil?
+		if value.nil?
+			record.errors.add attr, 'must be provided; could not determine what site this affects.' if record.category == 'site' and record.subcategory.nil?
+		elsif !Style.validate_url(value, false)
+			record.errors.add attr, 'must be a valid URL (with protocol, no wildcards).' 
+		elsif !record.url_matches_moz_docs(value)
+			record.errors.add attr, 'does not match the sites specified in the code.'
 		end
-		record.errors.add attr, 'must be a valid URL (with protocol, no wildcards).' if !value.nil? and !Style.validate_url(value, false)
 	end
 
 	#doesn't work with the alias
@@ -720,32 +722,6 @@ Replace = "$STOP()"
 		return sld
 	end
 
-	def self.get_domain(url)
-		#the part after :// but before the next slash
-		scheme_end = url.index("://")
-		if scheme_end != nil
-			url = url[scheme_end + 3..url.length]
-		end
-		#before the first : or /
-		domain_end = url.index(/[\:\/]/)
-		if domain_end != nil
-			url = url[0..domain_end - 1]
-		end
-		# handle trailing dots: add com
-		url.gsub!(/\.$/, ".com")
-		# handle people doing url-prefix(http://www.google)
-		domain_parts = url.split('.')
-		if domain_parts.size > 1 
-			if $add_com_tlds.include?(domain_parts[domain_parts.length - 1])
-				url = url + '.com'
-			elsif $add_org_tlds.include?(domain_parts[domain_parts.length - 1])
-				url = url + '.org'
-			end
-		end
-		return nil unless url.match($bad_domains).nil?
-		return url
-	end
-
 	def validate_screenshot(screenshot, prefix)
 		errors = []
 		if prefix.nil?
@@ -1260,7 +1236,37 @@ Replace = "$STOP()"
 		return references
 	end
 
- private
+	def url_matches_moz_docs(url)
+		moz_docs = calculate_moz_docs
+		# global
+		return true if moz_docs.empty?
+		moz_docs.each do |fn, value|
+			case fn
+				when 'url'
+					return true if url == value
+				when 'url-prefix'
+					return true if url.start_with?(value)
+				when 'domain'
+					domain = Style.get_domain(url)
+					return true if !domain.nil? and (domain == value or domain.end_with?('.' + value))
+				when 'regexp'
+					begin
+						re = Regexp.new(value)
+					rescue Exception => e
+						next
+					end
+					# we want to match the full url, so add ^ and $ if not already present
+					res = re.source
+					res = '^' + res unless res.start_with?('^')
+					res = res + '$' unless res.end_with?('$')
+					re = Regexp.new(res)
+					return true if re =~ url
+			end
+		end
+		return false
+	end
+
+private
 
 	# Returns an array of all docs for this style, or nil if any are invalid
 	# Cache the docs for the life of the request so we don't have to keep reparsing. If the code or settings 
@@ -1412,6 +1418,14 @@ Replace = "$STOP()"
 	def self.begins_with?(str, re)
 		m = str.match(re)
 		return !m.nil?# and m.begin(0) == 0
+	end
+
+	def self.get_domain(url)
+		begin
+			return URI.parse(url).host
+		rescue
+			return nil
+		end
 	end
 
 end
