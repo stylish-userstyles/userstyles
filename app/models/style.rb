@@ -960,7 +960,7 @@ Replace = "$STOP()"
 		end
 	end
 
-  def to_json(options = nil)
+	def as_json(options = {})
 		{
 			:url => full_pretty_url,
 			:name => short_description,
@@ -977,7 +977,7 @@ Replace = "$STOP()"
 			:rating => rating_string,
 			:screenshot => full_after_screenshot_thumbnail_path,
 			:license => effective_license_url
-		}.to_json(options)
+		}
 	end
 
 	def effective_license
