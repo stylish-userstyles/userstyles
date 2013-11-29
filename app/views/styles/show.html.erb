@@ -21,15 +21,12 @@
 <div id="left-info">
 	<div id="screenshots">
 		<% 
-		cache_param = params['r'].nil? ? '' : "?r=#{h(params['r'])}"
 		after = @style.after_screenshot_path
-		after = after + cache_param unless after.nil?
 		after_thumb = @style.after_screenshot_thumbnail_path
-		after_thumb = after_thumb + cache_param unless after_thumb.nil?
 
 		if !after_thumb.nil? and @style.obsolete == 0 %>
 			<figure id="main-screenshot" class="screenshot-thumbnail">
-				<a href="http://<%=SCREENSHOT_DOMAIN%><%=after%>" rel="lightbox[screenshot] nofollow" title="With the style applied"><img src="http://<%=SCREENSHOT_DOMAIN%><%=after_thumb%>" class="screenshot" alt=""></a>
+				<a href="<%=after%>" rel="lightbox[screenshot] nofollow" title="With the style applied"><img src="<%=after_thumb%>" class="screenshot" alt=""></a>
 			</figure>
 		<% end 
 		has_more_screenshots = @style.obsolete == 0 && @style.screenshots.size > 0
@@ -38,7 +35,7 @@
 			<div id="more-screenshots">
 				<span>More screenshots:</span>
 				<% @style.screenshots.each do |screenshot| %>
-					<a href="http://<%=SCREENSHOT_DOMAIN%>/style_screenshots/<%=screenshot.path%><%=cache_param%>" rel="lightbox[screenshot] nofollow" title="<%=screenshot.description%>"><%=screenshot.description%></a><% if @style.screenshots.last != screenshot %>, <% end
+					<a href="<%=screenshot.full_path%>" rel="lightbox[screenshot] nofollow" title="<%=screenshot.description%>"><%=screenshot.description%></a><% if @style.screenshots.last != screenshot %>, <% end
 				end %>
 			</div>
 		<% end 

@@ -23,7 +23,7 @@ cache_unless(show_obsolete || by_current_user, style) do
 			<% if !after_thumb.nil? %>
 				<figure class="screenshot-thumbnail">
 					<a href="<%=h style.pretty_url%>" <%=style.obsolete? ? 'rel="nofollow"' : ''%>>
-						<img src="http://<%=SCREENSHOT_DOMAIN%><%=after_thumb%>" class="screenshot" alt="">
+						<img src="<%=after_thumb%>" class="screenshot" alt="">
 					</a>
 				</figure>
 			<% else %> 

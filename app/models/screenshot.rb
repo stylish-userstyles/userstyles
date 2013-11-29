@@ -4,4 +4,7 @@ class Screenshot < ActiveRecord::Base
 	validates_length_of :description, :maximum => 50
 	validates_length_of :path, :minimum => 1
 
+	def full_path
+		"http://#{SCREENSHOT_DOMAIN}/style_screenshots/#{path}#{style.cdn_buster_param}"
+	end
 end

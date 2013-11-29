@@ -771,12 +771,10 @@ Replace = "$STOP()"
 		end
 		filename = "#{self.id}_#{prefix}.#{screenshot.content_type.strip.split('/')[1]}"
 		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "wb") { |f| f.write(screenshot.read) }
-		refresh_cdn "/style_screenshots/#{filename}" if is_update
 		if type == :after
 			if !system("#{Rails.root}/shellscripts/thumbnail.sh #{Rails.root}/public/style_screenshots/#{filename} #{Rails.root}/public/style_screenshot_thumbnails/#{filename} >> #{Rails.root}/log/thumbnail.log 2>&1")
 				logger.error "Failed making thumbnail for #{filename}, exit code is #{$?}"
 			end
-			refresh_cdn "/style_screenshot_thumbnails/#{filename}" if is_update
 		end
 		set_screenshot_name_by_type(type, filename)
 	end
@@ -793,14 +791,6 @@ Replace = "$STOP()"
 		full_path = "#{Rails.root}/public/style_screenshots/#{filename}"
 		is_update = File.exists?(full_path)
 		File.open(full_path, "wb") { |f| f.write(data.read) }
-		refresh_cdn "/style_screenshots/#{filename}" if is_update
-	end
-
-	def refresh_cdn(path)
-		url_to_refresh = "http://#{SCREENSHOT_DOMAIN}#{path}"
-		if !system("#{Rails.root}/shellscripts/refresh_cdn.sh #{url_to_refresh} >> #{Rails.root}/log/refresh_cdn.log 2>&1")
-			logger.error "Failed refreshing CDN for URL #{url_to_refresh} - #{$?}"
-		end
 	end
 
 	def delete_additional_screenshot(screenshot)
@@ -905,6 +895,10 @@ Replace = "$STOP()"
 		return "/styles/#{self.id}/#{self.url_snippet}"
 	end
 
+	def cdn_buster_param
+	 "?r=#{self.updated.to_i}"
+	end
+
 	def after_screenshot_path
 		return auto_after_screenshot_path if self.screenshot_type_preference == 'auto'
 		return provided_after_screenshot_path if self.screenshot_type_preference == 'manual'
@@ -912,17 +906,12 @@ Replace = "$STOP()"
 	end
 
 	def auto_after_screenshot_path
-		return "/auto_style_screenshots/#{self.id}-after.png" unless self.auto_screenshot_date.nil? or self.auto_screenshots_same
+		return "http://#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil? or self.auto_screenshots_same
 		return nil
 	end
 
 	def provided_after_screenshot_path
-		return "/style_screenshots/#{self.after_screenshot_name}" unless self.after_screenshot_name.nil?
-	end
-
-	def full_after_screenshot_thumbnail_path
-		return nil if after_screenshot_thumbnail_path.nil?
-		return 'http://' + STATIC_DOMAIN + after_screenshot_thumbnail_path
+		return "http://#{SCREENSHOT_DOMAIN}/style_screenshots/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
 	end
 
 	def after_screenshot_thumbnail_path
@@ -933,12 +922,12 @@ Replace = "$STOP()"
 	end
 
 	def provided_after_screenshot_thumbnail_path
-		return "/style_screenshot_thumbnails/#{self.after_screenshot_name}" unless self.after_screenshot_name.nil?
+		return "http://#{SCREENSHOT_DOMAIN}/style_screenshot_thumbnails/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
 		return nil
 	end
 
 	def auto_after_screenshot_thumbnail_path
-		return "/auto_style_screenshots/#{self.id}-after-thumbnail.png" unless self.auto_screenshot_date.nil?
+		return "http://#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after-thumbnail.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil?
 		return nil
 	end
 
@@ -975,7 +964,7 @@ Replace = "$STOP()"
 			:weekly_installs => weekly_install_count,
 			:total_installs => total_install_count,
 			:rating => rating_string,
-			:screenshot => full_after_screenshot_thumbnail_path,
+			:screenshot => after_screenshot_thumbnail_path,
 			:license => effective_license_url
 		}
 	end
