@@ -327,7 +327,7 @@ END_OF_STRING
 								string += " || (document.location.href.indexOf(\"#{escape_javascript(rule.rule_value)}\") == 0)"
 							when 'regexp'
 								# we want to match the full url, so add ^ and $ if not already present
-								re = rule.value
+								re = rule.rule_value
 								re = '^' + re unless re.start_with?('^')
 								re = re + '$' unless re.end_with?('$')
 								string += " || (new RegExp(\"#{escape_javascript(re)}\")).test(document.location.href)"
