@@ -16,6 +16,7 @@ class StyleCode < ActiveRecord::Base
 		clean_code = self.code.gsub(/\/\*.*?\*\//m, '')#.gsub(/(\r\n|[\r\n])/, '\n')
 
 		sections = []
+		ordinal = 0
 		
 		search_position = 0
 		while search_position < clean_code.size do
@@ -25,13 +26,15 @@ class StyleCode < ActiveRecord::Base
 			if md.nil?
 				code_portion = clean_code[search_position..clean_code.size].strip
 				if !code_portion.empty?
-					sections << {:global => true, :rules => [], :code => code_portion}
+					sections << StyleSection.new({:global => true, :ordinal => ordinal, :css => code_portion})
+					ordinal += 1
 				end
 				break;
 			elsif md.begin(0) > search_position
 				code_portion = clean_code[search_position..(search_position + md.begin(0) - 1)].strip
 				if !code_portion.empty?
-					sections << {:global => true, :rules => [], :code => code_portion}
+					sections << StyleSection.new({:global => true, :ordinal => ordinal, :css => code_portion})
+					ordinal += 1
 				end
 			end
 			search_position += md.begin(0)
@@ -99,8 +102,15 @@ class StyleCode < ActiveRecord::Base
 			if !bracket_match.nil?
 				part_code = clean_code[first_bracket + 1..last_bracket - 1].strip
 				if !part_code.empty?
-					part_urls = StyleCode.get_old_style_rules(clean_code[rule_start..first_bracket])
-					sections << {:global => false, :rules => part_urls, :code => part_code}
+					ss = StyleSection.new({:global => false, :ordinal => ordinal, :css => part_code})
+					ordinal += 1
+					StyleCode.get_old_style_rules(clean_code[rule_start..first_bracket]).each do |mdr|
+						next if !['domain', 'url', 'url-prefix', 'regexp'].include?(mdr.rule_type)
+						ss.style_section_rules << StyleSectionRule.new(:rule_type => mdr.rule_type, :rule_value => mdr.value)
+					end
+					if !ss.style_section_rules.empty?
+						sections << ss
+					end
 				end
 			end
 		end
@@ -110,7 +120,7 @@ class StyleCode < ActiveRecord::Base
 		current_index = 0
 		while current_index < sections.length
 			if current_index > 0 and sections_have_same_rules(sections[last_unique_index], sections[current_index])
-				sections[last_unique_index][:code] += sections[current_index][:code]
+				sections[last_unique_index][:css] += sections[current_index][:css]
 				sections.delete_at(current_index)
 			else
 				last_unique_index = current_index

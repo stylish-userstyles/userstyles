@@ -17,6 +17,7 @@ class Style < ActiveRecord::Base
 	belongs_to :user
 	has_many :screenshots
 	belongs_to :admin_delete_reason, -> { readonly }
+	has_many :style_sections, -> { order(:ordinal) }, :dependent => :destroy
 
 	alias_attribute :name, :short_description
 	alias_attribute :description, :long_description
@@ -259,14 +260,18 @@ class Style < ActiveRecord::Base
 		has_non_includable = false
 		includes = []
 
-		code = optionned_code(options)
-		return nil if code.nil?
-		sections = Style.parse_moz_docs_for_code(code)
+		if options.empty?
+			sections = style_sections
+		else
+			code = optionned_code(options)
+			return nil if code.nil?
+			sections = Style.parse_moz_docs_for_code(code)
+		end
 
 		# if the only global part is a default namespace, we'll strip that out to keep
 		global_sections = sections.select {|section| section[:global] }
 		if global_sections.size == 1
-			sections.delete(global_sections[0]) unless global_sections[0][:code].match($namespace_pattern).nil?
+			sections.delete(global_sections[0]) unless global_sections[0][:css].match($namespace_pattern).nil?
 		end
 
 		sections.each do |section|
@@ -274,8 +279,8 @@ class Style < ActiveRecord::Base
 			if section[:global]
 				has_global = true
 			else
-				section[:rules].each do |moz_doc_rule|
-					js_includes = moz_doc_rule.to_userjs_includes
+				section.style_section_rules.each do |ssr|
+					js_includes = ssr.to_userjs_includes
 					if js_includes.nil?
 						has_non_includable = true
 					else
@@ -283,8 +288,8 @@ class Style < ActiveRecord::Base
 					end
 				end
 			end
-			section[:code].gsub!(/\\/, '\&\&')
-			section[:code].gsub!('"', '\"')
+			section[:css].gsub!(/\\/, '\&\&')
+			section[:css].gsub!('"', '\"')
 		end
 
 		include_str = ""
@@ -306,20 +311,20 @@ class Style < ActiveRecord::Base
 (function() {
 END_OF_STRING
 		if sections.length == 1 and !has_non_includable
-			string += "var css = \"#{sections[0][:code].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
+			string += "var css = \"#{sections[0][:css].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
 		else
 			string += "var css = \"\";\n"
 			sections.each do |section|
 				if !section[:global]
 					string += "if (false"
-					section[:rules].each do |rule|
+					section.style_section_rules.each do |rule|
 						case rule.rule_type
 							when 'domain'
-								string += " || (document.domain == \"#{escape_javascript(rule.value)}\" || document.domain.substring(document.domain.indexOf(\".#{escape_javascript(rule.value)}\") + 1) == \"#{escape_javascript(rule.value)}\")"
+								string += " || (document.domain == \"#{escape_javascript(rule.rule_value)}\" || document.domain.substring(document.domain.indexOf(\".#{escape_javascript(rule.rule_value)}\") + 1) == \"#{escape_javascript(rule.rule_value)}\")"
 							when 'url'
-								string += " || (location.href.replace(location.hash,'') == \"#{escape_javascript(rule.value)}\")"
+								string += " || (location.href.replace(location.hash,'') == \"#{escape_javascript(rule.rule_value)}\")"
 							when 'url-prefix'
-								string += " || (document.location.href.indexOf(\"#{escape_javascript(rule.value)}\") == 0)"
+								string += " || (document.location.href.indexOf(\"#{escape_javascript(rule.rule_value)}\") == 0)"
 							when 'regexp'
 								# we want to match the full url, so add ^ and $ if not already present
 								re = rule.value
@@ -330,7 +335,7 @@ END_OF_STRING
 					end
 					string += ")\n\t"
 				end
-				string += "css += \"#{section[:code].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
+				string += "css += \"#{section[:css].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
 			end
 		end
 		string += <<-END_OF_STRING
@@ -433,23 +438,30 @@ Replace = "$STOP()"
 	def chrome_json(options)
 		o = {:sections => []}
 		global_sections = []
-		code = optionned_code(options)
-		return nil if code.nil?
-		Style.parse_moz_docs_for_code(code).each do |section|
+		
+		if options.empty?
+			sections = style_sections
+		else
+			code = optionned_code(options)
+			return nil if code.nil?
+			sections = Style.parse_moz_docs_for_code(code)
+		end
+		
+		sections.each do |section|
 			s = {:urls => [], :urlPrefixes => [], :domains => [], :regexps => []}
-			s[:code] = section[:code].strip
+			s[:code] = section[:css].strip
 			#puts "\n\nglobal#{section[:global]}"
 			if !section[:global]
-				section[:rules].each do |rule|
+				section.style_section_rules.each do |rule|
 					case rule.rule_type
 						when 'domain'
-							s[:domains] << rule.value
+							s[:domains] << rule.rule_value
 						when 'url'
-							s[:urls] << rule.value
+							s[:urls] << rule.rule_value
 						when 'url-prefix'
-							s[:urlPrefixes] << rule.value
+							s[:urlPrefixes] << rule.rule_value
 						when 'regexp'
-							s[:regexps] << rule.value
+							s[:regexps] << rule.rule_value
 					end
 				end
 				s[:domains].uniq!
@@ -1126,6 +1138,11 @@ Replace = "$STOP()"
 	end
 
 	def refresh_meta
+		if self.style_options.empty?
+			self.style_sections = Style.parse_moz_docs_for_code(style_code.code)
+		else
+			self.style_sections = []
+		end
 		self.screenshot_url = self.calculate_screenshot_url
 		self.category = self.calculate_category
 		self.subcategory = self.calculate_subcategory
@@ -1179,40 +1196,6 @@ Replace = "$STOP()"
 			end
 		end
 		return false
-	end
-
-	# Parses the code into an array of {global, rules, code}
-	def self.parse_moz_docs_for_code(code)
-		begin
-			doc = CSSPool::CSS::Document.parse(code)
-		rescue Racc::ParseError => e
-			return StyleCode.new(:code => code).old_style_rules
-		rescue Exception => e
-			return StyleCode.new(:code => code).old_style_rules
-		end
-		sections = []
-		last_document_query_end = 0
-		doc.document_queries.each do |dq|
-			# check for global sections
-			if dq.outer_start_pos > last_document_query_end
-				sections << {:global => true, :rules => [], :code => code[last_document_query_end..dq.outer_start_pos-1].strip}
-			end
-			section = {:global => false}
-			section[:rules] = dq.url_functions.map do |fn|
-				if fn.is_a?(CSSPool::Terms::URI)
-					MozDocRule.new({:rule_type => 'url', :value => fn.value})
-				else
-					MozDocRule.new({:rule_type => fn.name, :value => fn.params.first.value})
-				end
-			end
-			section[:code] = code[dq.inner_start_pos..dq.inner_end_pos-1].strip
-			sections << section
-			last_document_query_end = dq.outer_end_pos
-		end
-		if last_document_query_end < code.length
-			sections << {:global => true, :rules => [], :code => code[last_document_query_end..code.length-1].strip}
-		end
-		return sections.select{|s| Style.is_worthwhile_section(s)}
 	end
 
 private
@@ -1377,17 +1360,58 @@ private
 		end
 	end
 
+	# Parses the code into an array of StyleSections
+	def self.parse_moz_docs_for_code(code)
+		begin
+			doc = CSSPool::CSS::Document.parse(code)
+		rescue Racc::ParseError => e
+			return StyleCode.new(:code => code).old_parse_moz_docs
+		rescue Exception => e
+			return StyleCode.new(:code => code).old_parse_moz_docs
+		end
+		sections = []
+		last_document_query_end = 0
+		ordinal = 0
+		doc.document_queries.each do |dq|
+			# check for global sections
+			if dq.outer_start_pos > last_document_query_end
+				sections << StyleSection.new({:global => true, :ordinal => ordinal, :css => code[last_document_query_end..dq.outer_start_pos-1].strip})
+				ordinal += 1
+			end
+			section = StyleSection.new({:global => false, :ordinal => ordinal})
+			ordinal += 1
+			dq.url_functions.each do |fn|
+				if fn.is_a?(CSSPool::Terms::URI)
+					section.style_section_rules << StyleSectionRule.new({:rule_type => 'url', :rule_value => fn.value})
+				else
+					section.style_section_rules << StyleSectionRule.new({:rule_type => fn.name, :rule_value => fn.params.first.value})
+				end
+			end
+			section[:css] = code[dq.inner_start_pos..dq.inner_end_pos-1].strip
+			sections << section
+			last_document_query_end = dq.outer_end_pos
+		end
+		if last_document_query_end < code.length
+			sections << StyleSection.new({:global => true, :ordinal => ordinal, :css => code[last_document_query_end..code.length-1].strip})
+		end
+		begin
+			return sections.select{|s| Style.is_worthwhile_section(s)}
+		rescue Racc::ParseError => e
+			return StyleCode.new(:code => code).old_parse_moz_docs
+		end
+	end
+	
 	# Determines if the code section is worthwhile to include.
 	def self.is_worthwhile_section(section)
 		# Anything not global will be kept, even if empty
 		return true if !section[:global]
 		# Only whitespace - drop it. This can be covered by the next case, but this is a common
 		# situation and checking it separately is quicker.
-		return false if section[:code].strip.empty?
+		return false if section[:css].strip.empty?
 		# See if it contains anything functional. Since CSSPool considers a document with only
 		# whitespace and comments to be invalid (see https://github.com/JasonBarnabe/csspool/issues/4),
 		# we will tack on a ruleset and see if the resulting document has anything else.
-		doc = CSSPool::CSS::Document.parse(section[:code] + "\na{}")
+		doc = CSSPool::CSS::Document.parse(section[:css] + "\na{}")
 		return !(
 			doc.rule_sets.length == 1 and
 			doc.charsets.empty? and

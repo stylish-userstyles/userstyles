@@ -493,7 +493,7 @@ class StylesController < ApplicationController
 			return
 		end
 		begin
-			style = Style.find(params["id"])
+			style = Style.includes([{:style_sections => :style_section_rules}, {:style_options => :style_option_values}]).find(params["id"])
 		rescue ActiveRecord::RecordNotFound
 			render :nothing => true, :status => 404
 			return
@@ -542,7 +542,7 @@ class StylesController < ApplicationController
 
 	def chrome_json
 		begin
-			style = Style.find(params[:id])
+			style = Style.includes([{:style_sections => :style_section_rules}, {:style_options => :style_option_values}]).find(params[:id])
 		rescue ActiveRecord::RecordNotFound
 			render :nothing => true, :status => 404
 			return
