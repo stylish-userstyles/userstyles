@@ -643,9 +643,7 @@ class StylesController < ApplicationController
 		cp.each do |a|
 			p = a[0]
 			c = a[1]
-			sc = StyleCode.new
-			sc.code = c
-			sections = sc.parse_moz_docs
+			sections = Style.parse_moz_docs_for_code(c)
 			err = Style.get_parse_error_for_code(c)
 			@codes << [displayable_settings_param(p), sections.map {|s| s[:code]}.join("\n"), err]
 		end

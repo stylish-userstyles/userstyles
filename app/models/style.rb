@@ -259,10 +259,9 @@ class Style < ActiveRecord::Base
 		has_non_includable = false
 		includes = []
 
-		sc = StyleCode.new
-		sc.code = optionned_code(options)
-		return nil if sc.code.nil?
-		sections = sc.parse_moz_docs
+		code = optionned_code(options)
+		return nil if code.nil?
+		sections = Style.parse_moz_docs_for_code(code)
 
 		# if the only global part is a default namespace, we'll strip that out to keep
 		global_sections = sections.select {|section| section[:global] }
@@ -412,53 +411,11 @@ Replace = "$STOP()"
 	end
 
 	def calculate_ie_css_available?
-		return false if self.style_code.nil?
-		return false if !self.style_options.empty?
-		return false if self.category == 'app'
-		sections = style_code.parse_moz_docs
-		if sections.length == 0 or sections.length > 2
-			return false
-		end
-		# multiple sections is only acceptable if one is just a namespace
-		if sections.length == 2
-			non_namespace = sections.reject {|section| !section[:code].match($namespace_pattern).nil?}
-			if non_namespace.empty? or non_namespace.size == 2
-				return false
-			end
-			section = non_namespace[0]
-		else
-			section = sections[0]
-		end
-		if section[:global]
-			return true
-		end
-		return true
+		return false
 	end
 
 	def calculate_opera_css_available?
-		return false if self.style_code.nil?
-		return false if self.category == 'app'
-		sections = style_code.parse_moz_docs
-		return false if sections.length == 0 or sections.length > 2
-		# multiple sections is only acceptable if one is just a namespace
-		if sections.length == 2
-			non_namespace = sections.reject {|section| !section[:code].match($namespace_pattern).nil?}
-			if non_namespace.empty? or non_namespace.size == 2
-				return false
-			end
-			section = non_namespace[0]
-		else
-			section = sections[0]
-		end
-		if section[:global]
-			return true
-		end
-		section[:rules].each do |rule|
-			if rule.rule_type != 'domain'
-				return false
-			end
-		end
-		return true
+		return false
 	end
 
 	def calculate_chrome_json_available?
@@ -466,50 +423,19 @@ Replace = "$STOP()"
 	end
 
 	def ie_css
-		css = "/*\n\t@homepage http://userstyles.org/styles/#{id}\n" +
-			"\t@updateurl http://userstyles.org/styles/iecss/#{id}/#{URI.escape(short_description, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.css\n"
-		moz_docs = style_code.parse_moz_docs
-		moz_docs.each do |section|
-			if !section[:global]
-				section[:rules].each do |rule|
-					css += "\t@#{rule.rule_type} #{rule.value}\n"
-				end
-			end
-		end
-		css += "*/\n"
-		moz_docs.each do |section|
-			css += section[:code]
-		end
-		return css
+		return ''
 	end
 
 	def opera_css(options)
-		css = "/*\n\t#{short_description}\n\tBy #{user.name}\n\thttp://userstyles.org/styles/#{id}\n*/\n"
-		sc = StyleCode.new
-		sc.code = optionned_code(options)
-		sections = sc.parse_moz_docs
-		# charset must be first, even before the comment
-		if !sections.empty?
-			charset = sections[0][:code].match(/^@charset\s+["'][-A-Za-z0-9]+["']\s*;/m)
-			if !charset.nil?
-				css = charset[0] + "\n" + css + "\n" + sections[0][:code].sub(charset[0], '')
-				# first section is handled
-				sections = sections.slice(1, sections.length - 1)
-			end
-		end
-		sections.each do |section|
-			css += "\n" + section[:code]
-		end
-		return css
+		return ''
 	end
 
 	def chrome_json(options)
 		o = {:sections => []}
 		global_sections = []
-		sc = StyleCode.new
-		sc.code = optionned_code(options)
-		return nil if sc.code.nil?
-		sc.parse_moz_docs.each do |section|
+		code = optionned_code(options)
+		return nil if code.nil?
+		Style.parse_moz_docs_for_code(code).each do |section|
 			s = {:urls => [], :urlPrefixes => [], :domains => [], :regexps => []}
 			s[:code] = section[:code].strip
 			#puts "\n\nglobal#{section[:global]}"
@@ -1255,6 +1181,40 @@ Replace = "$STOP()"
 		return false
 	end
 
+	# Parses the code into an array of {global, rules, code}
+	def self.parse_moz_docs_for_code(code)
+		begin
+			doc = CSSPool::CSS::Document.parse(code)
+		rescue Racc::ParseError => e
+			return StyleCode.new(:code => code).old_style_rules
+		rescue Exception => e
+			return StyleCode.new(:code => code).old_style_rules
+		end
+		sections = []
+		last_document_query_end = 0
+		doc.document_queries.each do |dq|
+			# check for global sections
+			if dq.outer_start_pos > last_document_query_end
+				sections << {:global => true, :rules => [], :code => code[last_document_query_end..dq.outer_start_pos-1].strip}
+			end
+			section = {:global => false}
+			section[:rules] = dq.url_functions.map do |fn|
+				if fn.is_a?(CSSPool::Terms::URI)
+					MozDocRule.new({:rule_type => 'url', :value => fn.value})
+				else
+					MozDocRule.new({:rule_type => fn.name, :value => fn.params.first.value})
+				end
+			end
+			section[:code] = code[dq.inner_start_pos..dq.inner_end_pos-1].strip
+			sections << section
+			last_document_query_end = dq.outer_end_pos
+		end
+		if last_document_query_end < code.length
+			sections << {:global => true, :rules => [], :code => code[last_document_query_end..code.length-1].strip}
+		end
+		return sections.select{|s| Style.is_worthwhile_section(s)}
+	end
+
 private
 
 	# Returns an array of all docs for this style, or nil if any are invalid
@@ -1417,4 +1377,25 @@ private
 		end
 	end
 
+	# Determines if the code section is worthwhile to include.
+	def self.is_worthwhile_section(section)
+		# Anything not global will be kept, even if empty
+		return true if !section[:global]
+		# Only whitespace - drop it. This can be covered by the next case, but this is a common
+		# situation and checking it separately is quicker.
+		return false if section[:code].strip.empty?
+		# See if it contains anything functional. Since CSSPool considers a document with only
+		# whitespace and comments to be invalid (see https://github.com/JasonBarnabe/csspool/issues/4),
+		# we will tack on a ruleset and see if the resulting document has anything else.
+		doc = CSSPool::CSS::Document.parse(section[:code] + "\na{}")
+		return !(
+			doc.rule_sets.length == 1 and
+			doc.charsets.empty? and
+			doc.import_rules.empty? and
+			doc.document_queries.empty? and
+			doc.supports_rules.empty? and
+			doc.namespaces.empty? and
+			doc.keyframes_rules.empty?
+		)
+	end
 end

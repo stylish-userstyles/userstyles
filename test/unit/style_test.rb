@@ -7,18 +7,6 @@ class StyleTest < ActiveSupport::TestCase
 		assert style.valid?
 	end
 
-	# charsets always have to be first
-	test "charset is first on opera css" do
-		style = get_style_template()
-		style.style_code.code = <<-END_OF_STRING
-@charset "UTF-8";
-			@namespace url(http://www.w3.org/1999/xhtml);
-			@-moz-document domain("example.com") { /*rules*/ }
-		END_OF_STRING
-		opera_code = style.opera_css({}).gsub(/[\t\n]/, '')
-		assert opera_code.start_with?('@charset "UTF-8";/*Style name'), opera_code
-	end
-
 	test "nested settings" do
 		style = get_style_template()
 		style.style_code.code = '/*[[one]]*/'

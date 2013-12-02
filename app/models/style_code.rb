@@ -11,7 +11,7 @@ class StyleCode < ActiveRecord::Base
 		Digest::MD5.hexdigest(code)
 	end
 
-	def parse_moz_docs
+	def old_parse_moz_docs
 		#strip whitespace and comments
 		clean_code = self.code.gsub(/\/\*.*?\*\//m, '')#.gsub(/(\r\n|[\r\n])/, '\n')
 
@@ -25,13 +25,13 @@ class StyleCode < ActiveRecord::Base
 			if md.nil?
 				code_portion = clean_code[search_position..clean_code.size].strip
 				if !code_portion.empty?
-					sections << {:global => true, :code => code_portion}
+					sections << {:global => true, :rules => [], :code => code_portion}
 				end
 				break;
 			elsif md.begin(0) > search_position
 				code_portion = clean_code[search_position..(search_position + md.begin(0) - 1)].strip
 				if !code_portion.empty?
-					sections << {:global => true, :code => code_portion}
+					sections << {:global => true, :rules => [], :code => code_portion}
 				end
 			end
 			search_position += md.begin(0)
@@ -100,7 +100,7 @@ class StyleCode < ActiveRecord::Base
 				part_code = clean_code[first_bracket + 1..last_bracket - 1].strip
 				if !part_code.empty?
 					part_urls = StyleCode.get_old_style_rules(clean_code[rule_start..first_bracket])
-					sections << {:rules => part_urls, :code => part_code}
+					sections << {:global => false, :rules => part_urls, :code => part_code}
 				end
 			end
 		end
