@@ -1,0 +1,17 @@
+<pre>
+pid <%=Process.pid%>
+
+<% if params['class'].nil? 
+	counts = Hash.new{0}
+	ObjectSpace.each_object do |o|
+	  counts[o.class] += 1
+	end
+	counts.each do |k,v| %>
+<%=k%>: <%=v%>
+	<% end
+else
+	ObjectSpace.each_object(Object.const_get(params['class'])) do |o| %>
+<%=o.inspect%>
+	<% end
+end %>
+</pre>

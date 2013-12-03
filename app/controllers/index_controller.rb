@@ -26,15 +26,19 @@ class IndexController < ApplicationController
 	def contact
 		@page_title = "Contact the admin"
 	end
+	
+	def admin_debug
+		render :layout => false
+	end
 
 private
 
 	def public_action?
-		true
+		action_name != 'admin_debug'
 	end
 	
 	def admin_action?
-		false
+		action_name == 'admin_debug'
 	end
 	
 	def verify_private_action(user_id)
