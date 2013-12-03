@@ -228,10 +228,11 @@ class LoginController < ApplicationController
 		@page_title = 'Lost password recovery'
 		user = User.where(:email => params[:email]).first
 		if !user.nil?
+			user_was_valid = user.valid?
 			# login might be nil if they started with openid
 			user.login = user.name if user.login.nil?
 			user.create_lost_password_key
-			user.save!
+			user.save(:validate => user_was_valid)
 			LostPasswordMailer.password_reset(user).deliver
 		end
 	end
