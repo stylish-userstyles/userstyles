@@ -232,8 +232,11 @@ class LoginController < ApplicationController
 			# login might be nil if they started with openid
 			user.login = user.name if user.login.nil?
 			user.create_lost_password_key
-			user.save(:validate => user_was_valid)
-			LostPasswordMailer.password_reset(user).deliver
+			if user.save(:validate => user_was_valid)
+				LostPasswordMailer.password_reset(user).deliver
+			else
+				logger.error 'Couldn\'t save #{user.id} on lost password.'
+			end
 		end
 	end
 
