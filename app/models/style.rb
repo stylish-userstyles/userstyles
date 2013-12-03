@@ -1026,7 +1026,7 @@ Replace = "$STOP()"
 	def self.get_parse_error_for_code(code, exempt_stuff=true)
 		#return nil if exempt_stuff and !code.index(/box\-shadow|\-moz\-selection|\-moz\-linear\-gradient|\-moz\-appearance/).nil?
 		begin
-			CSSPool::CSS::Document.parse(code)
+			Style.get_doc(code)
 		rescue Racc::ParseError => e
 			return e.message
 		rescue Exception => e
@@ -1232,10 +1232,20 @@ private
  
 	def self.get_doc_or_nil(code)
 		begin
-			return CSSPool::CSS::Document.parse(code)
+			return Style.get_doc(code)
 		rescue Exception => e
 			return nil
 		end
+	end
+
+	def self.get_doc(code)
+		# workaround for 'unclosed comments hang stuff' bug
+		last_start_comment = code.rindex('/*')
+		if !last_start_comment.nil?
+			last_end_comment = code.rindex('*/')
+			raise Racc::ParseError.new("unclosed comment on line #{code[0,last_start_comment].lines.count}") if last_end_comment.nil? or last_end_comment < last_start_comment
+		end
+		return CSSPool::CSS::Document.parse(code)
 	end
 
 	def get_screenshot_name_by_type(type)
@@ -1363,7 +1373,7 @@ private
 	# Parses the code into an array of StyleSections
 	def self.parse_moz_docs_for_code(code)
 		begin
-			doc = CSSPool::CSS::Document.parse(code)
+			doc = Style.get_doc(code)
 		rescue Racc::ParseError => e
 			return StyleCode.new(:code => code).old_parse_moz_docs
 		rescue Exception => e
@@ -1411,7 +1421,7 @@ private
 		# See if it contains anything functional. Since CSSPool considers a document with only
 		# whitespace and comments to be invalid (see https://github.com/JasonBarnabe/csspool/issues/4),
 		# we will tack on a ruleset and see if the resulting document has anything else.
-		doc = CSSPool::CSS::Document.parse(section[:css] + "\na{}")
+		doc = Style.get_doc(section[:css] + "\na{}")
 		return !(
 			doc.rule_sets.length == 1 and
 			doc.charsets.empty? and
