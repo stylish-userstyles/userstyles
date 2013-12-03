@@ -7,7 +7,7 @@ pid <%=Process.pid%>
 		ObjectSpace.each_object do |o|
 		  counts[o.class] += 1
 		end
-		counts.each do |k,v| %>
+		counts.sort_by{|k,v| v}.reverse.each do |k,v| %>
 <%=k%>: <%=v%>
 		<% end
 	else
