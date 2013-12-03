@@ -41,7 +41,7 @@ protected
 	end
 
 	def complete(params, return_url)
-		parameters = params.reject{|k,v|request.path_parameters[k]}.reject{|k,v| k == 'action' || k == 'controller'}
+		parameters = params.reject{|k,v|request.path_parameters[k]}.reject{|k,v| k == 'action' || k == 'controller' || k == 'id'}
 		oidresp = consumer.complete(parameters, request.url)
 		case oidresp.status
 		when OpenID::Consumer::FAILURE

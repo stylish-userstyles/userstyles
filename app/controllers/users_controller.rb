@@ -183,7 +183,6 @@ class UsersController < ApplicationController
 		@user = User.find(params[:id].to_i)
 		if params[:provider_identifier] == nil or params[:provider_identifier].length == 0
 			@user.errors.add(:provider_identifier, "cannot be blank")
-			@page_title = "Migrate account to OpenID"
 			render :action => 'edit_login_methods'
 			return
 		end
@@ -205,7 +204,7 @@ class UsersController < ApplicationController
 		end
 
 		begin
-			response = self.complete(params, url_for(:controller => :login, :action => :add_authenticator_complete));
+			response = self.complete(params, url_for(:controller => :login, :action => :add_authenticator_complete, :id => @user.id));
 		rescue Exception => e
 			@message = e
 			render :action => 'edit_login_methods'
@@ -214,12 +213,12 @@ class UsersController < ApplicationController
 		sreg = OpenID::SReg::Response.from_success_response(response)
 
 		existing_ua = UserAuthenticator.where(:provider_identifier => response.identity_url).where(:provider => 'openid')
-		user_with_this_openid = existing_ua.user unless existing_ua.nil?
+		user_with_this_openid = existing_ua.first.user unless existing_ua.empty?
 		if !user_with_this_openid.nil?
 			if user_with_this_openid.id == @user.id
 				@message = 'This OpenID is already set on your account.'
 				render :action => 'edit_login_methods'
-				return			
+				return
 			end
 			@message = "Provided OpenID already in use by user '#{user_with_this_openid.name}'."
 			render :action => 'edit_login_methods'
