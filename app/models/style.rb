@@ -265,7 +265,12 @@ class Style < ActiveRecord::Base
 		else
 			code = optionned_code(options)
 			return nil if code.nil?
-			sections = Style.parse_moz_docs_for_code(code)
+			# skip the real parser if this is huge - the real parser leaks memory!
+			if code.length > 100000
+				sections = StyleCode.new(:code => code).old_parse_moz_docs
+			else
+				sections = Style.parse_moz_docs_for_code(code)
+			end
 		end
 
 		# if the only global part is a default namespace, we'll strip that out to keep
@@ -444,7 +449,12 @@ Replace = "$STOP()"
 		else
 			code = optionned_code(options)
 			return nil if code.nil?
-			sections = Style.parse_moz_docs_for_code(code)
+			# skip the real parser if this is huge - the real parser leaks memory!
+			if code.length > 100000
+				sections = StyleCode.new(:code => code).old_parse_moz_docs
+			else
+				sections = Style.parse_moz_docs_for_code(code)
+			end
 		end
 		
 		sections.each do |section|
