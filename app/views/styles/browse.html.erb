@@ -7,20 +7,6 @@
 	
 	<%= render :partial => 'listing', :collection => @styles, :as => :style%>
 
-	<script>
-		var user = getUserFromCookie();
-		if (user != null) {
-			var articles = document.getElementsByTagName("article");
-			for (var i = 0; i < articles.length; i++) {
-				if (articles[i].className.indexOf("style-brief") > -1) {
-					if (user == articles[i].getAttribute("author-id")) {
-						articles[i].className += " by-current-user";
-					}
-				}
-			}
-		}
-	</script>
-
 	<% if @no_ads.nil? or !@no_ads %>
 		<div class="ad" style="max-width: 100%; overflow: hidden">
 			<% if true %>
