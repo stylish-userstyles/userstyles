@@ -1,6 +1,6 @@
 <% @styles.each do |style| 
 	if !style.after_screenshot_thumbnail_path.nil? %>
-		<a href="/styles/<%=style.id%>"><img src="http://<%=STATIC_DOMAIN%><%=style.after_screenshot_thumbnail_path%>" title="<%=h style.name%>"></a>
+		<a href="/styles/<%=style.id%>"><img src="<%=style.after_screenshot_thumbnail_path%>" title="<%=h style.name%>"></a>
 	<% end
 end %>
 <p>
