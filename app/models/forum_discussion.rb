@@ -1,7 +1,12 @@
 class ForumDiscussion < ActiveRecord::Base
-	set_table_name 'GDN_Discussion'
-	set_primary_key 'DiscussionID'
+	self.table_name = 'GDN_Discussion'
+	self.primary_key = 'DiscussionID'
 	alias_attribute 'name', 'Name'
+	
+	# ignore this so we don't have to cache something we won't use
+	ignore_columns :Body
+	
+	belongs_to :original_forum_poster, -> { readonly }, :class_name => 'ForumUser', :foreign_key => 'InsertUserID'
 
 	def created
 		return self.DateInserted
@@ -14,6 +19,10 @@ class ForumDiscussion < ActiveRecord::Base
 
 	def url
 		"http://#{FORUM_DOMAIN}/discussion/#{self.DiscussionID}/x"
+	end
+
+	def original_poster
+		return original_forum_poster.user
 	end
 
 end

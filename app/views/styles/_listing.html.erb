@@ -1,74 +1,83 @@
 <% 
-rating_class = nil
-if style.rating.nil?
-	rating_class = 'no-rating'
-elsif style.rating >= 2.5
-	rating_class = 'good-rating'
-elsif style.rating >= 1.5
-	rating_class = 'ok-rating'
-else
-	rating_class = 'bad-rating'
-end
-
-after_thumb = style.after_screenshot_thumbnail_path
 show_obsolete = false if (defined? show_obsolete).nil?
-%>
+by_current_user = (!session.nil? && session[:user_id] == style.user_id)
 
-<article class="style-brief <%=(style.obsolete? and !show_obsolete) ? 'obsolete' : ''%> <%=rating_class%>" weekly-install-count='<%=style.weekly_install_count%>' total-install-count='<%=style.total_install_count%>' average-rating='<%=style.rating%>' author-id="<%=style.user_id%>" category="<%=h style.category%>"<%if !style.subcategory.nil?%> subcategory="<%=h style.subcategory%>"<%end%>>
-	<div class="listing-left-info <%=after_thumb.nil? ? 'listing-no-screenshot' : ''%>">
-		<% if !after_thumb.nil? %>
-			<figure class="screenshot-thumbnail">
-				<a href="<%=h style.pretty_url%>" <%=style.obsolete? ? 'rel="nofollow"' : ''%>>
-					<img src="http://<%=STATIC_DOMAIN%><%=after_thumb%>" class="screenshot" alt="">
-				</a>
-			</figure>
-		<% else %> 
-			<div class="no-screenshots">(No screenshot available)</div>
-		<% end %>
-	</div>
-	<div class="style-brief-text">
-		<header>
-			<a href="<%=h style.pretty_url%>" <%=style.obsolete? ? 'rel="nofollow"' : ''%>><%= h style.short_description %></a>
-		</header>
-		
-		<% if show_obsolete and !style.admin_delete_reason.nil? %>
-		<p class="deletion-reason">
-			(<%=h style.admin_delete_reason.reason%>) <%=h style.obsoletion_message%>
-			<% if !style.obsoleting_style_id.nil? %>
-				Use <%= link_to(h(style.obsoleting_style.short_description), :action => "show", :id => style.obsoleting_style_id)%> instead.
+cache_unless(show_obsolete || by_current_user, style) do 
+
+	rating_class = nil
+	if style.rating.nil?
+		rating_class = 'no-rating'
+	elsif style.rating >= 2.5
+		rating_class = 'good-rating'
+	elsif style.rating >= 1.5
+		rating_class = 'ok-rating'
+	else
+		rating_class = 'bad-rating'
+	end
+
+	after_thumb = style.after_screenshot_thumbnail_path
+	%>
+
+	<article class="style-brief <%=(style.obsolete? and !show_obsolete) ? 'obsolete' : ''%> <%=rating_class%>" weekly-install-count='<%=style.weekly_install_count%>' total-install-count='<%=style.total_install_count%>' average-rating='<%=style.rating%>' author-id="<%=style.user_id%>" category="<%=h style.category%>"<%if !style.subcategory.nil?%> subcategory="<%=h style.subcategory%>"<%end%>>
+		<div class="listing-left-info <%=after_thumb.nil? ? 'listing-no-screenshot' : ''%>">
+			<% if !after_thumb.nil? %>
+				<figure class="screenshot-thumbnail">
+					<a href="<%=h style.pretty_url%>" <%=style.obsolete? ? 'rel="nofollow"' : ''%>>
+						<img src="<%=after_thumb%>" class="screenshot" alt="">
+					</a>
+				</figure>
+			<% else %> 
+				<div class="no-screenshots">(No screenshot available)</div>
 			<% end %>
-		</p>
-		<% end %>
-		
-		<p>
-			<%=format_user_text_plain(style.long_description[0, 1000])%>
-		</p>
-
-		<div class="style-brief-stats">
-			<span>
-				Updated: <%=style.updated.strftime("%b %e, %Y")%>
-			</span>
-			<span>
-				Installs This Week: <%=h number_with_delimiter(style.weekly_install_count)%>
-			</span>
-			<span>
-				Average Rating:
-				<% if style.rating.nil? %>
-					N/A
-				<% elsif style.rating < 1.5 %>
-					<img class="bad-average-rating" src="http://<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
-				<% elsif style.rating < 2.5 %>
-					<img class="ok-average-rating" src="http://<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
-				<% else %>
-					<img class="good-average-rating" src="http://<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
+		</div>
+		<div class="style-brief-text">
+			<header>
+				<a href="<%=h style.pretty_url%>" <%=style.obsolete? ? 'rel="nofollow"' : ''%>><%= h style.short_description %></a>
+			</header>
+			
+			<% if by_current_user %>
+				<div class="style-brief-control-links">
+					<a class="edit-link" href="<%=h url_for(:controller => 'styles', :action => 'edit', :id => style.id)%>" rel='nofollow'>Edit</a>
+					<a class="delete-link" href="<%=h url_for(:controller => 'styles', :action => 'delete', :id => style.id)%>" rel='nofollow'><%=style.obsolete? ? 'Undelete' : 'Delete'%></a>
+					<a class="stats-link" href="<%=h url_for(:controller => 'styles', :action => 'stats', :id => style.id)%>" rel='nofollow'>Stats</a>
+				</div>
+			<% end %>
+			
+			<% if show_obsolete and !style.admin_delete_reason.nil? %>
+			<p class="deletion-reason">
+				(<%=h style.admin_delete_reason.reason%>) <%=h style.obsoletion_message%>
+				<% if !style.obsoleting_style_id.nil? %>
+					Use <%= link_to(h(style.obsoleting_style.short_description), :action => "show", :id => style.obsoleting_style_id)%> instead.
 				<% end %>
-			</span>
-		</div>
+			</p>
+			<% end %>
+			
+			<p>
+				<%=format_user_text_plain(style.long_description[0, 1000])%>
+			</p>
 
-		<div class="style-brief-control-links">
-			<a class="edit-link" href="<%=h url_for(:controller => 'styles', :action => 'edit', :id => style.id)%>" rel='nofollow'>Edit</a> <a class="delete-link" href="<%=h url_for(:controller => 'styles', :action => 'delete', :id => style.id)%>" rel='nofollow'><%=style.obsolete? ? 'Undelete' : 'Delete'%></a>
+			<div class="style-brief-stats">
+				<span>
+					Updated: <%=style.updated.strftime("%b %e, %Y")%>
+				</span>
+				<span>
+					Installs This Week: <%=h number_with_delimiter(style.weekly_install_count)%>
+				</span>
+				<span>
+					Average Rating:
+					<% if style.rating.nil? %>
+						N/A
+					<% elsif style.rating < 1.5 %>
+						<img class="bad-average-rating" src="http://<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
+					<% elsif style.rating < 2.5 %>
+						<img class="ok-average-rating" src="http://<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
+					<% else %>
+						<img class="good-average-rating" src="http://<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
+					<% end %>
+				</span>
+			</div>
 		</div>
-	</div>
-	<div style="clear:left"></div>
-</article>
+		<div style="clear:left"></div>
+	</article>
 
+<% end%>

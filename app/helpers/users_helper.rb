@@ -18,6 +18,6 @@ module UsersHelper
 	end
 
 	def obfuscate(text)
-		return text.split(//).collect{|c| "&##{c[0]};"}.join("")
+		return text.codepoints.map{|c| "&##{c};"}.join('')
 	end
 end

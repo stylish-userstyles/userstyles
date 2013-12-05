@@ -1,5 +1,0 @@
-<% r2 = params[:return_to]
-if r2.nil?
-	r2 = session[:return_to]
-end %>
-<%= render(:partial => 'login/form', :locals => {:login_reason => 'Log in to take part in discussions and post your own styles. <a href="/login/policy">Privacy policy</a>', :skip_remember => false, :return_to => r2}) %>

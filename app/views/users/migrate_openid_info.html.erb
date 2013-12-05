@@ -1,0 +1,12 @@
+<%= error_messages_for 'user' %>
+
+<p><a href="http://openid.net/">OpenID</a> is a decentralized system that allows you have to have one login for multiple sites. By using OpenID, you can have a centralized location for all your user info and manage what info what sites receive. Your login will also be safer - an OpenID provider's purpose is to safely store your information and thus the provider is an expert in that area.</p>
+
+<p>If you don't have an OpenID, you can receive one for free from <a href="http://openid.net/get-an-openid/">your choice of many providers</a>.</p>
+
+<p>By entering an OpenID and submitting this form, your login will no longer be managed by userstyles.org - it will be managed by your provider. This action can only be undone by a userstyles.org administrator.</p>
+<%= form_tag(:action => "migrate_openid", :id => @user.id) do %>
+	<div>
+		<input id="openid" name="openid" size="30"><input type="submit" value="Migrate"/>
+	</div>
+<% end %>

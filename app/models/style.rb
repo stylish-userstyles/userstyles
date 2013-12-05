@@ -4,23 +4,33 @@ require 'public_suffix'
 
 class Style < ActiveRecord::Base
 
-	PublicSuffix::List.private_domains = false
+	scope :active, -> { where obsolete: 0 }
 
 	include ActionView::Helpers::JavaScriptHelper
 	include ActionView::Helpers::DateHelper
 
-	strip_attributes!
+	strip_attributes
 
-	has_many :discussions, :class_name => 'ForumDiscussion', :finder_sql => 'SELECT gd.*, u.id user_id, u.name user_name FROM GDN_Discussion gd INNER JOIN GDN_UserAuthentication gu ON gu.UserId = gd.InsertUserID INNER JOIN users u ON u.id = gu.ForeignUserKey WHERE gd.StyleID = #{id} AND gd.Closed = 0 ORDER BY gd.DateInserted'
+	has_many :discussions, -> { readonly.order('DateInserted') }, :class_name => 'ForumDiscussion', :foreign_key => 'StyleID'
 	has_one :style_code
-	has_many :style_options, :order => 'ordinal'
+	has_many :style_options, -> { order(:ordinal) }
 	belongs_to :user
 	has_many :screenshots
-	belongs_to :admin_delete_reason
+	belongs_to :admin_delete_reason, -> { readonly }
+	has_many :style_sections, -> { order(:ordinal) }, :dependent => :destroy
 
 	alias_attribute :name, :short_description
 	alias_attribute :description, :long_description
 	alias_attribute :example_url, :screenshot_url_override
+
+	before_save :truncate_values
+	def truncate_values
+		['moz_doc_error', 'code_error'].each do |column|
+			next if self[column].nil?
+			length = Style.columns_hash[column].limit
+			self[column] = self[column][0..length-1] if self[column].length > length
+		end
+	end
 
 	validates_presence_of :name
 	validates_presence_of :description
@@ -38,11 +48,13 @@ class Style < ActiveRecord::Base
 	end
 
 	validates_each :example_url do |record, attr, value|
-		if record.category == 'site' and record.subcategory.nil?
-			record.errors.add attr, 'must be provided; could not determine what site this affects.' if value.nil?
-			record.errors.add attr, 'does not match the sites specified in the code.' if !value.nil?
+		if value.nil?
+			record.errors.add attr, 'must be provided; could not determine what site this affects.' if record.category == 'site' and record.subcategory.nil?
+		elsif !Style.validate_url(value, false)
+			record.errors.add attr, 'must be a valid URL (with protocol, no wildcards).' 
+		elsif !record.url_matches_moz_docs(value)
+			record.errors.add attr, 'does not match the sites specified in the code.'
 		end
-		record.errors.add attr, 'must be a valid URL (with protocol, no wildcards).' if !value.nil? and !Style.validate_url(value, false)
 	end
 
 	#doesn't work with the alias
@@ -62,71 +74,82 @@ class Style < ActiveRecord::Base
 	end
 
 	validates_each :style_code do |record, attr, value|
-		if true
-			e = record.get_parse_error
-			if !e.nil?
-				record.errors.add 'CSS', "has an error - #{e}.  If you need help, post your code at http://forum.userstyles.org/discussion/34614/new-css-parservalidator" unless e.nil?
-			else
-				record.errors.add 'CSS', "looks unintentionally global. Please read https://github.com/JasonBarnabe/stylish/wiki/Preventing-global-styles ." if record.calculate_unintentional_global
-				namespaces = record.calculate_namespaces
-				if !namespaces.nil?
-					bad_namespaces = namespaces - ['http://www.w3.org/1999/xhtml', 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'http://docbook.org/ns/docbook', 'http://www.w3.org/2000/svg', 'http://www.gribuser.ru/xml/fictionbook/2.0', 'http://vimperator.org/namespaces/liberator']
-					if bad_namespaces.length == 1
-						record.errors.add 'CSS', "has an invalid namespace: #{bad_namespaces.first}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces."
-					elsif bad_namespaces.length > 1
-						record.errors.add 'CSS', "has invalid namespaces: #{bad_namespaces.join(', ')}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces."
-					end
-				end
-				
-			end
+		# check validity, global, namespaces
+		e = record.get_parse_error
+		if !e.nil?
+			record.errors.add(attr, "has an error - #{e}. If you need help, post your code at http://forum.userstyles.org/discussion/34614/new-css-parservalidator .") unless e.nil?
 		else
-			code_error = nil
-			record.code_possibilities.each do |a|
-				p = a[0]
-				cp = a[1]
-				# first, check the parser. if it's cool, then we're cool. if it fails, then we'll do some manual checks
-				begin
-					CSSPool::CSS::Document.parse(cp)
-				#rescue Racc::ParseError => e
-				rescue Exception => e
-					potential_code_error = "has an error - #{e}"
-					# check the number of brackets
-					if cp.count("{") == 0 or cp.count("{") != cp.count("}")
-						code_error = potential_code_error
-						break
-					end
-					# must have at least one colon
-					if cp.count(":") == 0
-						code_error = potential_code_error
-						break
-					end
-					# can't be html (start with open bracket)
-					html_match = cp.match(/^\s*</)
-					if !html_match.nil? and html_match.begin(0) == 0
-						code_error = potential_code_error
-						break
-					end
-					# can't be JS (start with double slashes)
-					js_match = cp.match(/^\s*\/\//)
-					if !js_match.nil? and js_match.begin(0) == 0
-						code_error = potential_code_error
-						break
-					end
+			record.errors.add(attr, "looks unintentionally global. Please read https://github.com/JasonBarnabe/stylish/wiki/Preventing-global-styles .") if record.calculate_unintentional_global
+			namespaces = record.calculate_namespaces
+			if !namespaces.nil?
+				bad_namespaces = namespaces - ['http://www.w3.org/1999/xhtml', 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul', 'http://docbook.org/ns/docbook', 'http://www.w3.org/2000/svg', 'http://www.gribuser.ru/xml/fictionbook/2.0', 'http://vimperator.org/namespaces/liberator']
+				if bad_namespaces.length == 1
+					record.errors.add(attr, "has an invalid namespace: #{bad_namespaces.first}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces.")
+				elsif bad_namespaces.length > 1
+					record.errors.add(attr, "has invalid namespaces: #{bad_namespaces.join(', ')}. Read https://github.com/JasonBarnabe/stylish/wiki/CSS-namespaces for info on namespaces.")
 				end
 			end
-			record.errors.add attr, code_error if !code_error.nil?
+			
 		end
 		
+		# check @-moz-documents
 		record.calculate_moz_docs.each do |fn, value|
-			record.errors.add 'CSS', "has an invalid @-moz-document value: #{fn} #{value}. Read https://github.com/JasonBarnabe/stylish/wiki/Valid-@-moz-document-rules for more info." if !self.validate_moz_doc(fn, value)
+			record.errors.add(attr, "has an invalid @-moz-document value: #{fn} #{value}. Read https://github.com/JasonBarnabe/stylish/wiki/Valid-@-moz-document-rules for more info.") if !self.validate_moz_doc(fn, value)
 		end
+		
+		# URL references
+		allowed_reference_prefixes = ['http:', 'data:', 'moz-icon:', 'chrome:', 'https:']
+		references = record.calculate_external_references
+		references.each do |url|
+			# allow certain paths
+			allowed = false
+			allowed_reference_prefixes.each do |start|
+				if url.start_with?(start)
+					allowed = true
+					break
+				end
+			end
+			if url.empty?
+				display_url = '(empty string)'
+			else
+				# .. - rails fails with an ArgumentError in 118n.rb
+				# % - rails does other weird things
+				display_url = "'" + url.gsub('..', '').gsub('%', '') + "'"
+			end
+			message = "contains an invalid URL reference - #{display_url}. Only absolute URLs to one of the following protocols is allowed - " + allowed_reference_prefixes.join(', ') + '. For user-specified URLs, use style settings.'
+			record.errors.add(attr, message) unless allowed
+		end
+		
+		record.code_possibilities.each do |o, c|
+			# non-chrome @imports
+			import_match = /@import\s*(?:url\(\s*)?[\'\"]?\s*([^\'\"]+)[\'\"]?\s*\)?/
+			c.scan(import_match).each do |url|
+				if !begins_with?(url[0], /chrome:/)
+					record.errors.add attr, "cannot contain non-chrome imports (they cause UI hangs) - #{url[0]}"
+				end
+			end
+
+			# non-chrome bindings
+			binding_match = /-moz-binding\s*:\s*url\s*\(\s*[\'\"]?([^\'\"]+)[\'\"]?\s*\)/
+			c.scan(binding_match).each do |url|
+				if !begins_with?(url[0], /chrome:/)
+					if !AllowedBinding.is_allowed?(url[0])
+						record.errors.add attr, "cannot contain non-approved, non-chrome protocol bindings (mail jason.barnabe@gmail.com to get a new binding approved) - #{url[0]}"
+					end
+				end
+			end
+		end
+		
+		lengths = record.code_possibilities.map { |o, c| c.length }
+		record.errors.add(attr, 'is too short') if lengths.min < 5
+		allowed_length = record.allow_long_code? ? 400000 : 100000
+		record.errors.add(attr, "is too long. Code is #{lengths.max} bytes - max is #{allowed_length} bytes.") if lengths.max > allowed_length
 	end
 	
 	# Move child record errors onto main
 	validate do |style|
-		style_filtered_errors = style.errors.reject{ |attr, msg| ['style_options', 'style_option_values', 'style_code', 'screenshots'].include?(attr) and msg.include?('is invalid') }
-		style.errors.clear
-		style_filtered_errors.each { |err| style.errors.add(*err) }
+		style.errors.delete(:style_options)
+		style.errors.delete(:style_option_values)
 		style.style_options.each do |so|
 			so.errors.each do |attr, msg|
 				style.errors.add("Style option #{attr}", msg) unless attr == 'style_option_values'
@@ -137,9 +160,7 @@ class Style < ActiveRecord::Base
 				end
 			end
 		end
-		style.style_code.errors.each do |attr, msg|
-			style.errors.add("Code", msg)
-		end
+		style.errors.delete(:screenshots)
 		style.screenshots.each do |screenshot|
 			screenshot.errors.each do |attr, msg|
 				style.errors.add("Screenshot", msg)
@@ -147,34 +168,17 @@ class Style < ActiveRecord::Base
 		end
 	end
 
-	define_index do
-		# fields
-		indexes short_description, :as => :name, :sortable => true
-		indexes long_description, :as => :description
-		indexes additional_info
-		indexes category
-		indexes 'IF(ISNULL(subcategory), "none", subcategory)', :as => :subcategory
-		indexes user.name, :as => :author
-    
-		# attributes
-		has :popularity_score, :as => :popularity
-		has :created, :updated, :total_install_count, :weekly_install_count, :rating
-
-		where 'obsolete = 0'
-
-		set_property :field_weights => {
-			:subcategory => 10,
-			:name => 5,
-			:author => 5,
-			:description => 2,
-			:additional_info => 1
-		}
-
-		set_property :delta => :delayed
+	# Make errors unique
+	validate do |style|
+		style.errors.keys.each do |key|
+			msgs = style.errors.delete(key)
+			msgs.uniq!
+			msgs.each do |msg|
+				style.errors.add(key, msg)
+			end
+		end
 	end
 
-	@search_columns = ["short_description", "long_description", "additional_info"]
-	
 	# used when validating, because setting on the real property saves immediately
 	@_tmp_style_options = nil
 	def tmp_style_options
@@ -188,7 +192,7 @@ class Style < ActiveRecord::Base
 	end
 
 	attr_accessor :rating_avg, :rating_count
-
+	
 	def is_css_valid?
 		if self.style_code.code.count("{") > 0 and self.style_code.code.count("{") == self.style_code.code.count("}") and self.style_code.code.count(":") > 0
 			return true
@@ -197,7 +201,9 @@ class Style < ActiveRecord::Base
 	end
 
 	def self.newly_added(category, limit)
-		return Style.find(:all, :order => "created DESC", :limit => limit, :conditions => "created > #{1.week.ago.strftime('%Y-%m-%d')} AND obsolete = 0 " + (category.nil? ? "" : " AND category = '#{category}'"))
+		return Rails.cache.fetch "styles/newly_added/#{category}/#{limit}" do
+			Style.order("created DESC").limit(limit).where("created > #{1.week.ago.strftime('%Y-%m-%d')} AND obsolete = 0 " + (category.nil? ? "" : " AND category = '#{category}'")).load
+		end
 	end
 
 	def related
@@ -208,48 +214,40 @@ class Style < ActiveRecord::Base
 		else
 			conditions += "category = '#{Style.connection.quote_string(category)}'"
 		end
-		return Style.find(:all, :conditions => conditions, :order => "user_id = #{user.id} DESC, popularity_score DESC", :limit => 3)
+		return Style.where(conditions).order("user_id = #{user.id} DESC, popularity_score DESC").limit(3)
 	end
 
 	def self.top_styles(limit, choose_from)
-		#get the nth highest rated style
-		#rows = Style.find_by_sql("select id from styles where obsolete = 0 order by popularity_score DESC LIMIT #{choose_from};")
-		#style_ids = []
-		#rows.each do |row|
-		#	style_ids << row.id
-		#end
-		#return Style.find(:all,	 :conditions => "styles.id IN (#{style_ids.join(',')})", :order=> "RAND() DESC")
-
-		#grab the top n
-		possibilities = Style.find(:all, :conditions => "obsolete = 0", :order => "popularity_score DESC", :limit => choose_from)
-		#randomize
-		a = possibilities.dup
-	    possibilities = possibilities.collect { a.slice!(rand(a.length)) }
-		#limit to a certain number per subcategory to avoid facebook craziness
-		limit_per_category = (limit / 5.0).ceil
-		styles = []
-		subcategory_counts = {}
-		possibilities.each do |style|
-			if style.subcategory.nil?
-				styles << style
-			elsif subcategory_counts[style.subcategory].nil?
-				styles << style
-				subcategory_counts[style.subcategory] = 1
-			elsif subcategory_counts[style.subcategory] < limit_per_category
-				styles << style
-				subcategory_counts[style.subcategory] = subcategory_counts[style.subcategory] + 1
+		return Rails.cache.fetch "styles/top_styles/#{limit}/#{choose_from}" do
+			#grab the top n
+			possibilities = Style.where(:obsolete => 0).order("popularity_score DESC").limit(choose_from)
+			#randomize
+			a = possibilities.dup
+			possibilities = possibilities.collect { a.slice!(rand(a.length)) }
+			#limit to a certain number per subcategory to avoid facebook craziness
+			limit_per_category = (limit / 5.0).ceil
+			styles = []
+			subcategory_counts = {}
+			possibilities.each do |style|
+				if style.subcategory.nil?
+					styles << style
+				elsif subcategory_counts[style.subcategory].nil?
+					styles << style
+					subcategory_counts[style.subcategory] = 1
+				elsif subcategory_counts[style.subcategory] < limit_per_category
+					styles << style
+					subcategory_counts[style.subcategory] = subcategory_counts[style.subcategory] + 1
+				end
+				break if styles.size >= limit
 			end
-			if styles.size >= limit
-				return styles
+			# fill in the rest with whatever
+			i = 0
+			while styles.size < limit
+				styles << possibilities[i] unless styles.include?(possibilities[i])
+				i = i + 1
 			end
+			styles
 		end
-		# fill in the rest with whatever
-		i = 0
-		while styles.size < limit
-			styles << possibilities[i] unless styles.include?(possibilities[i])
-			i = i + 1
-		end
-		return styles
 	end
 
 	def self.subcategories(category)
@@ -262,15 +260,23 @@ class Style < ActiveRecord::Base
 		has_non_includable = false
 		includes = []
 
-		sc = StyleCode.new
-		sc.code = optionned_code(options)
-		return nil if sc.code.nil?
-		sections = sc.parse_moz_docs
+		if options.empty?
+			sections = style_sections
+		else
+			code = optionned_code(options)
+			return nil if code.nil?
+			# skip the real parser if this is huge - the real parser leaks memory!
+			if code.length > 100000
+				sections = StyleCode.new(:code => code).old_parse_moz_docs
+			else
+				sections = Style.parse_moz_docs_for_code(code)
+			end
+		end
 
 		# if the only global part is a default namespace, we'll strip that out to keep
 		global_sections = sections.select {|section| section[:global] }
 		if global_sections.size == 1
-			sections.delete(global_sections[0]) unless global_sections[0][:code].match($namespace_pattern).nil?
+			sections.delete(global_sections[0]) unless global_sections[0][:css].match($namespace_pattern).nil?
 		end
 
 		sections.each do |section|
@@ -278,8 +284,8 @@ class Style < ActiveRecord::Base
 			if section[:global]
 				has_global = true
 			else
-				section[:rules].each do |moz_doc_rule|
-					js_includes = moz_doc_rule.to_userjs_includes
+				section.style_section_rules.each do |ssr|
+					js_includes = ssr.to_userjs_includes
 					if js_includes.nil?
 						has_non_includable = true
 					else
@@ -287,8 +293,8 @@ class Style < ActiveRecord::Base
 					end
 				end
 			end
-			section[:code].gsub!(/\\/, '\&\&')
-			section[:code].gsub!('"', '\"')
+			section[:css].gsub!(/\\/, '\&\&')
+			section[:css].gsub!('"', '\"')
 		end
 
 		include_str = ""
@@ -310,23 +316,23 @@ class Style < ActiveRecord::Base
 (function() {
 END_OF_STRING
 		if sections.length == 1 and !has_non_includable
-			string += "var css = \"#{sections[0][:code].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
+			string += "var css = \"#{sections[0][:css].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
 		else
 			string += "var css = \"\";\n"
 			sections.each do |section|
 				if !section[:global]
 					string += "if (false"
-					section[:rules].each do |rule|
+					section.style_section_rules.each do |rule|
 						case rule.rule_type
 							when 'domain'
-								string += " || (document.domain == \"#{escape_javascript(rule.value)}\" || document.domain.substring(document.domain.indexOf(\".#{escape_javascript(rule.value)}\") + 1) == \"#{escape_javascript(rule.value)}\")"
+								string += " || (document.domain == \"#{escape_javascript(rule.rule_value)}\" || document.domain.substring(document.domain.indexOf(\".#{escape_javascript(rule.rule_value)}\") + 1) == \"#{escape_javascript(rule.rule_value)}\")"
 							when 'url'
-								string += " || (location.href.replace(location.hash,'') == \"#{escape_javascript(rule.value)}\")"
+								string += " || (location.href.replace(location.hash,'') == \"#{escape_javascript(rule.rule_value)}\")"
 							when 'url-prefix'
-								string += " || (document.location.href.indexOf(\"#{escape_javascript(rule.value)}\") == 0)"
+								string += " || (document.location.href.indexOf(\"#{escape_javascript(rule.rule_value)}\") == 0)"
 							when 'regexp'
 								# we want to match the full url, so add ^ and $ if not already present
-								re = rule.value
+								re = rule.rule_value
 								re = '^' + re unless re.start_with?('^')
 								re = re + '$' unless re.end_with?('$')
 								string += " || (new RegExp(\"#{escape_javascript(re)}\")).test(document.location.href)"
@@ -334,7 +340,7 @@ END_OF_STRING
 					end
 					string += ")\n\t"
 				end
-				string += "css += \"#{section[:code].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
+				string += "css += \"#{section[:css].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
 			end
 		end
 		string += <<-END_OF_STRING
@@ -415,53 +421,11 @@ Replace = "$STOP()"
 	end
 
 	def calculate_ie_css_available?
-		return false if self.style_code.nil?
-		return false if !self.style_options.empty?
-		return false if self.category == 'app'
-		sections = style_code.parse_moz_docs
-		if sections.length == 0 or sections.length > 2
-			return false
-		end
-		# multiple sections is only acceptable if one is just a namespace
-		if sections.length == 2
-			non_namespace = sections.reject {|section| !section[:code].match($namespace_pattern).nil?}
-			if non_namespace.empty? or non_namespace.size == 2
-				return false
-			end
-			section = non_namespace[0]
-		else
-			section = sections[0]
-		end
-		if section[:global]
-			return true
-		end
-		return true
+		return false
 	end
 
 	def calculate_opera_css_available?
-		return false if self.style_code.nil?
-		return false if self.category == 'app'
-		sections = style_code.parse_moz_docs
-		return false if sections.length == 0 or sections.length > 2
-		# multiple sections is only acceptable if one is just a namespace
-		if sections.length == 2
-			non_namespace = sections.reject {|section| !section[:code].match($namespace_pattern).nil?}
-			if non_namespace.empty? or non_namespace.size == 2
-				return false
-			end
-			section = non_namespace[0]
-		else
-			section = sections[0]
-		end
-		if section[:global]
-			return true
-		end
-		section[:rules].each do |rule|
-			if rule.rule_type != 'domain'
-				return false
-			end
-		end
-		return true
+		return false
 	end
 
 	def calculate_chrome_json_available?
@@ -469,64 +433,45 @@ Replace = "$STOP()"
 	end
 
 	def ie_css
-		css = "/*\n\t@homepage http://userstyles.org/styles/#{id}\n" +
-			"\t@updateurl http://userstyles.org/styles/iecss/#{id}/#{URI.escape(short_description, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}.css\n"
-		moz_docs = style_code.parse_moz_docs
-		moz_docs.each do |section|
-			if !section[:global]
-				section[:rules].each do |rule|
-					css += "\t@#{rule.rule_type} #{rule.value}\n"
-				end
-			end
-		end
-		css += "*/\n"
-		moz_docs.each do |section|
-			css += section[:code]
-		end
-		return css
+		return ''
 	end
 
 	def opera_css(options)
-		css = "/*\n\t#{short_description}\n\tBy #{user.name}\n\thttp://userstyles.org/styles/#{id}\n*/\n"
-		sc = StyleCode.new
-		sc.code = optionned_code(options)
-		sections = sc.parse_moz_docs
-		# charset must be first, even before the comment
-		if !sections.empty?
-			charset = sections[0][:code].match(/^@charset\s+["'][-A-Za-z0-9]+["']\s*;/m)
-			if !charset.nil?
-				css = charset[0] + "\n" + css + "\n" + sections[0][:code].sub(charset[0], '')
-				# first section is handled
-				sections = sections.slice(1, sections.length - 1)
-			end
-		end
-		sections.each do |section|
-			css += "\n" + section[:code]
-		end
-		return css
+		return ''
 	end
 
 	def chrome_json(options)
 		o = {:sections => []}
 		global_sections = []
-		sc = StyleCode.new
-		sc.code = optionned_code(options)
-		return nil if sc.code.nil?
-		sc.parse_moz_docs.each do |section|
+		
+		if options.empty?
+			sections = style_sections
+		else
+			code = optionned_code(options)
+			return nil if code.nil?
+			# skip the real parser if this is huge - the real parser leaks memory!
+			if code.length > 100000
+				sections = StyleCode.new(:code => code).old_parse_moz_docs
+			else
+				sections = Style.parse_moz_docs_for_code(code)
+			end
+		end
+		
+		sections.each do |section|
 			s = {:urls => [], :urlPrefixes => [], :domains => [], :regexps => []}
-			s[:code] = section[:code].strip
+			s[:code] = section[:css].strip
 			#puts "\n\nglobal#{section[:global]}"
 			if !section[:global]
-				section[:rules].each do |rule|
+				section.style_section_rules.each do |rule|
 					case rule.rule_type
 						when 'domain'
-							s[:domains] << rule.value
+							s[:domains] << rule.rule_value
 						when 'url'
-							s[:urls] << rule.value
+							s[:urls] << rule.rule_value
 						when 'url-prefix'
-							s[:urlPrefixes] << rule.value
+							s[:urlPrefixes] << rule.rule_value
 						when 'regexp'
-							s[:regexps] << rule.value
+							s[:regexps] << rule.rule_value
 					end
 				end
 				s[:domains].uniq!
@@ -563,11 +508,7 @@ Replace = "$STOP()"
 	end
 
 	def self.increment_installs(style_id, source, ip)
-		begin
-			Style.connection.execute("INSERT INTO daily_install_counts (style_id, ip, source) VALUES (#{Style.connection.quote_string(style_id)}, '#{Style.connection.quote_string(ip)}', '#{Style.connection.quote_string(source)}');")
-		rescue ActiveRecord::StatementInvalid
-			# user already installed
-		end
+		Style.connection.execute("INSERT IGNORE INTO daily_install_counts (style_id, ip, source) VALUES (#{Style.connection.quote_string(style_id)}, '#{Style.connection.quote_string(ip)}', '#{Style.connection.quote_string(source)}');")
 	end
 	
 	# returns an array of the namespace urls for this style, empty array if none, or null if parse error
@@ -729,32 +670,6 @@ Replace = "$STOP()"
 		return sld
 	end
 
-	def self.get_domain(url)
-		#the part after :// but before the next slash
-		scheme_end = url.index("://")
-		if scheme_end != nil
-			url = url[scheme_end + 3..url.length]
-		end
-		#before the first : or /
-		domain_end = url.index(/[\:\/]/)
-		if domain_end != nil
-			url = url[0..domain_end - 1]
-		end
-		# handle trailing dots: add com
-		url.gsub!(/\.$/, ".com")
-		# handle people doing url-prefix(http://www.google)
-		domain_parts = url.split('.')
-		if domain_parts.size > 1 
-			if $add_com_tlds.include?(domain_parts[domain_parts.length - 1])
-				url = url + '.com'
-			elsif $add_org_tlds.include?(domain_parts[domain_parts.length - 1])
-				url = url + '.org'
-			end
-		end
-		return nil unless url.match($bad_domains).nil?
-		return url
-	end
-
 	def validate_screenshot(screenshot, prefix)
 		errors = []
 		if prefix.nil?
@@ -786,7 +701,7 @@ Replace = "$STOP()"
 		#delete the existing one
 		if is_update
 			begin
-				File.delete("#{RAILS_ROOT}/public/style_screenshots/#{get_screenshot_name_by_type(type)}")
+				File.delete("#{Rails.root}/public/style_screenshots/#{get_screenshot_name_by_type(type)}")
 			rescue Errno::ENOENT
 				#no file. meh.
 			rescue Errno::EISDIR
@@ -794,7 +709,7 @@ Replace = "$STOP()"
 			end
 			if type == :after
 				begin
-					File.delete("#{RAILS_ROOT}/public/style_screenshot_thumbnails/#{get_screenshot_name_by_type(type)}")
+					File.delete("#{Rails.root}/public/style_screenshot_thumbnails/#{get_screenshot_name_by_type(type)}")
 				rescue Errno::ENOENT
 					#no file. meh.
 				rescue Errno::EISDIR
@@ -803,11 +718,11 @@ Replace = "$STOP()"
 			end
 		end
 		filename = "#{self.id}_#{prefix}.#{screenshot.content_type.strip.split('/')[1]}"
-		File.open("#{RAILS_ROOT}/public/style_screenshots/#{filename}", "w") { |f| f.write(screenshot.read) }
-		refresh_cdn "/style_screenshots/#{filename}" if is_update
+		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "wb") { |f| f.write(screenshot.read) }
 		if type == :after
-			`#{RAILS_ROOT}/thumbnail.sh #{RAILS_ROOT}/public/style_screenshots/#{filename} #{RAILS_ROOT}/public/style_screenshot_thumbnails/#{filename} &> #{RAILS_ROOT}/thumb.log`
-			refresh_cdn "/style_screenshot_thumbnails/#{filename}" if is_update
+			if !system("#{Rails.root}/shellscripts/thumbnail.sh #{Rails.root}/public/style_screenshots/#{filename} #{Rails.root}/public/style_screenshot_thumbnails/#{filename} >> #{Rails.root}/log/thumbnail.log 2>&1")
+				logger.error "Failed making thumbnail for #{filename}, exit code is #{$?}"
+			end
 		end
 		set_screenshot_name_by_type(type, filename)
 	end
@@ -821,19 +736,14 @@ Replace = "$STOP()"
 		filename = "#{self.id}_additional_#{screenshot.id}.#{data.content_type.strip.split('/')[1]}"
 		screenshot.path = filename
 		screenshot.save!
-		full_path = "#{RAILS_ROOT}/public/style_screenshots/#{filename}"
+		full_path = "#{Rails.root}/public/style_screenshots/#{filename}"
 		is_update = File.exists?(full_path)
-		File.open(full_path, "w") { |f| f.write(data.read) }
-		refresh_cdn "/style_screenshots/#{filename}" if is_update
-	end
-
-	def refresh_cdn(path)
-		`#{RAILS_ROOT}/refresh_cdn.sh http://#{STATIC_DOMAIN}#{path} >> #{RAILS_ROOT}/refresh_cdn.log 2>> #{RAILS_ROOT}/refresh_cdn.log`
+		File.open(full_path, "wb") { |f| f.write(data.read) }
 	end
 
 	def delete_additional_screenshot(screenshot)
 		begin
-			File.delete("#{RAILS_ROOT}/public/style_screenshots/#{screenshot.path}", "w")
+			File.delete("#{Rails.root}/public/style_screenshots/#{screenshot.path}", "w")
 		rescue Errno::ENOENT
 			#no file. meh.
 		end
@@ -842,14 +752,14 @@ Replace = "$STOP()"
 
 	def change_additional_screenshot(screenshot, data)
 		begin
-			File.delete("#{RAILS_ROOT}/public/style_screenshots/#{screenshot.path}", "w")
+			File.delete("#{Rails.root}/public/style_screenshots/#{screenshot.path}", "w")
 		rescue Errno::ENOENT
 			#no file. meh.
 		end
 		filename = "#{self.id}_additional_#{screenshot.id}.#{data.content_type.strip.split('/')[1]}"
 		screenshot.path = filename
 		screenshot.save!
-		File.open("#{RAILS_ROOT}/public/style_screenshots/#{filename}", "w") { |f| f.write(data.read) }
+		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "wb") { |f| f.write(data.read) }
 	end
 
 	# applies the style options to this style. the parameter is a hash of string style option id to (string style value id | text value)
@@ -933,6 +843,10 @@ Replace = "$STOP()"
 		return "/styles/#{self.id}/#{self.url_snippet}"
 	end
 
+	def cdn_buster_param
+	 "?r=#{self.updated.to_i}"
+	end
+
 	def after_screenshot_path
 		return auto_after_screenshot_path if self.screenshot_type_preference == 'auto'
 		return provided_after_screenshot_path if self.screenshot_type_preference == 'manual'
@@ -940,17 +854,12 @@ Replace = "$STOP()"
 	end
 
 	def auto_after_screenshot_path
-		return "/auto_style_screenshots/#{self.id}-after.png" unless self.auto_screenshot_date.nil? or self.auto_screenshots_same
+		return "http://#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil? or self.auto_screenshots_same
 		return nil
 	end
 
 	def provided_after_screenshot_path
-		return "/style_screenshots/#{self.after_screenshot_name}" unless self.after_screenshot_name.nil?
-	end
-
-	def full_after_screenshot_thumbnail_path
-		return nil if after_screenshot_thumbnail_path.nil?
-		return 'http://' + STATIC_DOMAIN + after_screenshot_thumbnail_path
+		return "http://#{SCREENSHOT_DOMAIN}/style_screenshots/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
 	end
 
 	def after_screenshot_thumbnail_path
@@ -961,12 +870,12 @@ Replace = "$STOP()"
 	end
 
 	def provided_after_screenshot_thumbnail_path
-		return "/style_screenshot_thumbnails/#{self.after_screenshot_name}" unless self.after_screenshot_name.nil?
+		return "http://#{SCREENSHOT_DOMAIN}/style_screenshot_thumbnails/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
 		return nil
 	end
 
 	def auto_after_screenshot_thumbnail_path
-		return "/auto_style_screenshots/#{self.id}-after-thumbnail.png" unless self.auto_screenshot_date.nil?
+		return "http://#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after-thumbnail.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil?
 		return nil
 	end
 
@@ -988,7 +897,7 @@ Replace = "$STOP()"
 		end
 	end
 
-  def to_json(options = nil)
+	def as_json(options = {})
 		{
 			:url => full_pretty_url,
 			:name => short_description,
@@ -1003,9 +912,9 @@ Replace = "$STOP()"
 			:weekly_installs => weekly_install_count,
 			:total_installs => total_install_count,
 			:rating => rating_string,
-			:screenshot => full_after_screenshot_thumbnail_path,
+			:screenshot => after_screenshot_thumbnail_path,
 			:license => effective_license_url
-		}.to_json(options)
+		}
 	end
 
 	def effective_license
@@ -1127,7 +1036,7 @@ Replace = "$STOP()"
 	def self.get_parse_error_for_code(code, exempt_stuff=true)
 		#return nil if exempt_stuff and !code.index(/box\-shadow|\-moz\-selection|\-moz\-linear\-gradient|\-moz\-appearance/).nil?
 		begin
-			CSSPool::CSS::Document.parse(code)
+			Style.get_doc(code)
 		rescue Racc::ParseError => e
 			return e.message
 		rescue Exception => e
@@ -1239,6 +1148,11 @@ Replace = "$STOP()"
 	end
 
 	def refresh_meta
+		if self.style_options.empty?
+			self.style_sections = Style.parse_moz_docs_for_code(style_code.code)
+		else
+			self.style_sections = []
+		end
 		self.screenshot_url = self.calculate_screenshot_url
 		self.category = self.calculate_category
 		self.subcategory = self.calculate_subcategory
@@ -1256,7 +1170,45 @@ Replace = "$STOP()"
 		self.unintentional_global = self.calculate_unintentional_global
 	end
 
- private
+	def calculate_external_references
+		references = Set.new
+		code_possibilities.each do |o, c|
+			references.merge(Style.calculate_external_references_for_code(c))
+		end
+		return references
+	end
+
+	def url_matches_moz_docs(url)
+		moz_docs = calculate_moz_docs
+		# global
+		return true if moz_docs.empty?
+		moz_docs.each do |fn, value|
+			case fn
+				when 'url'
+					return true if url == value
+				when 'url-prefix'
+					return true if url.start_with?(value)
+				when 'domain'
+					domain = Style.get_domain(url)
+					return true if !domain.nil? and (domain == value or domain.end_with?('.' + value))
+				when 'regexp'
+					begin
+						re = Regexp.new(value)
+					rescue Exception => e
+						next
+					end
+					# we want to match the full url, so add ^ and $ if not already present
+					res = re.source
+					res = '^' + res unless res.start_with?('^')
+					res = res + '$' unless res.end_with?('$')
+					re = Regexp.new(res)
+					return true if re =~ url
+			end
+		end
+		return false
+	end
+
+private
 
 	# Returns an array of all docs for this style, or nil if any are invalid
 	# Cache the docs for the life of the request so we don't have to keep reparsing. If the code or settings 
@@ -1290,10 +1242,20 @@ Replace = "$STOP()"
  
 	def self.get_doc_or_nil(code)
 		begin
-			return CSSPool::CSS::Document.parse(code)
+			return Style.get_doc(code)
 		rescue Exception => e
 			return nil
 		end
+	end
+
+	def self.get_doc(code)
+		# workaround for 'unclosed comments hang stuff' bug
+		last_start_comment = code.rindex('/*')
+		if !last_start_comment.nil?
+			last_end_comment = code.rindex('*/')
+			raise Racc::ParseError.new("unclosed comment on line #{code[0,last_start_comment].lines.count}") if last_end_comment.nil? or last_end_comment < last_start_comment
+		end
+		return CSSPool::CSS::Document.parse(code)
 	end
 
 	def get_screenshot_name_by_type(type)
@@ -1326,14 +1288,11 @@ Replace = "$STOP()"
 				return true if !(value =~ $moz_doc_validate_exempt_protocols).nil?
 				return false if !(value =~ $moz_doc_validate_invalid_url_chars).nil?
 				# it could just be the protocol for url-prefix
-				return true if !(value =~ /^(http|https|file|ftp):?\/*/).nil?
-				return false if (value =~ URI::regexp(%w(http https file ftp))).nil?
-				begin
-					url_value = URI.parse(value)
-				rescue
-					return false
-				end
-				return Style.validate_domain(url_value.host, false)
+				return true if !(value =~ /\A(http|https|file|ftp):?\/*\z/).nil?
+				# protocol://thenwhatever is ok, we can't validate it as a url because
+				# it could end at a weird spot
+				return true if !(value =~ /\A(http|https|file|ftp):\/\/.*/).nil?
+				return false
 			when 'regexp'
 				begin
 					re = Regexp.new(value)
@@ -1356,6 +1315,9 @@ Replace = "$STOP()"
 		rescue
 			return false
 		end
+		return false if ['http', 'https', 'ftp'].include?(url_value.scheme) and url_value.host.nil?
+		# don't validate domain for file:
+		return true if ['file'].include?(url_value.scheme)
 		return Style.validate_domain(url_value.host, publicly_accessible_only)
 	end
 
@@ -1373,4 +1335,111 @@ Replace = "$STOP()"
 		return (PublicSuffix.valid?('example.' + domain) or PublicSuffix.valid?('example.com.' + domain)) && !publicly_accessible_only
 	end
 
+	# returns a set of references in the code to external resources (things references via url(), minus namespaces and -moz-documents)
+	def self.calculate_external_references_for_code(code)
+		
+		references = Set.new
+		code = code.gsub(/[\r\n]+/, '')
+
+		code = StyleCode.strip_comments(code)
+
+		matches = code.scan(/url\s*\(\s*['"]?[^'")]*['"]?\s*\)/i)
+		matches.each do |url_statement|
+			# get the actual url, stripping out the url(' and ') parts
+			url = url_statement.sub(/^url\s*\(\s*['"]?/i, '')
+			url.sub!(/['"]?\s*\)$/i, '')
+
+			# check what came immediately before the url (up to start of file, ;, {, or }).
+			start_of_url = code.index(url_statement)
+			start_of_statement = code.rindex(/;|\}|\{/, start_of_url)
+			start_of_statement = 0 if start_of_statement.nil?
+			before_statement = code[start_of_statement..start_of_url]
+			next if before_statement.include?('namespace') or before_statement.include?('moz-document')
+
+			# look to see if the a [ or a ] is closer before the url. a [ closer indicates we may be in an attribute selector
+			close_bracket = code.rindex(/\]/, start_of_url)
+			open_bracket = code.rindex(/\[/, start_of_url)
+			next if !open_bracket.nil? and (close_bracket.nil? or open_bracket > close_bracket)
+
+			references << url
+		end
+
+		return references
+	end
+
+	def self.begins_with?(str, re)
+		m = str.match(re)
+		return !m.nil?# and m.begin(0) == 0
+	end
+
+	def self.get_domain(url)
+		begin
+			return URI.parse(url).host
+		rescue
+			return nil
+		end
+	end
+
+	# Parses the code into an array of StyleSections
+	def self.parse_moz_docs_for_code(code)
+		begin
+			doc = Style.get_doc(code)
+		rescue Racc::ParseError => e
+			return StyleCode.new(:code => code).old_parse_moz_docs
+		rescue Exception => e
+			return StyleCode.new(:code => code).old_parse_moz_docs
+		end
+		sections = []
+		last_document_query_end = 0
+		ordinal = 0
+		doc.document_queries.each do |dq|
+			# check for global sections
+			if dq.outer_start_pos > last_document_query_end
+				sections << StyleSection.new({:global => true, :ordinal => ordinal, :css => code[last_document_query_end..dq.outer_start_pos-1].strip})
+				ordinal += 1
+			end
+			section = StyleSection.new({:global => false, :ordinal => ordinal})
+			ordinal += 1
+			dq.url_functions.each do |fn|
+				if fn.is_a?(CSSPool::Terms::URI)
+					section.style_section_rules << StyleSectionRule.new({:rule_type => 'url', :rule_value => fn.value})
+				else
+					section.style_section_rules << StyleSectionRule.new({:rule_type => fn.name, :rule_value => fn.params.first.value})
+				end
+			end
+			section[:css] = code[dq.inner_start_pos..dq.inner_end_pos-1].strip
+			sections << section
+			last_document_query_end = dq.outer_end_pos
+		end
+		if last_document_query_end < code.length
+			sections << StyleSection.new({:global => true, :ordinal => ordinal, :css => code[last_document_query_end..code.length-1].strip})
+		end
+		begin
+			return sections.select{|s| Style.is_worthwhile_section(s)}
+		rescue Racc::ParseError => e
+			return StyleCode.new(:code => code).old_parse_moz_docs
+		end
+	end
+	
+	# Determines if the code section is worthwhile to include.
+	def self.is_worthwhile_section(section)
+		# Anything not global will be kept, even if empty
+		return true if !section[:global]
+		# Only whitespace - drop it. This can be covered by the next case, but this is a common
+		# situation and checking it separately is quicker.
+		return false if section[:css].strip.empty?
+		# See if it contains anything functional. Since CSSPool considers a document with only
+		# whitespace and comments to be invalid (see https://github.com/JasonBarnabe/csspool/issues/4),
+		# we will tack on a ruleset and see if the resulting document has anything else.
+		doc = Style.get_doc(section[:css] + "\na{}")
+		return !(
+			doc.rule_sets.length == 1 and
+			doc.charsets.empty? and
+			doc.import_rules.empty? and
+			doc.document_queries.empty? and
+			doc.supports_rules.empty? and
+			doc.namespaces.empty? and
+			doc.keyframes_rules.empty?
+		)
+	end
 end

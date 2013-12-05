@@ -1,0 +1,49 @@
+<%= error_messages_for 'user' %>
+<%= form_for(:user, :url => user_path(@user), :html => { :method => :put}) do |u| %>
+<table class="form-controls">
+	<tbody>
+		<tr>
+			<th><label for="user_name">Display name</label></th>
+			<td><%=u.text_field(:name)%></td>
+		</tr>
+		<tr>
+			<th><label for="user_email">E-mail</label></th>
+			<td><%=u.text_field(:email)%> <span style="font-size: smaller">(Optional, used to recover passwords.)</span></td>
+		</tr>
+		<tr>
+			<th><label for="user_show_email">Display e-mail?</label></th>
+			<td><%=u.check_box(:show_email)%> <span style="font-size: smaller">(Can other users see your e-mail address?)</span></td>
+		</tr>
+		<tr>
+			<th><label for="user_about">About you</label></th>
+			<td><p class="linking-note"><a href="/help/coding#format" tabindex="-1">Some HTML allowed.</a></p><%=u.text_area(:about, :rows => 10)%> <span style="font-size: smaller">(Displayed on your user page.)</span></td>
+		</tr>
+		<tr>
+			<th><label for="user_homepage">Homepage</label></th>
+			<td><%=u.text_field(:homepage)%></td>
+		</tr>
+		<tr>
+			<th><label for="user_paypal_email">PayPal e-mail</label></th>
+			<td><%=u.text_field(:paypal_email)%> <span style="font-size: smaller">(If you write a style, people will be invited to send you money.)</span></td>
+		</tr>
+		<tr>
+			<th><label for="license">Default License</label></th>
+			<td>
+				<p>By posting styles to userstyles.org, you are at minimum allowing people to use your styles for personal use. You may be more specific in what you allow by choosing a license. This setting defines the default license for all your styles; this may be overridden for individual styles on their edit pages. You can use the <a href="http://creativecommons.org/choose/">Creative Commons License Chooser</a> to help you pick a Creative Commons license. Be sure you understand the licenses before you choose them as they may not be revokable.</p>
+				<input id="license-cc0" name="user[license]" type="radio" value="publicdomain" <% if @user.license == 'publicdomain'%>checked<%end%>> <a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0 - Public Domain</a><br>
+				<input id="license-ccby" name="user[license]" type="radio" value="ccby" <% if @user.license == 'ccby'%>checked<%end%>> <a href="http://creativecommons.org/licenses/by/3.0/">CC BY - Creative Commons Attribution</a><br>
+				<input id="license-ccbysa" name="user[license]" type="radio" value="ccbysa" <% if @user.license == 'ccbysa'%>checked<%end%>> <a href="http://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA - Creative Commons Attribution-ShareAlike</a><br>
+				<input id="license-ccbynd" name="user[license]" type="radio" value="ccbynd" <% if @user.license == 'ccbynd'%>checked<%end%>> <a href="http://creativecommons.org/licenses/by-nd/3.0/">CC BY-ND - Creative Commons Attribution-NoDerivs</a><br>
+				<input id="license-ccbync" name="user[license]" type="radio" value="ccbync" <% if @user.license == 'ccbync'%>checked<%end%>> <a href="http://creativecommons.org/licenses/by-nc/3.0/">CC BY-NC - Creative Commons Attribution-NonCommercial</a><br>
+				<input id="license-ccbyncsa" name="user[license]" type="radio" value="ccbyncsa" <% if @user.license == 'ccbyncsa'%>checked<%end%>> <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/">CC BY-NC-SA - Creative Commons Attribution-NonCommercial-ShareAlike</a><br>
+				<input id="license-ccbyncnd" name="user[license]" type="radio" value="ccbyncnd" <% if @user.license == 'ccbyncnd'%>checked<%end%>> <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/">CC BY-NC-ND - Creative Commons Attribution-NonCommercial-NoDerivs</a><br>
+				<input id="license-arr" name="user[license]" type="radio" value="arr" <% if @user.license == 'arr'%>checked<%end%>> No Redistribution
+			</td>
+		</tr>
+		<tr>
+			<th></th>
+			<td><%= submit_tag "Update"%></td>
+		</tr>
+	</tbody>
+</table>
+<% end %>

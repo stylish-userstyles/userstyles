@@ -467,8 +467,8 @@ label.rating:hover {
 	float: right;
 }
 #control-panel {
-	display: none;
-	margin-bottom: 1em;
+	margin-left: 15px;
+	margin-top: 5px;
 }
 .paypal-donate-image {
 	width: 110px;
@@ -600,18 +600,15 @@ a.btn-twitter:visited {
 #search select {
 	font-size: inherit;
 }
-.style-brief-control-links {
-	display: none;
-}
-.by-current-user .style-brief-control-links {
-	display: block;
-}
 .style-brief-stats {
 	font-size: smaller;
 }
 .style-brief-stats span {
 	display: inline-block;
 	min-width: 16em;
+}
+.style-brief-control-links {
+	padding-top: 0.5em;
 }
 .style-brief-text .style-brief-stats span:last-child {
 	min-width: auto;
@@ -669,6 +666,9 @@ a.btn-twitter:visited {
 }
 .deletion-reason {
 	color: red;
+}
+.pagination .current {
+	font-style: normal;
 }
 
 .style1 {font-size: 16px;color: #CCFFFF;}

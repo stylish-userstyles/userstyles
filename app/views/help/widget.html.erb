@@ -38,7 +38,7 @@ html_url = 'http://userstyles.org' + extensionParts[0] + queryString
 
 <p>The generated code is HTML and JS. You are free to modify the generated code as you see fit, with one exception: don't modify the subdomain of the referenced JS scripts (you're free to download them and host them yourself, though). <a href="widget_details">You can also create completely new code based on the data feed.</a> If you have suggestions for new widget styles or changes to the existing formats, please <a href="mailto:jason.barnabe@gmail.com">send me an e-mail</a>.</p>
 
-<form action="widget">
+<%=form_tag(:action => 'widget') do |f|%>
 	<table class="form-controls" style="width: 400px">
 		<tbody>
 			<tr>
@@ -75,7 +75,7 @@ html_url = 'http://userstyles.org' + extensionParts[0] + queryString
 			</tr>
 		</tbody>
 	</table>
-</form>
+<% end %>
 
 <% if !json_url.nil?
 		code = <<-END_OF_STRING
@@ -104,9 +104,8 @@ Check out <a href="#{h html_url}">#{h widget_title}</a>
 END_OF_STRING
 %>
 	Code:<br>
-	<pre id="widget-code"><%=h code%></pre>
+	<pre id="widget-code"><%=code%></pre>
 
 	Preview:<br>
-	<div id="widget-preview"><%=code%></div>
+	<div id="widget-preview"><%=raw(code)%></div>
 <% end %>
-

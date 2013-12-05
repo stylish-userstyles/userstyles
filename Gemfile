@@ -1,17 +1,24 @@
-source 'https://rubygems.org'
-gem 'rails', '2.3.15'
-gem 'thinking-sphinx', '1.4.14'
-gem 'ts-delayed-delta', '1.1.1'
-gem 'mysql', '2.8.1'
-gem 'will_paginate', '2.3.12'
-gem 'public_suffix', '1.3.1'
+source 'http://rubygems.org'
 
-#maybe not needed?
-gem 'openid', '0.0.1'
+ruby '2.0.0'
 
-gem 'ruby-openid', '2.1.7'
-gem 'sanitize', '2.0.3'
-
-ruby '1.8.7'
-
-#gem "csspool", '4.0.0', :path => '/home/jason/csspool/pkg/csspool-4.0.0/'
+gem 'rails', '~> 4.0.1'
+gem 'mysql2', '~> 0.3.0'
+gem 'sanitize', '~> 2.0.6'
+gem 'csspool', '~> 4.0.0'
+gem 'public_suffix', '~> 1.3.1'
+gem 'thinking-sphinx', '~> 3.0.6',
+	:git    => 'git://github.com/pat/thinking-sphinx.git',
+	:branch => 'develop',
+	:ref    => 'ed9b39ae84'
+gem 'ts-delayed-delta', '~> 2.0.0'
+gem 'delayed_job', '~> 4.0.0'
+gem 'delayed_job_active_record', '~> 4.0.0'
+gem 'will_paginate', '~> 3.0.5'
+gem 'ruby-openid', '~> 2.3.0'
+gem 'strip_attributes', '~> 1.4.4'
+gem 'dynamic_form', '~> 1.1.4'
+gem 'dalli', '~> 2.6.4'
+gem 'rails-observers', '~> 0.1.2'
+gem 'ignorable', '~> 0.2.0'
+gem 'daemons'

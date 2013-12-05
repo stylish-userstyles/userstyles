@@ -1,0 +1,52 @@
+<%= error_messages_for 'user' %>
+<%= form_for(:user, :action => "create") do |f| %>
+<table class="form-controls">
+	<tbody>
+		<tr>
+			<th><label for="user_login">Login</label></th>
+			<td><%=f.text_field :login, :size => 20, :maxlength => 20%></td>
+		</tr>
+		<tr>
+			<th><label for="user_name">Display name</label></th>
+			<td><%=f.text_field :name%></td>
+		</tr>
+		<tr>
+			<th><label for="user_email">E-mail</label></th>
+			<td><%=f.text_field :email%> <span style="font-size: smaller">Optional, lets you recover your password.</span></td>
+		</tr>
+		<tr>
+			<th><label for="user_show_email">Display e-mail?</label></th>
+			<td><%=f.check_box :show_email%> <span style="font-size: smaller">Can other users see your e-mail address?</span></td>
+		</tr>
+		<tr>
+			<th><label for="user_paypal_email">PayPal e-mail</label></th>
+			<td><%=f.text_field :paypal_email%> <span style="font-size: smaller">Optional, if you write a style people will be invited to send you money.</span></td>
+		</tr>
+		<tr>
+			<th><label for="user_password">Password</label></th>
+			<td><%=password_field "user", "password", :size => 15, :maxlength => 15%></td>
+		</tr>
+		<tr>
+			<th><label for="user_password_confirmation">Confirm Password</label></th>
+			<td><%=password_field "user", "password_confirmation", :size => 15, :maxlength => 15%></td>
+		</tr>
+		<tr>
+			<th><label for="user_about">About you</label></th>
+			<td><%=f.text_area(:about, :rows => 10)%> <span style="font-size: smaller">Optional, displayed on your user page.</span></td>
+		</tr>
+		<tr>
+			<th><label for="user_homepage">Homepage</label></th>
+			<td><%=f.text_field :homepage %>  <span style="font-size: smaller">Optional, displayed on your user page.</span></td>
+		</tr>
+		<tr>
+			<th></th>
+			<td>
+				<% if !@return_to.nil?%>
+					<input type="hidden" name="return_to" value="<%=h @return_to%>">
+				<% end %>
+				<%=submit_tag "Create"%>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<% end %>

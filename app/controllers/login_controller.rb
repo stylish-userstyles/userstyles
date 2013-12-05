@@ -1,22 +1,16 @@
 class LoginController < ApplicationController
-	layout "standard_layout"
-#	after_filter OutputCompressionFilter
 
-	#$store_dir = Pathname.new(Dir.tmpdir).join("openid-store")
-	#$store = OpenID::FilesystemStore.new($store_dir)
-
-  def index
-		if session[:user]
+	def index
+		if !session[:user_id].nil?
 			go_to_return_to
 			return
 		end
 		@page_title = "Login"
 		@no_bots = true
-    # show login screen
-  end
+	end
 
 	def check
-		render :text => session[:user] ? 'logged in' : 'not logged in'
+		render :text => session[:user_id] ? 'logged in' : 'not logged in'
 	end
 
 	def forum
@@ -24,17 +18,16 @@ class LoginController < ApplicationController
 	end
 
 	def login_as
-		if session[:user].nil? or session[:user].id != $admin_id
-			render :text => "Access denied.", :layout => true
-			return
-		end
-		session[:user] = User.find(params[:id])
+		session[:user_id] = User.find(params[:id]).id
 		redirect_to '/'
 	end
 
 	def authenticate_normal
 		if params[:login] and params[:password] and user = User.authenticate(params[:login], params[:password])
-			session[:user] = user
+			# Only validate if the user was previously valid. some people may have bad data and if we
+			# validate them, they can't log in.
+			user_was_valid = user.valid?
+			session[:user_id] = user.id
 			remember = params[:remember] == "true"
 			if remember
 				if user.token.nil?
@@ -44,7 +37,7 @@ class LoginController < ApplicationController
 			end
 			user.ip = request.remote_ip()
 			user.lost_password_key = nil
-			user.save!
+			user.save(:validate => user_was_valid)
 			go_to_return_to
 			return
 		end
@@ -56,13 +49,7 @@ class LoginController < ApplicationController
 	def authenticate_openid
 		session[:remember] = params[:remember] == "true"
 		session[:return_to] = params[:return_to]
-		openid = nil
-		params['openid'].each do |o|
-			if o.is_a?(String)
-				openid = o
-				break
-			end
-		end
+		openid = params['openid']
 		begin
 			start(openid, url_for(:controller => :login, :action => :authenticate_openid_complete));
 		rescue Exception => e
@@ -76,11 +63,10 @@ class LoginController < ApplicationController
 
 		response = self.complete(params, url_for(:controller => :login, :action => :authenticate_openid_complete));
 	    sreg = OpenID::SReg::Response.from_success_response(response)
-	    ua = UserAuthenticator.find(:first, :conditions => ['provider = ? AND provider_identifier = ?', 'openid', response.identity_url])
+	    ua = UserAuthenticator.where(:provider => 'openid').where(:provider_identifier => response.identity_url).first
 	    user = nil
 	    user = ua.user unless ua.nil?
-		#user = User.find_by_openid_url(response.identity_url)
-		if user == nil
+		if user.nil?
 			user = User.new
 			user.login = nil
 			user.password = nil
@@ -90,17 +76,17 @@ class LoginController < ApplicationController
 			ua.provider = 'openid'
 			ua.provider_identifier = response.identity_url
 			user.user_authenticators << ua
-			user.email = sreg["email"]
+			user.email = sreg['email']
 			begin
-				user.name = sreg["nickname"]
+				user.name = sreg['nickname']
 			rescue Exception => e
-				session[:temp_user] = user
-				redirect_to(:action => "name_required")
+				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email']}
+				redirect_to(:action => 'name_required')
 				return
 			end
 			if user.name.nil? or user.name.length == 0
-				session[:temp_user] = user
-				redirect_to(:action => "name_required")
+				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email']}
+				redirect_to(:action => 'name_required')
 				return
 			end
 			if user.save
@@ -111,21 +97,33 @@ class LoginController < ApplicationController
 					end
 					cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now}
 				end
-				session[:user] = user
+				session[:user_id] = user.id
 				go_to_return_to()
 			else
-				session[:temp_user] = user
-				redirect_to(:action => "name_conflict")
+				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email'], :name => sreg['nickname']}
+				redirect_to(:action => 'name_conflict')
 			end
 			return
 		end
-		original_name = user.name
-		user.name = sreg["nickname"]
-		user.email = sreg["email"]
-		#the nickname might be in use
-		if !user.valid?
-			user.name = original_name
+		# The user may already be invalid, we don't want to prevent logging in. If they're invalid,
+		# we can't tell if their new name and e-mail are good, so we won't update those.
+		user_was_valid = user.valid?
+		if user_was_valid
+			# Leave user name and e-mail alone if the passed value is invalid
+			
+			original_name = user.name
+			user.name = sreg['nickname']
+			if !user.valid?
+				user.name = original_name
+			end
+			
+			original_email = user.email
+			user.email = sreg['email']
+			if !user.valid?
+				user.email = original_email
+			end
 		end
+
 		if session[:remember]
 			if user.token.nil?
 				user.token = user.generate_login_token
@@ -133,76 +131,117 @@ class LoginController < ApplicationController
 			cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now}
 		end
 		user.ip = request.remote_ip()
-		user.save
-		session[:user] = user
-		go_to_return_to()
+		user.save(:validate => user_was_valid)
+		session[:user_id] = user.id
+		go_to_return_to
 	end
 
 	def name_conflict
-		@page_title = "Display name conflict"
-		@taken_name = session[:temp_user].name
+		@page_title = 'Display name conflict'
+		@taken_name = session[:temp_login_details][:name]
 	end
 
 	def name_required
-		@page_title = "Display name required"
+		@page_title = 'Display name required'
 	end
 
 	def resolve_name_conflict
-		@user = session[:temp_user]
-		@user.name = params[:name]
-		if @user.save
-			session[:temp_user] = nil
-			session[:user] = @user
-			go_to_return_to()
-		else
-			@taken_name = session[:temp_user].name
-			render :action => "name_conflict"
-		end
-		return
-	end
-
-	def resolve_name_required
-		if params[:name] == nil
-			redirect_to(:action => "name_required")
-			return
-		end
-		@user = session[:temp_user]
-		if @user.nil?
+		if session[:temp_login_details].nil?
 			redirect_to :action => 'index'
 			return
 		end
-		@user.name = params[:name]
-		if @user.save
-			session[:temp_user] = nil
-			session[:user] = @user
-			go_to_return_to()
-		else
-			@taken_name = session[:temp_user].name
-			render :action => "name_conflict"
+		
+		if params[:name] == nil or params[:name].empty?
+			redirect_to(:action => 'name_required')
+			return
 		end
+		
+		@user = User.new
+		@user.login = nil
+		@user.password = nil
+		@user.ip = request.remote_ip()
+		
+		@user[:email] = session[:temp_login_details][:email]
+		ua = UserAuthenticator.new
+		ua.provider = 'openid'
+		ua.provider_identifier = session[:temp_login_details][:provider_identifier]
+		@user.user_authenticators << ua
+		
+		@user.name = params[:name]
+		
+		if @user.save
+			session[:temp_login_details] = nil
+			session[:user_id] = @user.id
+			go_to_return_to()
+			return
+		end
+		@taken_name = params[:name]
+		@page_title = 'Display name conflict'
+		render :action => 'name_conflict'
+	end
+
+	def resolve_name_required
+		if session[:temp_login_details].nil?
+			redirect_to :action => 'index'
+			return
+		end
+
+		if params[:name] == nil or params[:name].empty?
+			redirect_to(:action => 'name_required')
+			return
+		end
+
+		@user = User.new
+		@user.login = nil
+		@user.password = nil
+		@user.ip = request.remote_ip()
+		
+		@user[:email] = session[:temp_login_details][:email]
+		ua = UserAuthenticator.new
+		ua.provider = 'openid'
+		ua.provider_identifier = session[:temp_login_details][:provider_identifier]
+		@user.user_authenticators << ua
+		
+		@user.name = params[:name]
+
+		if @user.save
+			session[:temp_login_details] = nil
+			session[:user_id] = @user.id
+			go_to_return_to()
+			return
+		end
+
+		@taken_name = params[:name]
+		@page_title = 'Display name conflict'
+		render :action => 'name_conflict'
 	end
 
 	def policy
-		@page_title = "Privacy policy"
+		@page_title = 'Privacy policy'
 	end
 
 	def lost_password
-		@page_title = "Lost password recovery"
+		@page_title = 'Lost password recovery'
 	end
 
 	def lost_password_start
-		user = User.find_by_email(params[:email])
+		@page_title = 'Lost password recovery'
+		user = User.where(:email => params[:email]).first
 		if !user.nil?
+			user_was_valid = user.valid?
 			# login might be nil if they started with openid
 			user.login = user.name if user.login.nil?
 			user.create_lost_password_key
-			user.save!
-			LostPasswordMailer.deliver_password_reset(user)
+			if user.save(:validate => user_was_valid)
+				LostPasswordMailer.password_reset(user).deliver
+			else
+				logger.error 'Couldn\'t save #{user.id} on lost password.'
+			end
 		end
 	end
 
 	def lost_password_done
-		user = User.find_by_lost_password_key(params[:id])
+		user = User.where(:lost_password_key => params[:id]).first unless params[:id].nil?
 		if !user.nil?
 			user.lost_password_key = nil
 			@login = user.login
@@ -211,22 +250,35 @@ class LoginController < ApplicationController
 			user.save!
 			return
 		end
-		render :text => "Sorry, didn't work."
+		render :text => "Sorry, didn't work.", :layout => true
 	end
 
 	def single_sign_on
-		if session[:user].nil?
+		if session[:user_id].nil?
 			render :nothing => true
 		else
-			name = session[:user].name.gsub('"', '\"')
-			email = session[:user].email
-			email = 'user' + session[:user].id.to_s + '@userstyles.org' if email.nil?
-			send_data "HyperFoo=Bar\nUniqueID=#{session[:user].id}\nName=\"#{name}\"\nEmail=#{email}", :type => "text/plain", :disposition => "inline"
+			user = User.find(session[:user_id])
+			name = user.name.gsub('"', '\"')
+			email = user.email
+			email = 'user' + user.id.to_s + '@userstyles.org' if email.nil?
+			send_data "HyperFoo=Bar\nUniqueID=#{user.id}\nName=\"#{name}\"\nEmail=#{email}", :type => "text/plain", :disposition => "inline"
 		end
 	end
 
 
 private
+
+	def public_action?
+		['index', 'check', 'forum', 'authenticate_normal', 'authenticate_openid', 'authenticate_openid_complete', 'name_conflict', 'name_required', 'resolve_name_conflict', 'resolve_name_required', 'policy', 'lost_password', 'lost_password_start', 'lost_password_done', 'single_sign_on'].include?(action_name)
+	end
+	
+	def admin_action?
+		['login_as'].include?(action_name)
+	end
+	
+	def verify_private_action(user_id)
+		false
+	end
 
 	def go_to_return_to
 		return_to = session[:return_to]
@@ -235,7 +287,7 @@ private
 		end
 		if return_to.nil?
 			logger.info("No return to URL, going to user page")
-			redirect_to(:controller => "users", :action => "show", :id => session[:user].id) 
+			redirect_to(:controller => "users", :action => "show", :id => session[:user_id]) 
 		else
 			logger.info("Going to return to URL - " + return_to)
 			session[:return_to] = nil

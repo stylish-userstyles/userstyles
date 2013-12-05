@@ -215,23 +215,14 @@ function initShowCode() {
 	showButton.style.display = "inline";
 
 }
-function initEditCode() {
-	var controlPanel = document.getElementById("control-panel");
-	var styleUserId = document.getElementById("user-id").innerHTML;
-	var userId = getUserFromCookie();
-	if (userId == styleUserId) {
-		controlPanel.style.display = "block";
-	}
-}
 function init() {
 	initShowCode();
-	initEditCode();
 	// update these links with the default values
 	updateNonStylishInstallLinks();
 }
 
 if (window.addEventListener)
-	window.addEventListener("load", init, false);
+	window.addEventListener("DOMContentLoaded", init, false);
 else
 	window.onload = init;
 

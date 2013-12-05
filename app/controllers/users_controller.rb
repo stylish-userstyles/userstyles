@@ -3,43 +3,45 @@ require 'will_paginate'
 class UsersController < ApplicationController
 	helper :styles
 	helper :users
-	layout "standard_layout"
-
-	before_filter :verify_user, :except => [:show, :comments, :comments_on, :new, :create, :comments_redirect, :comments_on_redirect, :stats, :show_by_forum_id, :show_by_name]
-
-	cache_sweeper :user_sweeper
 
 	def show
 		@user_displayed = User.find(params[:id])
-		if !params[:per_page].nil? and params[:per_page].to_i > 0 and params[:per_page].to_i <= 200
-			per_page = params[:per_page].to_i
+		if @user_displayed.id == session[:user_id]
+			@styles = Style.where(:user_id => @user_displayed.id).order('obsolete, short_description')
+			# prevent 2n loads
+			@style_forum_stats = @user_displayed.style_forum_stats
 		else
-			per_page = 10
+			if !params[:per_page].nil? and params[:per_page].to_i > 0 and params[:per_page].to_i <= 200
+				per_page = params[:per_page].to_i
+			else
+				per_page = 10
+			end
+			@styles = Style.active.where(:user_id => @user_displayed.id).order('short_description').paginate({:per_page => per_page, :page => params[:page]})
+			@no_ads = @styles.empty?
 		end
-		styles_public = Style.paginate(:all, :per_page => per_page, :order => 'short_description', :page => params[:page], :conditions => "obsolete = 0 and user_id = #{@user_displayed.id}")
-		@no_ads = styles_public.empty?
 
 		respond_to do |format|
 			format.html {
-				if !session[:user].nil? and @user_displayed.id == session[:user].id
-					@styles = Style.find(:all, :conditions => "user_id = #{@user_displayed.id}", :order => 'obsolete, short_description')
-					# prevent 2n loads
-					@style_forum_stats = @user_displayed.style_forum_stats
-				else
-					@styles = styles_public
-				end
 				@page_title = @user_displayed.name
 				@feeds = []
-				@feeds << {:title => "Styles by this user", :href => "#{@user_displayed.id}/styles.rss", :type => "application/rss+xml"}
-				@feeds << {:title => "Styles by this user", :href => "#{@user_displayed.id}/styles.atom", :type => "application/atom+xml"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'rss'), :type => "application/rss+xml"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'atom'), :type => "application/atom+xml"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'json'), :type => "application/json"}
+				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'jsonp'), :type => "text/javascript"}
 			}
 			format.json {
-				render :text => styles_public.to_json
+				render :text => @styles.to_json
 			}
 			format.jsonp {
 				callback = params[:callback]
 				callback = 'handleUserstylesData' if callback.nil? or /^[$A-Za-z_][0-9A-Za-z_\.]*$/.match(callback).nil?
-				render :text => callback + '(' + styles_public.to_json + ');'
+				render :text => callback + '(' + @styles.to_json + ');'
+			}
+			format.atom {
+				render(:template => '/styles/style_atom.xml.builder', :content_type => 'application/atom+xml')
+			}
+			format.rss {
+				render(:template => '/styles/style_rss.xml.builder', :content_type => 'application/rss+xml')
 			}
 		end
 	end
@@ -54,7 +56,7 @@ class UsersController < ApplicationController
 	end
 
 	def show_by_name
-		user = User.find_by_name(params[:id])
+		user = User.where(:name => params[:id]).first
 		if user.nil?
 			render :nothing => true, :status => 404
 		else
@@ -83,25 +85,26 @@ class UsersController < ApplicationController
 	def create
 		@page_title = "Register"
 		@user = User.new
-		@user.attributes = params["user"]
-		@user.name = @user.login if @user.name.nil? or @user.name = ''
+		@user.login = params[:user][:login]
+		@user.name = @user.login
+		@user.email = params[:user][:email]
+		@user.password = params[:user][:password]
+		@user.password_confirmation = params[:user][:password_confirmation]
 		@user.ip = request.remote_ip()
 		@return_to = params[:return_to]
-		if @return_to.nil?
-			@return_to = session[:return_to]
-		end
-		if @user.password.length <= 3
+		if params[:user][:password].length < 3
 			@user.errors.add('password', 'must be at least 3 characters.')
 			render :action => "new"
 			return
 		end
-		begin
-			@user.save!
-		rescue ActiveRecord::RecordInvalid
+		if !@user.save
 			render :action => "new"
 			return
 		end
-		session[:user] = @user
+		if @return_to.nil?
+			@return_to = session[:return_to]
+		end
+		session[:user_id] = @user.id
 		if @return_to.nil?
 			redirect_to(:action => "show", :id => @user.id)
 		else
@@ -117,12 +120,10 @@ class UsersController < ApplicationController
 
 	def update
 		@user = User.find(params[:id])
-		@user.attributes = params[:user]
-		if !@user.save
+		if !@user.update_attributes(user_params)
 			render(:action => :edit)
-			return			
+			return
 		end
-		session[:user].reload
 		redirect_to user_url(@user)
 	end
 	
@@ -157,7 +158,6 @@ class UsersController < ApplicationController
 		@user.password = params[:password]
 		@user.password_confirmation = params[:password_confirmation]
 		if @user.save
-			session[:user].reload
 			redirect_to(:action => "edit_login_methods", :id => @user.id, :password_updated => true)
 			return
 		else
@@ -176,19 +176,13 @@ class UsersController < ApplicationController
 		@user.hashed_password = nil
 		@user.lost_password_key = nil
 		@user.save!
-		session[:user].reload
 		redirect_to(:action => "edit_login_methods", :id => @user.id, :password_removed => true)
 	end
 
 	def add_authenticator
-		if session[:user].id != params[:id].to_i
-			render :text => "Access denied.", :status => 403
-			return
-		end
 		@user = User.find(params[:id].to_i)
 		if params[:provider_identifier] == nil or params[:provider_identifier].length == 0
 			@user.errors.add(:provider_identifier, "cannot be blank")
-			@page_title = "Migrate account to OpenID"
 			render :action => 'edit_login_methods'
 			return
 		end
@@ -203,11 +197,6 @@ class UsersController < ApplicationController
 	end
 
 	def add_authenticator_complete
-		if session[:user].id != params[:id].to_i
-			render :text => "Access denied.", :status => 403
-			return
-		end
-
 		@user = User.find(params[:id])
 		if @user == nil
 			render :action => 'edit_login_methods'
@@ -215,7 +204,7 @@ class UsersController < ApplicationController
 		end
 
 		begin
-			response = self.complete(params, url_for(:controller => :login, :action => :add_authenticator_complete));
+			response = self.complete(params, url_for(:controller => :login, :action => :add_authenticator_complete, :id => @user.id));
 		rescue Exception => e
 			@message = e
 			render :action => 'edit_login_methods'
@@ -223,13 +212,13 @@ class UsersController < ApplicationController
 		end
 		sreg = OpenID::SReg::Response.from_success_response(response)
 
-		existing_ua = UserAuthenticator.find(:first, :conditions => ['provider_identifier = ? and provider = ?', response.identity_url, 'openid'])
-		user_with_this_openid = existing_ua.user unless existing_ua.nil?
+		existing_ua = UserAuthenticator.where(:provider_identifier => response.identity_url).where(:provider => 'openid')
+		user_with_this_openid = existing_ua.first.user unless existing_ua.empty?
 		if !user_with_this_openid.nil?
 			if user_with_this_openid.id == @user.id
 				@message = 'This OpenID is already set on your account.'
 				render :action => 'edit_login_methods'
-				return			
+				return
 			end
 			@message = "Provided OpenID already in use by user '#{user_with_this_openid.name}'."
 			render :action => 'edit_login_methods'
@@ -252,26 +241,11 @@ class UsersController < ApplicationController
 			render :action => 'edit_login_methods'
 			return
 		end
-		
-		#see if we can update the nickname. if it fails (because openid didn't provide it, or because it's in use) then continue using the old one
-		#old_name = user.name
-		#begin
-		#	user.name = sreg["nickname"]
-		#	user.save!
-		#rescue Exception
-			#don't want some versions of the object to have the wrong name
-		#	user.name = old_name
-		#end
-		session[:user].reload
+
 		redirect_to(:controller => "users", :action => 'edit_login_methods', :id => @user.id, :authenticator_added => true)
 	end
 
 	def remove_authenticator
-		if session[:user].id != params[:id].to_i
-			render :text => "Access denied.", :status => 403
-			return
-		end
-		
 		@user = User.find(params[:id])
 		if @user == nil
 			@message = 'OpenID remove failed - user not found.'
@@ -279,7 +253,7 @@ class UsersController < ApplicationController
 			return
 		end
 		
-		existing_ua = UserAuthenticator.find(:first, :conditions => ['provider_identifier = ? and provider = ?', params[:provider_identifier], 'openid'])
+		existing_ua = UserAuthenticator.where(:provider_identifier => params[:provider_identifier]).where(:provider => 'openid').first
 		if existing_ua.nil? or existing_ua.user_id != @user.id
 			@message = 'OpenID remove failed - could not find authenticator.'
 			render :action => 'edit_login_methods'
@@ -293,7 +267,6 @@ class UsersController < ApplicationController
 		end
 		
 		existing_ua.delete
-		session[:user].reload
 		
 		redirect_to(:controller => "users", :action => 'edit_login_methods', :id => @user.id, :authenticator_removed => true)
 	end
@@ -312,16 +285,22 @@ class UsersController < ApplicationController
 
   protected
 
-	$admin_id = 1
-
-  def secure?
-    ["edit", "update", "edit_password", "update_password", 'remove_password', 'add_authenticator', 'remove_authenticator', 'add_authenticator_complete']. include?(action_name)
-  end
-
-	def verify_user
-		if session[:user].nil? or session[:user].id != params[:id].to_i
-			render :text => "Access denied.", :status => 403
-			return
-		end
+	def public_action?
+		['show', 'show_by_forum_id', 'show_by_name', 'comments', 'comments_on', 'new', 'create', 'index', 'stats', 'comments_redirect', 'comments_on_redirect'].include?(action_name)
 	end
+
+	def admin_action?
+		return false
+	end
+
+	def verify_private_action(user_id)
+		return user_id == params[:id].to_i
+	end
+
+private
+
+	def user_params
+		params.require(:user).permit(:login, :email, :paypal_email, :show_email, :homepage, :about, :license, :name)
+	end
+
 end

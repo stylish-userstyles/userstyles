@@ -1,0 +1,7 @@
+<% if !style.long_description.nil?%><%=format_user_text(style.long_description)%><% end %>
+<% if !style.additional_info.nil?%><%=format_user_text(style.additional_info)%><% end %>
+<% if style.after_screenshot_thumbnail_path != nil %>
+	<div class="screenshot-box">
+		<img src="<%=style.after_screenshot_thumbnail_path%>" alt="">
+	</div>
+<% end %>

@@ -1,5 +1,4 @@
 class HelpController < ApplicationController
-	layout "standard_layout"
 
 	def index
 		@page_title = "Help"
@@ -48,5 +47,18 @@ class HelpController < ApplicationController
 	def bundle
 		@page_title = 'Bundled software'
 		@no_ads = true
+	end
+	
+private
+	def public_action?
+		true
+	end
+	
+	def admin_action?
+		false
+	end
+	
+	def verify_private_action(user_id)
+		false
 	end
 end

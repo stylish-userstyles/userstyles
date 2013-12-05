@@ -1,0 +1,130 @@
+<% if !session[:user_id].nil? and @user_displayed.id == session[:user_id]%>
+
+	<% if !@styles.empty? and @user_displayed.license.nil? %>
+		<div class="notice">
+			<p>You've uploaded styles but haven't specified a license for people to use them! <%= link_to "You should fix that.", :action => "edit" %></li>
+		</div>
+	<% end %>
+
+	<ul>
+		<li><%= link_to "Create new style", :action => "new", :controller => "styles" %></li>
+		<li><%= link_to "Change details", :action => "edit" %></li>
+		<li><%= link_to "Change login methods", :action => "edit_login_methods", :id => @user_displayed.id %></li>
+		<% if !@styles.empty?%>
+			<li><%=link_to("Create a widget displaying my styles", "/help/widget?listing-url=http%3A%2F%2Fuserstyles.org%2Fusers%2F#{h @user_displayed.id}&widget-title=My+User+Styles")%></li>
+			<li><%=link_to("Discussions on my styles", "http://#{FORUM_DOMAIN}/?Discussion/StyleAuthorID=#{@user_displayed.id}")%></li>
+		<% end %>
+		<li><%= link_to "Log out", :action => "index", :controller => "logout" %></li>
+	</ul>
+
+<% end %>
+
+<dl>
+<% if !@user_displayed.about.nil? %>
+	<dt>About <%=@user_displayed.name%></dt>
+	<dd><%=format_user_text(@user_displayed.about)%></dd>
+<% end %>
+<% if !@user_displayed.homepage.nil? %>
+	<dt>Homepage</dt>
+	<dd><a href="<%=@user_displayed.homepage%>" rel="nofollow"><%=@user_displayed.homepage%></a></dd>
+<% end %>
+	<% if (@user_displayed.show_email and !@user_displayed.email.nil?) or !@user_displayed.forum_id.nil? %>
+		<dt>Contact</dt>
+		<dd>
+			<% if @user_displayed.show_email and !@user_displayed.email.nil? %>
+				<a href="mailto:<%=@user_displayed.email%>"><%=@user_displayed.email%></a>
+			<% end %>
+			<% if !@user_displayed.forum_id.nil? %>
+				<%=link_to('Send private message', "http://#{FORUM_DOMAIN}/messages/add/#{h URI.escape(@user_displayed.name, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))}", {:rel => 'nofollow'})%>
+			<% end %>
+		</dd>
+	<% end %>
+<% if !@user_displayed.paypal_email.nil?%>
+	<dt>Support</dt>
+	<dd>
+		<form id="donate" class="paypal-user-donate" name="_xclick" action="https://www.paypal.com/cgi-bin/webscr" method="post">
+			<input type="hidden" name="cmd" value="_xclick">
+			<input type="hidden" name="business" value="<%=obfuscate(@user_displayed.paypal_email)%>">
+			<input type="hidden" name="item_name" value="Styles on userstyles.org">
+			Send <%=@user_displayed.name%> a donation via PayPal:
+			<input type="image" src="http://<%=STATIC_DOMAIN%>/images/donate-button.gif" alt="Donate">.
+		</form>
+	</dd>
+<% end %>
+</dl>
+
+<%if !@styles.empty?%>
+	<h2>Styles</h2>
+
+	<% if !session[:user_id].nil? and @user_displayed.id == session[:user_id] %>
+		<table class="author-styles">
+			<thead>
+				<th></th>
+				<th>Updated</th>
+				<th>Installs (week)</th>
+				<th>Installs (total)</th>
+				<th>Average rating</th>
+				<th>Most recent discussion</th>
+			</thead>
+			<tbody>
+				<% @styles.each do |style|
+					if style.obsolete?
+						warnings = []
+					else
+						warnings = style.calculate_warnings
+						warnings.map! do |warning|
+							if warning[:type] == :parse
+								"This style contains parsing errors - \"#{h warning[:message]}\". See <a href=\"/styles/validate/#{style.id}\">W3 validator results</a> or <a href=\"http://forum.userstyles.org/discussion/34614/new-css-parservalidator\">ask in the forum</a> if you need help."
+							else
+								warning[:message]
+							end
+						end
+					end %>
+					<tr>
+						<td <%if !warnings.empty?%>rowspan="2"<%end%> valign="top" <%if style.obsolete?%> class="obsolete"<%end%>><a href="<%=style.pretty_url%>"><%=style.name%></a></td>
+						<td class="date-value"><%=style.updated.strftime("%b %e, %Y")%></td>
+						<td class="numeric-value"><%=number_with_delimiter(style.weekly_install_count)%></td>
+						<td class="numeric-value"><%=number_with_delimiter(style.total_install_count)%></td>
+						<td class="image-value">
+							<% if style.rating.nil? %>
+								-
+							<% elsif style.rating < 1.5 %>
+								<img class="bad-average-rating" src="http://<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
+							<% elsif style.rating < 2.5 %>
+								<img class="ok-average-rating" src="http://<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
+							<% else %>
+								<img class="good-average-rating" src="http://<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
+							<% end %>
+						</td>
+						<td class="date-value">
+							<% if @style_forum_stats[style.id].nil? %>
+								-
+							<% else %>
+								<%=@style_forum_stats[style.id].strftime('%b %e, %Y')%>
+							<% end %>
+						</td>
+						<td>
+							<%=link_to "Edit", :controller => 'styles', :action => "edit", :id => style.id%>
+							<%=link_to style.obsolete? ? "Undelete" : "Delete", :controller => 'styles', :action => "delete", :id => style.id%>
+							<%=link_to "Stats", :controller => 'styles', :action => "stats", :id => style.id%>
+							<% if !warnings.empty? %>
+								<img src="http://<%=STATIC_DOMAIN%>/images/warning.png" class="style-warning-icon" alt="Warning" height="15" width="15" onclick="document.getElementById('style-warnings-<%=style.id%>').style.display = 'table-row'">
+							<% end %>
+						</td>
+					</tr>
+					<%if !warnings.empty?%>
+						<tr id="style-warnings-<%=style.id%>" class="style-warnings">
+							<td colspan="6">
+								<div class="style-warning"><%=warnings.join('<br>')%></div>
+							</td>
+						<tr>
+					<% end %>
+				<% end %>
+			</tbody>
+		</table>
+	<% else %>
+		<%= render :partial => 'styles/listing', :collection => @styles, :as => :style%>
+		<%= will_paginate @styles %>
+	<% end %>
+
+<% end %>
