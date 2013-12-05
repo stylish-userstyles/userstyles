@@ -15,7 +15,7 @@ class IndexController < ApplicationController
 		@no_ads = true
 		@no_bots = true
 		logger.warn "Request for #{request.original_url} resulted in 404."
-		render :status => '404', :layout => true
+		render :status => '404', :layout => true, :formats => [:html]
 	end
 
 	def firstrun
