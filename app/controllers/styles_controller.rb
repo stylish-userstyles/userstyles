@@ -293,11 +293,11 @@ class StylesController < ApplicationController
 		begin 
 			@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true, :select => 'weight() myweight'
 			@no_ads = @styles.empty?
-		#rescue ThinkingSphinx::SphinxError => e
+		rescue ThinkingSphinx::SyntaxError => e
 			# back to the main listing, unless we're already there
-		#	raise e if params[:category].nil? and params[:search_terms].nil? and params[:page].nil? and params[:order].nil? and params[:sort].nil? and params[:sort_direction].nil?
-		#	redirect_to :controller => 'styles', :action => 'browse', :category => nil, :search_terms => nil
-		#	return
+			raise e if params[:category].nil? and params[:search_terms].nil? and params[:page].nil? and params[:order].nil? and params[:sort].nil? and params[:sort_direction].nil?
+			redirect_to :controller => 'styles', :action => 'browse', :category => nil, :search_terms => nil
+			return
 		rescue Riddle::OutOfBoundsError
 			# same url, minus the page param
 			redirect_to :controller => 'styles', :action => 'browse', :search_terms => params[:search_terms], :category => params[:category], :format => params[:format], :sort => params[:sort], :sort_direction => params[:sort_direction]
