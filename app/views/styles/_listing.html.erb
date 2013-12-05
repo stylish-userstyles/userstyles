@@ -32,7 +32,7 @@ cache_unless(show_obsolete || by_current_user, style) do
 		</div>
 		<div class="style-brief-text">
 			<header>
-				<a href="<%=h style.pretty_url%>" <%=style.obsolete? ? 'rel="nofollow"' : ''%>><%= h style.short_description %></a>
+				<a href="<%=style.pretty_url%>" <%=style.obsolete? ? 'rel="nofollow"' : ''%>><%=style.short_description %></a>
 			</header>
 			
 			<% if by_current_user %>

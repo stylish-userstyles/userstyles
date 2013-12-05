@@ -34,7 +34,7 @@ module StylesHelper
 
 	def format_user_text_plain(text)
 		# run it through the normal formatter then strip the tags. the normal formatter will modify the text
-		return Sanitize.clean(format_user_text(text))
+		return Sanitize.clean(format_user_text(text)).html_safe
 	end
 
 	def format_user_text(text)
