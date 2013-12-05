@@ -83,10 +83,10 @@
 							<div id="show-advanced-search" style="" onclick="this.parentNode.className+=' advanced-search-active';document.getElementById('search-submit').name = 'as'">Advanced</div>
 							<div id="advanced-search">
 								<select name="category" id="category-select">
-									<option value="all"<%=@bc_category=='all' ? ' selected="selected"' : ''%>>All</option>
-									<option value="app"<%=@bc_category=='app' ? ' selected="selected"' : ''%>>App</option>
-									<option value="global"<%=@bc_category=='global' ? ' selected="selected"' : ''%>>Global</option>
-									<option value="site"<%=(@bc_category=='site' and @bc_subcategory.nil?) ? ' selected="selected"' : ''%>>Site</option>
+									<option value="all"<%if @bc_category=='all'%> selected="selected"<%end%>>All</option>
+									<option value="app"<%if @bc_category=='app'%> selected="selected"<%end%>>App</option>
+									<option value="global"<%if @bc_category=='global'%> selected="selected"<%end%>>Global</option>
+									<option value="site"<%if @bc_category=='site' and @bc_subcategory.nil?%> selected="selected"<%end%>>Site</option>
 									<% if !@bc_subcategory.nil? %>
 										<option value="<%=@bc_subcategory%>" selected="selected"><%=@bc_subcategory.capitalize%></option>
 									<% end %>
@@ -97,16 +97,16 @@
 								end %>
 								<select name="sort" id="sort-select">
 									<% $sorts_map.keys.each do |sort| %>
-										<option<%=@chosen_sort == sort ? ' selected="selected"' : ''%> value="<%=sort%>"><%=sort.gsub('_', ' ')%></option>
+										<option<%if @chosen_sort == sort%> selected="selected"<%end%> value="<%=sort%>"><%=sort.gsub('_', ' ')%></option>
 									<% end %>
 								</select><select name="sort_direction">
-									<option value="asc"<%=@direction == 'asc' ? ' selected="selected"' : ''%>>asc</option>
-									<option value="desc"<%=@direction == 'desc' ? ' selected="selected"' : ''%>>desc</option>
+									<option value="asc"<%if @direction == 'asc'%> selected="selected"<%end%>>asc</option>
+									<option value="desc"<%if @direction == 'desc'%> selected="selected"<%end%>>desc</option>
 								</select>, showing
 								<select name="per_page" id="per-page-select">
-									<option<%=params[:per_page].to_i == 10 ? ' selected="selected"' : ''%>>10</option>
-									<option<%=params[:per_page].to_i == 25 ? ' selected="selected"' : ''%>>25</option>
-									<option<%=params[:per_page].to_i == 50 ? ' selected="selected"' : ''%>>50</option>
+									<option<%if params[:per_page].to_i == 10%> selected="selected"<%end%>>10</option>
+									<option<%if params[:per_page].to_i == 25%> selected="selected"<%end%>>25</option>
+									<option<%if params[:per_page].to_i == 50%> selected="selected"<%end%>>50</option>
 									<% if ![0,10,25,50].include?(params[:per_page].to_i) %>
 										<option selected="selected"><%=params[:per_page].to_i%></option>
 									<% end %>
@@ -115,6 +115,7 @@
 									<button onclick="this.parentNode.parentNode.parentNode.className='';document.getElementById('search-submit').name = '';return false">Back</button>
 									<input type="submit" name="as" value="Search">
 								</div>
+							</div>
 						<% end %>
 					</li>
 					<li><%=link_to_unless_current('Browse', :action => "index", :controller => "categories") %></li>
