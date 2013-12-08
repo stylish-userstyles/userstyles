@@ -47,7 +47,7 @@ class UsersController < ApplicationController
 	end
 
 	def show_by_forum_id
-		user = User.get_user_for_forum_id(params[:id])
+		user = User.get_user_id_for_forum_id(params[:id])
 		if user.nil?
 			render :nothing => true, :status => 404
 		else

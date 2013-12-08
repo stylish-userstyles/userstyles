@@ -226,18 +226,21 @@ class LoginController < ApplicationController
 
 	def lost_password_start
 		@page_title = 'Lost password recovery'
-		user = User.where(:email => params[:email]).first
-		if !user.nil?
+		email = params[:email].strip
+		return if email.empty?
+		# support multiple accounts the same e-mail - reset them all!
+		users = User.where(:email => params[:email])
+		return if users.empty?
+		users.each do |user|
 			user_was_valid = user.valid?
 			# login might be nil if they started with openid
 			user.login = user.name if user.login.nil?
 			user.create_lost_password_key
-			if user.save(:validate => user_was_valid)
-				LostPasswordMailer.password_reset(user).deliver
-			else
+			if !user.save(:validate => user_was_valid)
 				logger.error 'Couldn\'t save #{user.id} on lost password.'
 			end
 		end
+		LostPasswordMailer.password_reset(users).deliver
 	end
 
 	def lost_password_done

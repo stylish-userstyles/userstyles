@@ -5,14 +5,13 @@ class LogoutController < ApplicationController
 			user = User.find(session[:user_id])
 			if !user.token.nil?
 				user.token = nil
-				user.save!
+				user.save(:validate => false)
 			end
 		end
 		reset_session
 		cookies.delete(:login)
 		cookies.delete(:session_id)
-		cookies.delete(:user_id)
-		redirect_to "/"
+		redirect_to '/'
 	end
 	
 private

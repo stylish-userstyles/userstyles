@@ -10,3 +10,4 @@ public/auto_style_screenshots/
 public/style_screenshots
 public/style_screenshot_thumbnails
 public/auto_style_screenshots
+config/initializers/password_salt.rb
