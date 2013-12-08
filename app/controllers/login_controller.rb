@@ -226,8 +226,8 @@ class LoginController < ApplicationController
 
 	def lost_password_start
 		@page_title = 'Lost password recovery'
-		email = params[:email].strip
-		return if email.empty?
+		email = params[:email].nil? ? nil :params[:email].strip
+		return if email.nil? or email.empty?
 		# support multiple accounts the same e-mail - reset them all!
 		users = User.where(:email => params[:email])
 		return if users.empty?
