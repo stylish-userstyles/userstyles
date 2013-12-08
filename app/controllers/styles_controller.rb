@@ -16,10 +16,6 @@ class StylesController < ApplicationController
 	def show
 		respond_to do |format|
 			format.html {
-				if request.remote_ip == '74.117.177.181'
-					redirect_to '/getstyles/0.html', :status => 301
-					return
-				end
 				begin
 					@style = Rails.cache.fetch "styles/show/#{params[:id]}" do
 						Style.includes([:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason, {:discussions => {:original_forum_poster => :users}}]).find(params[:id])
@@ -81,10 +77,6 @@ class StylesController < ApplicationController
 				end
 			}
 			format.css {
-				if request.remote_ip == '74.117.177.181'
-					redirect_to '/getstyles/0.css', :status => 301
-					return
-				end
 				begin
 					style = Style.includes([:style_code, {:style_options => :style_option_values}]).find(params[:id])
 				rescue ActiveRecord::RecordNotFound
@@ -102,10 +94,6 @@ class StylesController < ApplicationController
 				redirect_to "http://#{UPDATE_DOMAIN}/#{params[:id]}.md5", :status => 301
 			}
 			format.json {
-				if request.remote_ip == '74.117.177.181'
-					redirect_to '/getstyles/0.json', :status => 301
-					return
-				end
 				begin
 					style = Style.includes([:user, :style_code, {:style_options => :style_option_values}]).find(params[:id])
 				rescue ActiveRecord::RecordNotFound
