@@ -440,14 +440,14 @@ Replace = "$STOP()"
 		return ''
 	end
 
-	def chrome_json(options)
+	def chrome_json(passed_options)
 		o = {:sections => []}
 		global_sections = []
 		
-		if options.empty?
+		if style_options.empty?
 			sections = style_sections
 		else
-			code = optionned_code(options)
+			code = optionned_code(passed_options)
 			return nil if code.nil?
 			# skip the real parser if this is huge - the real parser leaks memory!
 			if code.length > 100000
