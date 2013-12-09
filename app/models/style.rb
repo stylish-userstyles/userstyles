@@ -844,7 +844,7 @@ Replace = "$STOP()"
 	end
 
 	def cdn_buster_param
-	 "?r=#{self.updated.to_i}"
+	 "?r=#{self.updated_at.to_i}"
 	end
 
 	def after_screenshot_path
