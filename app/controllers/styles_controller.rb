@@ -815,6 +815,8 @@ private
 		end
 		#existing screenshots
 		@style.screenshots.each do |screenshot|
+			# don't validate if they're deleting it
+			next if params["remove_screenshot_#{screenshot.id}"]
 			screenshot.description = params["screenshot_description_#{screenshot.id}"]
 			non_ar_errors << ['screenshot', 'is missing a description'] if screenshot.description.nil? or screenshot.description.empty?
 			data = params["screenshot_#{screenshot.id}"]
