@@ -132,11 +132,7 @@ class Style < ActiveRecord::Base
 			# non-chrome bindings
 			binding_match = /-moz-binding\s*:\s*url\s*\(\s*[\'\"]?([^\'\"]+)[\'\"]?\s*\)/
 			c.scan(binding_match).each do |url|
-				if !begins_with?(url[0], /chrome:/)
-					if !AllowedBinding.is_allowed?(url[0])
-						record.errors.add attr, "cannot contain non-approved, non-chrome protocol bindings (mail jason.barnabe@gmail.com to get a new binding approved) - #{url[0]}"
-					end
-				end
+				record.errors.add attr, "cannot contain non-chrome protocol bindings - \"#{url[0]}\"" if !begins_with?(url[0], /chrome:/)
 			end
 		end
 		
@@ -1052,7 +1048,7 @@ Replace = "$STOP()"
 		docs = get_docs_or_nil
 		#logger.debug "calculate_moz_docs 2"
 		# fall back on old method if this failed
-		return style_code.old_style_rules.map{|mdr| [mdr.rule_type, mdr.value]} if docs.nil?
+		return style_code.old_style_rules if docs.nil?
 		#logger.debug "calculate_moz_docs 4"
 		stuff = []
 		docs.each do |doc|

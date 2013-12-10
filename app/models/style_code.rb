@@ -105,8 +105,8 @@ class StyleCode < ActiveRecord::Base
 					ss = StyleSection.new({:global => false, :ordinal => ordinal, :css => part_code})
 					ordinal += 1
 					StyleCode.get_old_style_rules(clean_code[rule_start..first_bracket]).each do |mdr|
-						next if !['domain', 'url', 'url-prefix', 'regexp'].include?(mdr.rule_type)
-						ss.style_section_rules << StyleSectionRule.new(:rule_type => mdr.rule_type, :rule_value => mdr.value)
+						next if !['domain', 'url', 'url-prefix', 'regexp'].include?(mdr[0])
+						ss.style_section_rules << StyleSectionRule.new(:rule_type => mdr[0], :rule_value => mdr[1])
 					end
 					if !ss.style_section_rules.empty?
 						sections << ss
@@ -188,16 +188,11 @@ private
 			opening_bracket = moz_doc_value.index("(")
 			closing_bracket = moz_doc_value.rindex(")")
 			if opening_bracket != nil and closing_bracket != nil
-				moz_doc_rule = MozDocRule.new
-				#moz_doc_rule.style_id = style.id
-				moz_doc_rule.rule_type = moz_doc_value[0..opening_bracket - 1].strip()
-				moz_doc_rule.value = moz_doc_value[opening_bracket + 1..closing_bracket - 1].strip().delete("\"'")
-				if moz_doc_rule.rule_type == "domain" and /^[\w\d-]+(\.[\w\d-]+)*$/.match(moz_doc_rule.value).nil?
-					moz_doc_rule.errors.add('moz-document domain', 'must be a valid host name (no protocol, no wildcards)');
-				end
+				rule_type = moz_doc_value[0..opening_bracket - 1].strip()
+				rule_value = moz_doc_value[opening_bracket + 1..closing_bracket - 1].strip().delete("\"'")
 				# unescape the css
-				moz_doc_rule.value.gsub!('\\\\', '\\') if moz_doc_rule.rule_type == 'regexp'
-				site_rules[site_rules.length] = moz_doc_rule
+				rule_value.gsub!('\\\\', '\\') if rule_type == 'regexp'
+				site_rules[site_rules.length] = [rule_type, rule_value]
 			end
 			
 		end

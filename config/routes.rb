@@ -72,7 +72,6 @@ Userstyles::Application.routes.draw do
   get 'style/raw/:id' => 'styles#show', :format => 'css'
   get 'styles/raw/:id' => 'styles#show', :format => 'css'
 
-  resources :allowed_bindings
   get 'stylish' => 'index#index'
   get 'firstrun' => 'index#firstrun'
   get 'contact' => 'index#contact'
