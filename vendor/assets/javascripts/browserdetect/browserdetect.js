@@ -26,6 +26,13 @@ var BrowserDetect = {
 		return parseFloat(dataString.substring(index+this.versionSearchString.length+1));
 	},
 	dataBrowser: [
+		// added by me!
+		{
+			string: navigator.userAgent,
+			subString: "OPR",
+			versionSearch: "OPR/",
+			identity: "Opera"
+		},
 		{
 			string: navigator.userAgent,
 			subString: "Chrome",
@@ -115,4 +122,3 @@ var BrowserDetect = {
 
 };
 BrowserDetect.init();
-

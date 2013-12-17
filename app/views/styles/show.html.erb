@@ -26,7 +26,7 @@
 
 		if !after_thumb.nil? and @style.obsolete == 0 %>
 			<figure id="main-screenshot" class="screenshot-thumbnail">
-				<a href="<%=after%>" rel="lightbox[screenshot] nofollow" title="With the style applied"><img src="<%=after_thumb%>" class="screenshot" alt=""></a>
+				<a href="<%=after%>" data-lightbox="screenshot" rel="nofollow" title="With the style applied"><img src="<%=after_thumb%>" class="screenshot" alt=""></a>
 			</figure>
 		<% end 
 		has_more_screenshots = @style.obsolete == 0 && @style.screenshots.size > 0
@@ -35,7 +35,7 @@
 			<div id="more-screenshots">
 				<span>More screenshots:</span>
 				<% @style.screenshots.each do |screenshot| %>
-					<a href="<%=screenshot.full_path%>" rel="lightbox[screenshot] nofollow" title="<%=screenshot.description%>"><%=screenshot.description%></a><% if @style.screenshots.last != screenshot %>, <% end
+					<a href="<%=screenshot.full_path%>" data-lightbox="screenshot" rel="nofollow" title="<%=screenshot.description%>"><%=screenshot.description%></a><% if @style.screenshots.last != screenshot %>, <% end
 				end %>
 			</div>
 		<% end 
@@ -61,12 +61,12 @@
 					<% if option.option_type == 'color' %>
 						<li>
 							<label for="option-<%=option.id%>"><%=option.display_name%></label>
-							<input id="option-<%=option.id%>" name="option-<%=option.id%>" type="text" class="color {hash:true,required:true}" onchange="hideCode();updateNonStylishInstallLinks();" value="<%=option.style_option_values[0].value%>" size="7" maxlength="7">
+							<input id="option-<%=option.id%>" name="option-<%=option.id%>" type="text" class="style-option-value color {hash:true,required:true}" value="<%=option.style_option_values[0].value%>" size="7" maxlength="7">
 						</li>
 					<% elsif option.option_type == 'dropdown' %>
 						<li>
 							<label for="option-<%=option.id%>"><%=option.display_name%></label>
-							<select id="option-<%=option.id%>" name="option-<%=option.id%>" onchange="hideCode();updateNonStylishInstallLinks();">
+							<select id="option-<%=option.id%>" name="option-<%=option.id%>" class="style-option-value">
 								<% option.style_option_values.each do |value|%>
 									<option value="<%=value.id%>" <%if value.default%>selected<%end%>><%=value.display_name%></option>
 								<% end %>
@@ -77,10 +77,10 @@
 							<label><%=option.display_name%></label>
 							<ul>
 								<% option.style_option_values.each do |value|%>
-									<li><input type="radio" id="option-value-<%=value.id%>" name="option-<%=option.id%>" onchange="hideCode();updateNonStylishInstallLinks();" <%if value.default%>checked<%end%> value="<%=value.value%>"> <label for="option-value-<%=h value.id%>"><%=value.display_name%></label> <a href="<%=value.value%>" rel="lightbox[option-<%=option.id%>] nofollow" title="<%=value.display_name%>">See it</a></li>
+									<li><input type="radio" id="option-value-<%=value.id%>" name="option-<%=option.id%>" class="style-option-value" <%if value.default%>checked<%end%> value="<%=value.value%>"> <label for="option-value-<%=h value.id%>"><%=value.display_name%></label> <a href="<%=value.value%>" rel="lightbox[option-<%=option.id%>] nofollow" title="<%=value.display_name%>">See it</a></li>
 								<% end %>
-								<li><input type="radio" id="option-value-url-choice-<%=h option.id%>" name="option-<%=h option.id%>" onchange="hideCode();updateNonStylishInstallLinks();" value="user-url" <%if option.style_option_values.empty?%>checked<%end%>> <label for="option-value-url-choice-<%=h option.id%>">Provide your own</label> <input id="option-user-url-<%=option.id%>" type="url" placeholder="URL" onchange="document.getElementById('option-value-url-choice-<%=option.id%>').checked = true;hideCode();updateNonStylishInstallLinks();"></li>
-								<li class="upload-control"><input type="radio" id="option-value-upload-choice-<%=h option.id%>" name="option-<%=option.id%>" onchange="hideCode();updateNonStylishInstallLinks();" value="user-upload"> <label for="option-value-upload-choice-<%=h option.id%>">Upload your own</label> <input id="option-user-upload-<%=option.id%>" type="file" accept="image/*" onchange="loadUpload(this);document.getElementById('option-value-upload-choice-<%=h option.id%>').checked = true;hideCode();updateNonStylishInstallLinks();"></li>
+								<li><input type="radio" id="option-value-url-choice-<%=h option.id%>" name="option-<%=h option.id%>" class="style-option-value" value="user-url" <%if option.style_option_values.empty?%>checked<%end%>> <label for="option-value-url-choice-<%=h option.id%>">Provide your own</label> <input id="option-user-url-<%=option.id%>" class="option-user-url" type="url" placeholder="URL"></li>
+								<li class="upload-control"><input type="radio" id="option-value-upload-choice-<%=h option.id%>" name="option-<%=option.id%>" class="style-option-value" value="user-upload"> <label for="option-value-upload-choice-<%=h option.id%>">Upload your own</label> <input id="option-user-upload-<%=option.id%>" class="option-user-upload" type="file" accept="image/*"></li>
 							</ul>
 						</li>
 					<% end %>
@@ -100,8 +100,6 @@
 			</div>
 		<% end %>
 	</div>
-
-	<script type="text/javascript" src="http://<%=STATIC_DOMAIN%>/javascripts/script.js?cache=30"></script>
 
 	<div id="hidden-meta">
 		<div id="stylish-description" rel="dct:title"><%=@style.short_description%></div>
@@ -270,11 +268,11 @@
 	</div>
 
 	<% if @style.discussions.empty? %>
-		<p id="no-discussions">No discussions posted yet. <a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" onclick="addDiscussion();return false;" rel="nofollow">Be the first to ask a question or review this style.</a></p>
+		<p id="no-discussions">No discussions posted yet. <a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Be the first to ask a question or review this style.</a></p>
 	<% elsif @style.recent_discussions.empty? %>
-		<p id="no-discussions">No discussions posted in the last year. <a href="http://<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See older discussions.</a> <a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" onclick="addDiscussion();return false;" rel="nofollow">Ask a new question or add a review for this style.</a></p>
+		<p id="no-discussions">No discussions posted in the last year. <a href="http://<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See older discussions.</a> <a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Ask a new question or add a review for this style.</a></p>
 	<% else %>
-		<p id="no-discussions"><a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" onclick="addDiscussion();return false;" rel="nofollow">Ask a new question or add a review for this style.</a></p>
+		<p id="no-discussions"><a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Ask a new question or add a review for this style.</a></p>
 		<ul id="discussions">
 			<% @style.recent_discussions.reverse.each do |discussion|
 				rating_class = nil

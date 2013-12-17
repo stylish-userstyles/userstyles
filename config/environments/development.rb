@@ -20,6 +20,10 @@ Userstyles::Application.configure do
   config.action_dispatch.best_standards_support = :builtin
   
   config.eager_load = true
+  
+  config.assets.compress = false
+  config.assets.debug = true
+  config.assets.prefix = "/dev-assets"
 
   # override domain set in config/initializers/session_store.rb
   config.session_store :cookie_store, :key => '_session_id', :domain => '.userstyles.local'

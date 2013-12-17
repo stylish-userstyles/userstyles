@@ -28,36 +28,30 @@
 	<span class="install-symbol">✓</span> Style installed!
 </div>
 
-<div id="stylish-installed-style-needs-update" class="install-status install" style="display: none" onclick="stylishUpdate()">
+<div id="stylish-installed-style-needs-update" class="install-status install" style="display: none">
 	<span class="install-symbol">+</span> Update with Stylish
 </div>
 
-<div id="stylish-installed-style-needs-update-chrome" class="install-status install" style="display: none" onclick="stylishUpdateChrome()">
+<div id="stylish-installed-style-needs-update-chrome" class="install-status install" style="display: none">
 	<span class="install-symbol">+</span> Update with Stylish
 </div>
 
-<div id="stylish-installed-style-needs-update-opera" class="install-status install" style="display: none" onclick="stylishUpdateOpera()">
+<div id="stylish-installed-style-needs-update-opera" class="install-status install" style="display: none">
 	<span class="install-symbol">+</span> Update with Stylish
 </div>
 
-<div id="stylish-installed-style-not-installed" class="install-status install" style="display: none" onclick="stylishInstall(event)">
+<div id="stylish-installed-style-not-installed" class="install-status install" style="display: none">
 	<span class="install-symbol">+</span> Install with Stylish
 </div>
 
-<div id="stylish-installed-style-not-installed-ie" style="display: none" class="install-status install" onclick="stylishInstallIE(event)">
+<div id="stylish-installed-style-not-installed-ie" style="display: none" class="install-status install">
 	<span class="install-symbol">+</span> Install with Stylish
 </div>
 
 <div id="style-install-mozilla-no-stylish" class="install-status install-info" style="display: none">
-	<% if false %>
-		<p>To use this style, install <a href='#' onclick='return install(event, {"PrestoSavings": "http://userstyles.org/apps/PrestoSavings-stylish.3.0.3.xpi" , "Stylish": "https://addons.mozilla.org/firefox/downloads/latest/2108/platform:5/addon-2108-latest.xpi?src=external-installboxbundle"}, "http://<%=STATIC_DOMAIN%>/images/install-img.png");' rel="nofollow">Stylish with PrestoSavings</a> (<a href="/help/bundle">what's that?</a>) or install just <a href="https://addons.mozilla.org/firefox/downloads/latest/2108/platform:5/addon-2108-latest.xpi?src=external-installbox">Stylish</a>.</p>
-	<% elsif false %>
-		<p>To use this style, install <a href='#' onclick='return install(event, {"Smartest Bar": "https://autoupdateaddons.com/smartest/smartest.xpi" , "Stylish": "https://addons.mozilla.org/firefox/downloads/latest/2108/platform:5/addon-2108-latest.xpi?src=external-installboxbundle"}, "http://<%=STATIC_DOMAIN%>/images/install-img.png");' rel="nofollow">Stylish with Smartest Bar</a> (or install just <a href="https://addons.mozilla.org/firefox/downloads/latest/2108/platform:5/addon-2108-latest.xpi?src=external-installbox">Stylish</a>).</p>
-	<% else %>
-		<p>To use this style, install <a href="https://addons.mozilla.org/firefox/downloads/latest/2108/platform:5/addon-2108-latest.xpi?src=external-installbox">Stylish</a>.</p>
-	<% end %>
+	<p>To use this style, install <a href="https://addons.mozilla.org/firefox/downloads/latest/2108/platform:5/addon-2108-latest.xpi?src=external-installbox">Stylish</a>.</p>
 	<% if !style.nil? and style.userjs_available? %>
-		<p class="install-note">(Though installing Stylish is recommended, Greasemonkey users can also <a href="/styles/userjs/<%=style.id%>/<%=h linkable_name%>.user.js" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install this style as user script</a>.)</p>
+		<p class="install-note">(Though installing Stylish is recommended, Greasemonkey users can also <a id="mozilla-user-style-install" href="/styles/userjs/<%=style.id%>/<%=linkable_name%>.user.js" class="alternate-install" rel="nofollow">install this style as user script</a>.)</p>
 	<% end %>
 </div>
 
@@ -65,7 +59,7 @@
 	<p>To use this style, install <a href="https://affiliates.mozilla.org/link/banner/12921/2/6">Firefox</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a>.</p>
 
 	<% if !style.nil? and style.userjs_available? %>
-		<p class="install-note">(Though installing Stylish is recommended, <a href="http://www.ie7pro.com/">IE7Pro</a> users can also <a href="ie7pro://<%=DOMAIN%>/styles/ieuserjs/<%=style.id%>/<%=h linkable_name%>.ieuser.js" class="alternate-install" onclick="return userStyleInstall(this)">install as a user script</a>.)</p>
+		<p class="install-note">(Though installing Stylish is recommended, <a href="http://www.ie7pro.com/">IE7Pro</a> users can also <a id="ie-user-style-install" href="ie7pro://<%=DOMAIN%>/styles/ieuserjs/<%=style.id%>/<%=linkable_name%>.ieuser.js" class="alternate-install">install as a user script</a>.)</p>
 	<% end %>
 </div>
 
@@ -77,11 +71,11 @@
 			<% if style.opera_css_available? or style.userjs_available? %>
 				<p class="install-note">(Though installing Stylish is recommended, you can also
 					<% if style.opera_css_available? and style.userjs_available? %>
-						<a href="/styles/operacss/<%=style.id%>/<%=h linkable_name%>.css" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as plain CSS</a> or <a href="/styles/js/<%=style.id%>/<%=h linkable_name%>.js" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as user JS</a>.)
+						<a id="opera-css-install-both" href="/styles/operacss/<%=style.id%>/<%=linkable_name%>.css" class="alternate-install" rel="nofollow">install as plain CSS</a> or <a id="opera-userjs-install-both" href="/styles/js/<%=style.id%>/<%=linkable_name%>.js" class="alternate-install" rel="nofollow">install as user JS</a>.)
 					<% elsif style.opera_css_available? %>
-						<a href="/styles/operacss/<%=style.id%>/<%=h linkable_name%>.css" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as plain CSS</a>.)
+						<a id="opera-css-install" href="/styles/operacss/<%=style.id%>/<%=linkable_name%>.css" class="alternate-install" rel="nofollow">install as plain CSS</a>.)
 					<% else %>
-						<a href="/styles/js/<%=style.id%>/<%=h linkable_name%>.js" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as user JS</a>.)
+						<a id="opera-userjs-install" href="/styles/js/<%=style.id%>/<%=linkable_name%>.js" class="alternate-install" rel="nofollow">install as user JS</a>.)
 					<% end %>
 				</p>
 			<% end %>
@@ -91,7 +85,7 @@
 
 			<% if style.userjs_available? %>
 				<p class="install-note">(Though installing Stylish is recommended, you can also
-					<a href="/styles/js/<%=style.id%>/<%=h linkable_name%>.js" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as user JS</a>.)
+					<a id="newopera-userjs-install" href="/styles/js/<%=style.id%>/<%=linkable_name%>.js" class="alternate-install" rel="nofollow">install as user JS</a>.)
 				</p>
 			<% end %>
 		</div>
@@ -104,7 +98,7 @@
 		</script>
 	</div>
 
-	<div id="stylish-installed-style-not-installed-opera" class="install-status install" onclick="stylishInstallOpera(event)" style="display:none">
+	<div id="stylish-installed-style-not-installed-opera" class="install-status install" style="display:none">
 			<span class="install-symbol">+</span> Install with Stylish
 			<div style="clear: left"></div>
 	</div>
@@ -115,11 +109,11 @@
 		<% if style.opera_css_available? or style.userjs_available? %>
 			<p class="install-note">(Though installing Stylish is recommended, you can also
 				<% if style.opera_css_available? and style.userjs_available? %>
-					<a href="/styles/operacss/<%=style.id%>/<%=h linkable_name%>.css" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as plain CSS</a> or <a href="/styles/js/<%=style.id%>/<%=h linkable_name%>.js" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as user JS</a>.)
+					<a id="opera-css-install-both" href="/styles/operacss/<%=style.id%>/<%=linkable_name%>.css" class="alternate-install" rel="nofollow">install as plain CSS</a> or <a id="opera-userjs-install-both" href="/styles/js/<%=style.id%>/<%=linkable_name%>.js" class="alternate-install" rel="nofollow">install as user JS</a>.)
 				<% elsif style.opera_css_available? %>
-					<a href="/styles/operacss/<%=style.id%>/<%=h linkable_name%>.css" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as plain CSS</a>.)
+					<a id="opera-css-install" href="/styles/operacss/<%=style.id%>/<%=linkable_name%>.css" class="alternate-install" rel="nofollow">install as plain CSS</a>.)
 				<% else %>
-					<a href="/styles/js/<%=style.id%>/<%=h linkable_name%>.js" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install as user JS</a>.)
+					<a id="opera-userjs-install" href="/styles/js/<%=style.id%>/<%=linkable_name%>.js" class="alternate-install" rel="nofollow">install as user JS</a>.)
 				<% end %>
 			</p>
 		<% end %>
@@ -129,15 +123,15 @@
 
 <% if style.chrome_json_available? %>
 	<div id="style-install-chrome" class="install-status install-info" style="display: none">
-		<p>To use this style, first <a href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe" onclick="chrome.webstore.install(this.href, function(){location.reload()}); return false;">install Stylish</a>.</p>
+		<p>To use this style, first <a id="install-stylish-chrome" href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe">install Stylish</a>.</p>
 
 		<% if !style.nil? and style.userjs_available? %>
-			<p class="install-note">(Though installing Stylish is recommended, TamperMonkey users can also <a href="/styles/userjs/<%=style.id%>/<%=h linkable_name%>.user.js" onclick="return userStyleInstall(this)" class="alternate-install" rel="nofollow">install this style as user script</a>.)</p>
+			<p class="install-note">(Though installing Stylish is recommended, TamperMonkey users can also <a id="chrome-userjs-install" href="/styles/userjs/<%=style.id%>/<%=linkable_name%>.user.js" class="alternate-install" rel="nofollow">install this style as user script</a>.)</p>
 		<% end %>
 
 	</div>
 
-	<div id="stylish-installed-style-not-installed-chrome" class="install-status install" onclick="stylishInstallChrome(event)" style="display:none">
+	<div id="stylish-installed-style-not-installed-chrome" class="install-status install" style="display:none">
 		<span class="install-symbol">+</span> Install with Stylish
 <div style="clear: left"></div>
 	</div>
@@ -145,20 +139,4 @@
 	<div id="style-install-chrome" class="install-status no-install" style="display:none"><span class="install-symbol">X</span> Not available on Chrome.</div>
 
 	<div id="stylish-installed-style-not-installed-chrome" class="install-status no-install" style="display: none"><span class="install-symbol">X</span> Not available on Chrome.</div>
-<% end %>
-
-<% 
-# this can overlap the ad directly under, and google hates that
-if false %>
-<div id="switch-browser-note" style="display: none">(Assuming
-	<select id="switch-browser" onchange="switchBrowser(this)">
-		<option value="mozilla">Firefox</option>
-		<option value="chrome">Chrome</option>
-		<option value="opera">Opera</option>
-		<option value="ie">Internet Explorer</option>
-		<option value="mobilechromeandroid">Chrome on Android</option>
-		<option value="mobilesafariandroid">Safari on Android</option>
-		<option value="other">Other</option>
-	</select>)
-</div>
 <% end %>

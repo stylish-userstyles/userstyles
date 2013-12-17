@@ -1,6 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
+require 'sprockets/railtie'
 
 # If you have a Gemfile, require the gems listed there, including any gems
 # you've limited to :test, :development, or :production.
@@ -39,9 +40,15 @@ module Userstyles
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
 
-    # Not sure if assets are useful/desirable considering I have a CDN, so disabled for now.
-    config.assets.enabled = false
-
     config.active_record.schema_format = :sql
+
+    config.assets.enabled = true
+    config.assets.version = '1.0'
+    config.assets.initialize_on_precompile = false
+    
+    config.generators do |g|
+      g.assets false
+    end
+
   end
 end
