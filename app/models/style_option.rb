@@ -2,7 +2,12 @@ class StyleOption < ActiveRecord::Base
 	belongs_to :style, :touch => true
 	has_many :style_option_values, -> { order(:ordinal) }, :dependent => :destroy
 
-	validates_presence_of :name, :display_name
+	alias_attribute :label, :display_name
+	alias_attribute :placeholder, :name
+
+	validates_presence_of :placeholder, :label
+	validates_length_of :placeholder, :maximum => 20
+	validates_length_of :label, :maximum => 100
 	validates_length_of :style_option_values, :minimum =>2, :message => 'must have at least 2 options.', :if => Proc.new { |option| option.option_type == "dropdown" }
 	validates_length_of :style_option_values, :minimum =>1, :message => 'must have a default option.', :if => Proc.new { |option| option.option_type == "color" }
 	validates_inclusion_of :option_type, :in => %w( dropdown color image )

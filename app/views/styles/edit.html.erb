@@ -66,7 +66,7 @@ end %>
 			}
 
 			function addTextSetting(type, fromServer, name, placeholder) {
-				var code = '<li class="edit-settingType-setting"><input name="setting-display-name-fakeId" placeholder="Label" required value="passedName"> <input name="setting-name-fakeId" placeholder="Placeholder" required value="passedPlaceholder"><input type="hidden" name="style_options_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="serverSettingType"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(this.parentNode);" value="✖"><ul id="edit-style-options-fakeId" class="edit-style-options"><li class="new-option"><input type="button" onclick="return addTextOptionEvent(event, \'settingType\', fakeId, \'\', \'\', false)" value="Add Option"></li></ul></li>'
+				var code = '<li class="edit-settingType-setting"><input name="setting-display-name-fakeId" placeholder="Label" required maxlength="100" value="passedName"> <input name="setting-name-fakeId" placeholder="Placeholder" required maxlength="20" value="passedPlaceholder"><input type="hidden" name="style_options_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="serverSettingType"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(this.parentNode);" value="✖"><ul id="edit-style-options-fakeId" class="edit-style-options"><li class="new-option"><input type="button" onclick="return addTextOptionEvent(event, \'settingType\', fakeId, \'\', \'\', false)" value="Add Option"></li></ul></li>'
 				var id = getFakeId();
 				var serverSettingType = type == 'text' ? 'dropdown' : type;
 				code = code.replace(/fakeId/g, id).replace(/settingType/g, type).replace(/serverSettingType/g, serverSettingType).replace(/passedName/g, name).replace(/passedPlaceholder/g, placeholder);
@@ -81,7 +81,7 @@ end %>
 			}
 
 			function addColorSetting(name, placeholder, defaultValue) {
-				var code = '<li class="edit-color-setting"><input name="setting-display-name-fakeId" placeholder="Label" required value="passedName"> <input name="setting-name-fakeId" placeholder="Placeholder" required value="passedPlaceholder"><input type="hidden" name="style_options_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="color"> <label for="option-default-fakeId">Default</label> <input type="text" class="color {hash:true,required:false}" id="option-default-fakeId" name="option-default-fakeId" value="" size="7" maxlength="7"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(this.parentNode);" value="✖"></li>';
+				var code = '<li class="edit-color-setting"><input name="setting-display-name-fakeId" placeholder="Label" required maxlength="100" value="passedName"> <input name="setting-name-fakeId" placeholder="Placeholder" required maxlength="20" value="passedPlaceholder"><input type="hidden" name="style_options_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="color"> <label for="option-default-fakeId">Default</label> <input type="text" class="color {hash:true,required:false}" id="option-default-fakeId" name="option-default-fakeId" value="" size="7" maxlength="7"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(this.parentNode);" value="✖"></li>';
 				var fakeId = getFakeId();
 				code = code.replace(/fakeId/g, fakeId).replace(/passedName/g, name).replace(/passedPlaceholder/g, placeholder);
 				settings.insertBefore(html(code), newSetting);
@@ -98,7 +98,7 @@ end %>
 			}
 
 			function addTextOption(ul, type, fakeId, label, value, isDefault) {
-				var code = '<li><div style="display: inline-block; vertical-align: top"><input name="option-display-name-fakeId[]" required onchange="modifyValueName(event)" placeholder="Label" value="passedLabel"><br><input type="radio" name="option-default-fakeId" value="passedLabel"' + (isDefault ? 'checked' : '') + '> Default</div>';
+				var code = '<li><div style="display: inline-block; vertical-align: top"><input name="option-display-name-fakeId[]" required maxlength="100" onchange="modifyValueName(event)" placeholder="Label" value="passedLabel"><br><input type="radio" name="option-default-fakeId" value="passedLabel"' + (isDefault ? 'checked' : '') + '> Default</div>';
 				if (type == 'text') {
 					code += '<textarea name="option-value-fakeId[]" rows="5" placeholder="Code">passedValue</textarea>';
 				} else {
