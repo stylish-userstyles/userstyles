@@ -21,6 +21,7 @@ class StylesController < ApplicationController
 						Style.includes([:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason, {:discussions => {:original_forum_poster => :users}}]).find(params[:id])
 					end
 				rescue ActiveRecord::RecordNotFound
+					@no_ads = true
 					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true
 					return
 				end
@@ -29,6 +30,7 @@ class StylesController < ApplicationController
 					return
 				end
 				if !@style.admin_delete_reason.nil? and @style.admin_delete_reason.locked
+					@no_ads = true
 					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true
 					return
 				end
@@ -101,6 +103,11 @@ class StylesController < ApplicationController
 					return
 				end
 				render :text => style.to_json
+			}
+			format.all {
+				@no_ads = true
+				render :file => "#{Rails.root}/public/404.html", :status => 404, :content_type => 'text/html', :formats => [:html]
+				return
 			}
 		end
 	end
