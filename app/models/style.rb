@@ -681,7 +681,7 @@ Replace = "$STOP()"
 		end
 		content_type = screenshot.content_type.strip
 		errors << [name, "has a content type of '#{content_type}', must be PNG, GIF, or JPG"] unless content_type == 'image/png' or content_type == 'image/gif' or content_type == 'image/jpeg'	
-		errors << [name, "is too big, must be under 100KB"] if size > 100 * 1024
+		errors << [name, "is too big, must be under 200KB"] if size > 200 * 1024
 		return errors
 	end
 
