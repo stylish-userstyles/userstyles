@@ -66,8 +66,8 @@ Userstyles::Application.routes.draw do
   get 'styles/browse/:category/:search_terms/:sort/:sort_direction/:page_o.:format' => 'styles#browse', :constraints => { :sort_direction => /(ASC|DESC)/i, :page_o => /\d+/, :search_terms => /.+/, :category => /[^\/\.]+/ }
   resources :styles
   post 'styles/:id.:format' => 'styles#show', :constraints => { :id => /[0-9]+/ }
-  get 'styles/:id/:foo' => 'styles#show', :constraints => { :id => /[0-9]+/, :foo => /[0-9a-z-]+/ }
-  get 'styles/:id/:foo.:format' => 'styles#show', :constraints => { :id => /[0-9]+/, :foo => /[0-9a-z-]+/ }
+  get 'styles/:id/:slug' => 'styles#show', :constraints => { :id => /[0-9]+/, :slug => /[^\?\/\.]+/ }
+  get 'styles/:id/:slug.:format' => 'styles#show', :constraints => { :id => /[0-9]+/, :slug => /[^\?\/\.]+/ }
   get 'style/show/:id' => 'styles#show_redirect'
   get 'style/raw/:id' => 'styles#show', :format => 'css'
   get 'styles/raw/:id' => 'styles#show', :format => 'css'
