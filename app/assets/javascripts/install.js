@@ -603,9 +603,11 @@ function init() {
 		// update these links with the default values
 		updateNonStylishInstallLinks();
 		initInstall();
-		addListeners();
 	}
 }
+
+// run this immediately to prevent a race between Stylish emitting this event and this script adding a listener
+addListeners();
 
 if (document.readyState == "loading") {
 	window.addEventListener("DOMContentLoaded", init);
