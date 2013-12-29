@@ -446,7 +446,7 @@ Replace = "$STOP()"
 			code = optionned_code(passed_options)
 			return nil if code.nil?
 			# skip the real parser if this is huge - the real parser leaks memory!
-			if code.length > 100000
+			if code.length > 400000
 				sections = StyleCode.new(:code => code).old_parse_moz_docs
 			else
 				sections = Style.parse_moz_docs_for_code(code)
