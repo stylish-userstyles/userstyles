@@ -471,7 +471,7 @@ function addClickEvent(id, fn) {
 	el.addEventListener("click", fn);
 }
 
-function addListeners() {
+function addStylishListeners() {
 	addCustomEventListener("styleInstalled", styleInstalled);
 	addCustomEventListener("styleInstalledChrome", styleInstalledChrome);
 	addCustomEventListener("styleInstalledOpera", styleInstalledOpera);
@@ -490,6 +490,9 @@ function addListeners() {
 			styleInstalled();
 		}
 	});
+}
+
+function addEvents() {
 	addClickEvent("stylish-installed-style-not-installed-chrome", stylishInstallChrome);
 	addClickEvent("stylish-installed-style-needs-update", stylishUpdate);
 	addClickEvent("stylish-installed-style-needs-update-chrome", stylishUpdateChrome);
@@ -603,11 +606,12 @@ function init() {
 		// update these links with the default values
 		updateNonStylishInstallLinks();
 		initInstall();
+		addEvents();
 	}
 }
 
 // run this immediately to prevent a race between Stylish emitting this event and this script adding a listener
-addListeners();
+addStylishListeners();
 
 if (document.readyState == "loading") {
 	window.addEventListener("DOMContentLoaded", init);
