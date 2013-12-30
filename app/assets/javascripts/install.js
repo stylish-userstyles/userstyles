@@ -490,6 +490,8 @@ function addStylishListeners() {
 			styleInstalled();
 		}
 	});
+	// defined in standard_layout.html.erb, see note there.
+	stopRecordingEvents();
 }
 
 function addEvents() {

@@ -30,6 +30,34 @@
 		<link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe">
 
 		<%= stylesheet_link_tag 'application', :media => 'all' %>
+		
+		<script>
+			<%#
+				Due to https://bugzilla.mozilla.org/show_bug.cgi?id=688580, Stylish could fire events before the deferred script adds listeners.
+				To work around this, we will remember the events Stylish fires until the deferred script tells us to stop, at which point
+				we'll re-dispatch them.
+			%>
+			var eventTypesToRecord = ["styleAlreadyInstalled", "styleCanBeInstalled", "styleCanBeUpdated", "styleLoadCode"];
+			eventTypesToRecord.forEach(function(type) {
+				document.addEventListener(type, recordEvent, false);
+			});
+			var eventsHeard = [];
+			function recordEvent(e) {
+				console.log("Recording " + e.type + " for dispatching later.");
+				eventsHeard.push(e.type);
+			}
+			function stopRecordingEvents() {
+				console.log("Stopping recording events, " + eventsHeard.length + " events will now be dispatched.");
+				eventTypesToRecord.forEach(function(type) {
+					document.removeEventListener(type, recordEvent, false);
+				});
+				eventsHeard.forEach(function(type) {
+					var stylishEvent = document.createEvent("Events");
+					stylishEvent.initEvent(type, false, false, document.defaultView, null);
+					document.dispatchEvent(stylishEvent);
+				});
+			}
+		</script>
 		<%= javascript_include_tag 'application', :defer => 'defer' %>
 
 		<% if @header_include != nil %>
