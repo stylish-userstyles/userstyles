@@ -119,23 +119,45 @@ class Style < ActiveRecord::Base
 			message = "contains an invalid URL reference - #{display_url}. Only absolute URLs to one of the following protocols is allowed - " + allowed_reference_prefixes.join(', ') + '. For user-specified URLs, use style settings.'
 			record.errors.add(attr, message) unless allowed
 		end
-		
-		record.code_possibilities.each do |o, c|
-			# non-chrome @imports
-			import_match = /@import\s*(?:url\(\s*)?[\'\"]?\s*([^\'\"]+)[\'\"]?\s*\)?/
-			c.scan(import_match).each do |url|
-				if !begins_with?(url[0], /chrome:/)
-					record.errors.add attr, "cannot contain non-chrome imports (they cause UI hangs) - #{url[0]}"
+
+		docs = record.get_docs_or_nil
+		# @imports
+		if docs.nil?
+			record.code_possibilities.each do |p, c|
+				import_match = /@import\s*(?:url\(\s*)?[\'\"]?\s*([^\'\"]+)[\'\"]?\s*\)?/
+				c.scan(import_match).each do |url|
+					record.errors.add attr, "cannot contain non-chrome imports (they can cause hangs) - #{url[0]}" if !url[0].start_with?('chrome:')
 				end
 			end
-
-			# non-chrome bindings
-			binding_match = /-moz-binding\s*:\s*url\s*\(\s*[\'\"]?([^\'\"]+)[\'\"]?\s*\)/
-			c.scan(binding_match).each do |url|
-				record.errors.add attr, "cannot contain non-chrome protocol bindings - \"#{url[0]}\"" if !begins_with?(url[0], /chrome:/)
+		else
+			docs.each do |doc|
+				doc.import_rules.each do |r|
+					uri = r.uri.value
+					record.errors.add attr, "cannot contain non-chrome imports (they can cause hangs) - #{uri}" if !uri.start_with?('chrome:')
+				end
 			end
 		end
-		
+		# -moz-binding
+		if docs.nil?
+			binding_match = /-moz-binding\s*:\s*url\s*\(\s*[\'\"]?([^\'\"]+)[\'\"]?\s*\)/
+			record.code_possibilities.each do |p, c|
+				c.scan(binding_match).each do |url|
+					record.errors.add attr, "cannot contain non-chrome protocol bindings - #{url[0]}" if !url[0].start_with?('chrome:')
+				end
+			end
+		else
+			docs.each do |doc|
+				doc.rule_sets.each do |r|
+					r.declarations.each do |d|
+						if ['binding', '-moz-binding'].include?(d.property)
+							uri = d.expressions.first.value
+							record.errors.add attr, "cannot contain non-chrome protocol bindings - #{uri}" if uri != 'none' and !uri.start_with?('chrome:')
+						end
+					end
+				end
+			end
+		end
+
 		lengths = record.code_possibilities.map { |o, c| c.length }
 		record.errors.add(attr, 'is too short') if lengths.min < 5
 		allowed_length = record.allow_long_code? ? 400000 : 100000
@@ -1204,8 +1226,6 @@ Replace = "$STOP()"
 		return false
 	end
 
-private
-
 	# Returns an array of all docs for this style, or nil if any are invalid
 	# Cache the docs for the life of the request so we don't have to keep reparsing. If the code or settings 
 	# change, then don't return the cached copy.
@@ -1243,6 +1263,8 @@ private
 			return nil
 		end
 	end
+
+private
 
 	def self.get_doc(code)
 		# workaround for 'unclosed comments hang stuff' bug
