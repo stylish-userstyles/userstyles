@@ -166,22 +166,25 @@ class StylesController < ApplicationController
 	end
 
 	def browse_r
-		original_category = params[:category]
-		fix_search_url(params)
-		options = {:controller => 'styles', :action => 'browse', :page => params[:page], :status => 301}
+		options = {:controller => 'styles', :action => 'browse', :status => 301}
 		options[:search_terms] = params[:search_terms] unless (!params[:search_terms].nil? and params[:search_terms] == '')
-		# keep advanced search if set. if we calculated a category, perform advanced search, but don't show the ui
-    calculated_category = (original_category.nil? or original_category == 'all') and !(params[:category].nil? or params[:category] == 'all')
-		if !params[:as].nil? or calculated_category
-			options[:as] = 1 unless calculated_category
-			options[:category] = params[:category] unless (!params[:category].nil? and params[:category] == '')
-			options[:format] = params[:format] unless (!params[:format].nil? and params[:format] == '')
-			options[:per_page] = params[:per_page] unless (!params[:per_page].nil? and (params[:per_page] == '' or params[:per_page].to_i == 10))
-			if (!params[:sort].nil? and params[:sort] != 'relevance') or (!params[:sort_direction].nil? and params[:sort_direction] != 'desc')
-				options[:sort] = params[:sort]
-				options[:sort_direction] = params[:sort_direction]
-			end
+
+		# basic search - only look at the search terms
+		if params[:as].nil?
+			fix_search_url(options)
+			redirect_to options
+			return
 		end
+		
+		# advanced search
+		options[:category] = (params[:category] == '' or params[:category] == 'all') ? nil : params[:category]
+		options[:per_page] = params[:per_page] unless (!params[:per_page].nil? and (params[:per_page] == '' or params[:per_page].to_i == 10))
+		if (!params[:sort].nil? and params[:sort] != 'relevance') or (!params[:sort_direction].nil? and params[:sort_direction] != 'desc')
+			options[:sort] = params[:sort]
+			options[:sort_direction] = params[:sort_direction]
+		end
+		fix_search_url(params)
+		options[:as] = 1
 		redirect_to options
 	end
 
@@ -747,7 +750,7 @@ protected
 		if !urls.empty?
 			subcategory = Style.get_subcategory_for_url(urls[0])
 			params[:category] = subcategory
-			params[:search_terms] = keywords.join(' ')
+			params[:search_terms] = keywords.empty? ? nil : keywords.join(' ')
 			fixed = true
 		elsif keywords.size == 1 and (params[:category].nil? or params[:category] == 'all')
 			# one keyword without a category - see if it matches a common subcategory name
