@@ -76,6 +76,7 @@ Userstyles::Application.routes.draw do
   get 'firstrun' => 'index#firstrun'
   get 'contact' => 'index#contact'
   get 'admin_debug' => 'index#admin_debug'
+  get 'dberror', to: redirect('/help/db_chrome')
   match '/:controller(/:action(/:id))', via: [:get, :post]
   match '*path' => 'index#rescue_404', via: [:get, :post]
 end
