@@ -10,7 +10,7 @@ class User < ActiveRecord::Base
 	validates_length_of :login, :in => 1..20, :allow_nil => true
 
 	validates_uniqueness_of :name, :case_sensitive => false
-	validates_length_of :name, :minimum => 1
+	validates_length_of :name, :in => 1..50
 
 	validates_length_of :homepage, :maximum => 255, :allow_blank => true
 	validates_length_of :about, :maximum => 4000, :allow_blank => true

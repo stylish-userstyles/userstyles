@@ -103,8 +103,8 @@ end %>
 	<%=form_tag({:controller => 'users', :action => 'create'}, {:id => 'password-create', :style => (!params['view'].nil? and params['view'] == 'create') ? '' : 'display:none'}) do |f| %>
 		<p><span class="login-option-explanation">Create a userstyles.org account:</span> <a href="<%=url_for(:controller => 'login', :action => 'index')%>" class="login-navigation" onclick="return showLoginStart()">Back</a></p>
 		<table>
-			<tr><td><label for="login-new" class="text-label">User name</label></td><td><input id="login-new" name="user[login]"></td></tr>
-			<tr><td><label for="email-new" class="text-label">Email</label></td><td><input id="email-new" name="user[email]" 	type="email"></td><td> <span style="font-size: smaller">Optional, lets you recover your password</span></tr>
+			<tr><td><label for="login-new" class="text-label">User name</label></td><td><input id="login-new" name="user[login]" maxlength="50" required></td></tr>
+			<tr><td><label for="email-new" class="text-label">Email</label></td><td><input id="email-new" name="user[email]" type="email"></td><td> <span style="font-size: smaller">Optional, lets you recover your password</span></tr>
 			<tr><td><label for="password-new" class="text-label">Password</label></td><td><input id="password-new" name="user[password]" type="password"></td></tr>
 			<tr><td><label for="password-new-confirm" class="text-label">Confirm password</label></td><td><input id="password-new-confirm" name="user[password_confirmation]" type="password"></td></tr>
 			<% if !skip_remember %>

@@ -8,7 +8,7 @@
 		</tr>
 		<tr>
 			<th><label for="user_name">Display name</label></th>
-			<td><%=f.text_field :name%></td>
+			<td><%=f.text_field :name, :maxlength => 50, :required => 'required'%></td>
 		</tr>
 		<tr>
 			<th><label for="user_email">E-mail</label></th>

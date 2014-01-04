@@ -2,7 +2,7 @@
 <p>The display name '<%=@taken_name%>' has already been taken. Please choose a new one.</p>
 <%= form_tag(:action => "resolve_name_conflict") do %>
 	<div>
-		<input id="name" name="name" />
-		<input type="submit" value="Submit"/>
+		<input id="name" maxlength="50" required name="name">
+		<input type="submit" value="Submit">
 	</div>
 <% end %>
