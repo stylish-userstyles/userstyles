@@ -311,7 +311,8 @@ textarea#css {
 section#obsoletion-message {
 	background-color: #FF6347;
 	border-radius: 3px;
-	margin-bottom: 5px;
+	margin-bottom: 2em;
+	padding-right: 15px;
 }
 section#obsoletion-message > h2 {
 	margin-left: auto;

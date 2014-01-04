@@ -4,14 +4,32 @@
 	<section id="obsoletion-message">
 		<h2>Deleted!</h2>
 		<p>
-			<% if !@style.obsoletion_message.nil? and @style.obsoletion_message.length > 0 %>
-				<%=format_user_text(@style.obsoletion_message)%>
+			This style was deleted by 
+			<% if @style.admin_delete_reason_id.nil? %>
+				its author, <%= link_to @style.user.name, {:controller => "users", :action => "show", :id => @style.user.id} %>.
 			<% else %>
-				This style has been deleted.
+				the site admin.
 			<% end %>
-			<% if !@style.obsoleting_style.nil? %>
-				Use <%= link_to(h(@style.obsoleting_style.short_description), :action => "show", :id => @style.obsoleting_style_id)%> instead.
+			<% if !@style.obsoletion_message.nil? and !@style.obsoletion_message.empty? %>
+				The reason given was <q><%=format_user_text(@style.obsoletion_message)%></q>.
 			<% end %>
+			<% if !@style.obsoleting_style.nil?  and @style.obsoleting_style.obsolete == 0
+				alternative = @style.obsoleting_style
+			elsif !@style.related.nil? and !@style.related.empty? 
+				alternative = @style.related.first
+			end 
+			if !alternative.nil? 
+				if !alternative.after_screenshot_thumbnail_path.nil? %>
+					Instead, try:</p><p><a href="<%=alternative.pretty_url%>"><img src="<%=alternative.after_screenshot_thumbnail_path%>" class="screenshot" alt=""><br><%=alternative.short_description%></a>
+				<% else %>
+					Instead, try <a href="<%=alternative.pretty_url%>"><%=alternative.short_description%></a>
+				<% end 
+				if !@style.subcategory.nil? and @style.category == 'site'%>
+					or other <%=link_to("#{@style.subcategory.capitalize} themes", :action => "browse", :controller => "styles", :category => @style.subcategory) %>.
+				<% elsif !@style.category.nil? %>
+					or other <%=link_to("#{@style.category.capitalize} themes", :action => "browse", :controller => "styles", :category => @style.category) %>.
+				<% end
+			end %>
 		</p>
 	</section>
 <% end %>
