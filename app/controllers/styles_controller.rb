@@ -723,7 +723,11 @@ protected
 			fixed = true
 		end
 
-		search_terms = params[:search_terms]
+		search_terms = fix_bad_chars(params[:search_terms])
+		if search_terms != params[:search_terms]
+			fixed = true 
+			params[:search_terms] = search_terms
+		end
 		search_terms.strip! if !search_terms.nil?
 		keywords = []
 		urls = []
@@ -958,6 +962,10 @@ private
 		@style.save!
 
 		redirect_to @style.pretty_url
+	end
+
+	def fix_bad_chars(s)
+		s.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => '')
 	end
 
 end
