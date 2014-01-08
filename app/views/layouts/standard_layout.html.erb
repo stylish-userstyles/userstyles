@@ -76,8 +76,13 @@
 		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
 		ga('create', 'UA-8246384-1', 'auto');
-		ga('send', 'pageview');
-
+		<% dimensions = {}
+		if !@style.nil? and action_name == 'show'
+			dimensions['dimension1'] = h @style.category
+			dimensions['dimension2'] = h @style.subcategory
+		end
+		dimensions['dimension3'] = @no_bots ? 'noindex' : (@no_index_but_follow ? 'noindexfollow' : 'none') %>
+		ga('send', 'pageview', <%=raw dimensions.to_json%>);
 		</script>
 		<!-- End Google Analytics -->
 
