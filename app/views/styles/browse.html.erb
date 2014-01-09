@@ -4,47 +4,43 @@
 	<p>No styles found. Try <a href="/styles/browse">browsing from the top</a> or try a new search on the left.</p>
 
 <% else %>
-	
-	<%= render :partial => 'listing', :collection => @styles, :as => :style%>
 
-	<% if @no_ads.nil? or !@no_ads %>
-		<div class="ad" style="max-width: 100%; overflow: hidden">
-			<% if true %>
+	<%
+	midpoint_ad_position = nil
+	if @no_ads.nil? or !@no_ads
+		if @styles.per_page >= 10 and @styles.length == @styles.per_page
+			midpoint_ad_position = (@styles.per_page / 2).to_i - 1
+		end
+	end
+	@styles.each_with_index do |style, i| %>
+		<%= render :partial => 'listing', :locals => {:style => style} %>
+		<% if i == midpoint_ad_position %>
+			<div id="browse-middle-ad" class="ad">
 				<div class="ad-note"><span>Advertisement</span></div>
-				<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+				<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+				<!-- Browse styles midpage -->
 				<ins class="adsbygoogle"
 					 style="display:inline-block;width:728px;height:90px"
 					 data-ad-client="ca-pub-2247465624637408"
-					 data-ad-slot="5085099206"></ins>
+					 data-ad-slot="5354346118"></ins>
 				<script>
 				(adsbygoogle = window.adsbygoogle || []).push({});
 				</script>
-			<% else %>
-				<div style="display: inline-block">
-					<div class="ad-note"><span>Advertisement</span></div>
-					<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-					<!-- Browse styles bottom square 1 -->
-					<ins class="adsbygoogle"
-						 style="display:inline-block;width:336px;height:280px"
-						 data-ad-client="ca-pub-2247465624637408"
-						 data-ad-slot="1174194115"></ins>
-					<script>
-					(adsbygoogle = window.adsbygoogle || []).push({});
-					</script>
-				</div>
-				<div style="display: inline-block">
-					<div class="ad-note"><span>Advertisement</span></div>
-					<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-					<!-- Browse styles bottom square 2 -->
-					<ins class="adsbygoogle"
-						 style="display:inline-block;width:336px;height:280px"
-						 data-ad-client="ca-pub-2247465624637408"
-						 data-ad-slot="2650927313"></ins>
-					<script>
-					(adsbygoogle = window.adsbygoogle || []).push({});
-					</script>
-				</div>
-			<% end %>
+			</div>
+		<% end %>
+	<% end %>
+
+	<% if @no_ads.nil? or !@no_ads %>
+		<div id="browse-bottom-ad" class="ad">
+			<div class="ad-note"><span>Advertisement</span></div>
+			<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+			<ins class="adsbygoogle"
+				 style="display:inline-block;width:728px;height:90px"
+				 data-ad-client="ca-pub-2247465624637408"
+				 data-ad-slot="5085099206"></ins>
+			<script>
+			(adsbygoogle = window.adsbygoogle || []).push({});
+			</script>
 		</div>
 	<% end %>
 
