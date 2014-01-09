@@ -20,6 +20,9 @@
 			<meta name="description" content="<%=@meta_description%>">
 		<% end %>
 		<meta property="fb:admins" content="1319443195">
+		<% if !params[:dw].nil? %>
+			<meta name="viewport" content="width=device-width">
+		<% end %>
 		<link rel="search" href="http://<%=STATIC_DOMAIN%>/opensearch.xml" type="application/opensearchdescription+xml" title="userstyles Search">
 		<link rel="icon" href="http://<%=STATIC_DOMAIN%>/images/s3-16.png" type="image/png">
 		<% if not @feeds.nil?
