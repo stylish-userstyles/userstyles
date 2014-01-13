@@ -111,7 +111,7 @@
 
 			<nav>
 				<ul>
-					<li>
+					<li id="sidebar-search">
 						<%= form_tag('/styles/browse_r', {:method => 'get', :class => params[:as].nil? ? '' : 'advanced-search-active'}) do |f| %>
 							<div id="simple-search">
 								<input id="search-terms" placeholder="Search" type="search" title="Enter search words or a URL" name="search_terms" size="7" value="<%=params[:search_terms]%>"><input type="submit" id="search-submit" value="→"<% if !params[:as].nil? %> name="as"<%end%>>
@@ -154,14 +154,14 @@
 							</div>
 						<% end %>
 					</li>
-					<li><%=link_to_unless_current('Browse', :action => "index", :controller => "categories") %></li>
+					<li id="sidebar-browse"><%=link_to_unless_current('Browse', :action => "index", :controller => "categories") %></li>
 					<% if session[:user_id].nil? %>
-						<li><%=link_to_unless_current('Log in', {:action => "index", :controller => "login"}, :rel => 'nofollow') %></li>
+						<li id="sidebar-login"><%=link_to_unless_current('Log in', {:action => "index", :controller => "login"}, :rel => 'nofollow') %></li>
 					<% else %>
-						<li><%=link_to_unless_current('My account', user_path(session[:user_id]), :rel => 'nofollow') %></li>
+						<li id="sidebar-my-account"><%=link_to_unless_current('My account', user_path(session[:user_id]), :rel => 'nofollow') %></li>
 					<% end %>
-					<li><%=link_to_unless_current('Help', {:action => "index", :controller => "help"}, :rel => 'nofollow') %></li>
-					<li><a href="http://forum.userstyles.org" rel="nofollow">Forum</a></li>
+					<li id="sidebar-help"><%=link_to_unless_current('Help', {:action => "index", :controller => "help"}, :rel => 'nofollow') %></li>
+					<li id="sidebar-forum"><a href="http://forum.userstyles.org" rel="nofollow">Forum</a></li>
 				</ul>
 			</nav>
 
