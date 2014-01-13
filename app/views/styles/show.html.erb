@@ -129,13 +129,15 @@
 	<% if @no_ads.nil? or !@no_ads %>
 		<% # this will be lower if there's options so that we can prevent option dropdowns from overlapping it
 			if @style.style_options.empty? %>
-			<div id="below-install-ad" class="ad" style="max-width: 100%; overflow: hidden">
+			<div id="below-install-ad" class="ad">
 				<div class="ad-note"><span>Advertisement</span></div>
-				<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+				<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+				<!-- Style pages responsive -->
 				<ins class="adsbygoogle"
-					 style="display:inline-block;width:728px;height:90px"
+					 style="display:block"
 					 data-ad-client="ca-pub-2247465624637408"
-					 data-ad-slot="9293396217"></ins>
+					 data-ad-slot="7996428119"
+					 data-ad-format="auto"></ins>
 				<script>
 				(adsbygoogle = window.adsbygoogle || []).push({});
 				</script>
@@ -241,13 +243,15 @@
 <% if @no_ads.nil? or !@no_ads %>
 	<% # see comment above
 		if !@style.style_options.empty? %>
-		<div id="below-install-ad" class="ad" style="max-width: 100%; overflow: hidden">
+		<div id="below-install-ad" class="ad">
 			<div class="ad-note"><span>Advertisement</span></div>
-			<script async src="http://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+			<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+			<!-- Style pages responsive -->
 			<ins class="adsbygoogle"
-				 style="display:inline-block;width:728px;height:90px"
+				 style="display:block"
 				 data-ad-client="ca-pub-2247465624637408"
-				 data-ad-slot="9293396217"></ins>
+				 data-ad-slot="7996428119"
+				 data-ad-format="auto"></ins>
 			<script>
 			(adsbygoogle = window.adsbygoogle || []).push({});
 			</script>

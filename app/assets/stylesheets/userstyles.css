@@ -173,9 +173,17 @@ section > h2 {
 #more-info, #below-install-ad {
 	clear: both;
 }
+#below-install-ad, #browse-bottom-ad, #browse-middle-ad {
+	/* this makes it left-aligned when in full width mode */
+	max-width: 728px;
+	overflow: hidden;
+}
 #below-install-ad {
 	margin-top: 1.5em;
 	margin-bottom: 1.5em;
+}
+#browse-bottom-ad, #browse-middle-ad {
+	margin-bottom: 1em;
 }
 #info-tables {
 	clear: left;
@@ -677,8 +685,92 @@ a.btn-twitter:visited {
 .install-bag {position : absolute;width : 100%;z-index: 1001;top: 0px;left:0px; }
 .install-img {float:right; opacity: 0; margin-right:10px; margin-top:10px; }
 
-#browse-bottom-ad, #browse-middle-ad {
-	max-width: 100%;
-	overflow: hidden;
-	margin-bottom: 1em;
+@media (max-width: 900px) {
+	/* move sidebar to the bottom */
+	#left-sidebar { 
+		float: none !important;
+		width: auto !important;
+		margin-left: 5px !important;
+		margin-top: 1em !important;
+	}
+	#content-wrapper {
+		float: none !important;
+		width: auto !important;
+	}
+	#main-article {
+		margin-left: 5px !important;
+		margin-right: 5px !important;
+	}
+
+	/* reorganize sidebar nav */
+	#search-terms, #search-submit, #show-advanced-search {
+		float: none !important;
+	}
+	#search-terms {
+		width: 85% !important;
+	}
+	#show-advanced-search {
+		text-align: left !important;
+	}
+	nav form {
+		margin-bottom: 0.5em !important;
+	}
+}
+@media (max-width: 600px) {
+	/* browse page - put screenshot on top of text rather than beside */
+	.listing-left-info {
+		float: none !important;
+		width: auto !important;
+	}
+	.screenshot-thumbnail {
+		text-align: left !important;
+	}
+	.style-brief-text {
+		margin-left: 0 !important;
+	}
+	.style-brief, #browse-middle-ad {
+		padding-top: 15px !important;
+		border-bottom: 2px solid gray !important;
+		padding-bottom: 2em !important;
+	}
+	.style-brief:last-of-type {
+		padding-bottom: 5px !important;
+	}
+	
+	/* browse page - fit stats on one line */
+	.style-brief-stats span {
+		display: inline !important;
+	}
+	.style-brief-stats span::after {
+		content: "|" !important;
+	}
+	.style-brief-stats span:last-child::after {
+		content: "" !important;
+	}
+
+	/* show page - screenshot on top of text rather than beside */
+	#style-author-info {
+		margin-left: 0 !important;
+	}
+	#left-info {
+		float: none !important;
+		width: auto !important;
+	}
+	
+	/* show page - align style info */
+	#main-style-info {
+		margin-left: 0 !important;
+	}
+	#info-tables th {
+		min-width: 150px !important;
+	}
+	
+	/* allow social widgets to wrap */
+	#social {
+		height: auto !important;
+	}
+	/* give the header a better chance of being on one line */
+	h1 {
+		font-size: 1.25em !important;
+	}
 }
