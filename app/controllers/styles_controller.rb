@@ -582,7 +582,7 @@ class StylesController < ApplicationController
 			'and screenshot_type_preference = "auto" ' +
 			'and subcategory NOT IN (' + bad_content_in + ')')
 			.order('auto_screenshot_date IS NULL DESC, ' + #styles with no screenshot
-			'IF(updated >= auto_screenshot_date, DATEDIFF(updated, auto_screenshot_date), -1) DESC, ' + #anything that was updated since the screenshot was generated, the days between the update and the screenshot dates
+			'IF(updated >= auto_screenshot_date, updated - auto_screenshot_date, -1) DESC, ' + #anything that was updated since the screenshot was generated
 			'auto_screenshot_date, ' + #last time the screenshot was generated
 			'updated DESC') #last time the style was updated
 			.limit(1000)
