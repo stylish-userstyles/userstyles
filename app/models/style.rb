@@ -1190,8 +1190,15 @@ Replace = "$STOP()"
 
 	def calculate_external_references
 		references = Set.new
-		code_possibilities.each do |o, c|
-			references.merge(Style.calculate_external_references_for_code(c))
+		docs = get_docs_or_nil
+		if docs.nil?
+			code_possibilities.each do |o, c|
+				references.merge(Style.old_calculate_external_references_for_code(c))
+			end
+		else
+			docs.each do |d|
+				references.merge(Style.calculate_external_references_for_doc(d))
+			end
 		end
 		return references
 	end
@@ -1353,8 +1360,20 @@ private
 		return (PublicSuffix.valid?('example.' + domain) or PublicSuffix.valid?('example.com.' + domain)) && !publicly_accessible_only
 	end
 
+	def self.calculate_external_references_for_doc(doc)
+		urls = Set.new
+		doc.rule_sets.each do |rs|
+			rs.declarations.each do |d|
+				d.expressions.each do |e|
+					urls << e.value if e.is_a?(CSSPool::Terms::URI)
+				end
+			end
+		end
+		return urls
+	end
+
 	# returns a set of references in the code to external resources (things references via url(), minus namespaces and -moz-documents)
-	def self.calculate_external_references_for_code(code)
+	def self.old_calculate_external_references_for_code(code)
 		
 		references = Set.new
 		code = code.gsub(/[\r\n]+/, '')

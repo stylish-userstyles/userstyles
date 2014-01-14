@@ -101,7 +101,7 @@ class StyleUrlReferencesTest < ActiveSupport::TestCase
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(http://example.com/example.png); }
 		END_OF_STRING
-		assert style.valid?
+		assert style.valid?, style.errors.values
 	end
 
 	test "file: url() is not allowed" do
@@ -109,7 +109,7 @@ class StyleUrlReferencesTest < ActiveSupport::TestCase
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(file:///home/jason/example.png); }
 		END_OF_STRING
-		assert !style.valid?
+		assert !style.valid?, style.errors.values
 	end
 
 	test "resource: url() is not allowed" do
@@ -117,7 +117,7 @@ class StyleUrlReferencesTest < ActiveSupport::TestCase
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(resource://example.png); }
 		END_OF_STRING
-		assert !style.valid?
+		assert !style.valid?, style.errors.values
 	end
 
 	test "relative url() is not allowed" do
@@ -125,7 +125,7 @@ class StyleUrlReferencesTest < ActiveSupport::TestCase
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(../example.png); }
 		END_OF_STRING
-		assert !style.valid?
+		assert !style.valid?, style.errors.values
 	end
 
 	test "blank url() is not allowed" do
@@ -133,7 +133,7 @@ class StyleUrlReferencesTest < ActiveSupport::TestCase
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(); }
 		END_OF_STRING
-		assert !style.valid?
+		assert !style.valid?, style.errors.values
 	end
 
 	test "data: url() is allowed" do
@@ -141,17 +141,15 @@ class StyleUrlReferencesTest < ActiveSupport::TestCase
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==); }
 		END_OF_STRING
-		assert style.valid?
+		assert style.valid?, style.errors.values
 	end
 
 	test "data: url() is allowed with whitespace" do
 		style = get_style_template()
-		style.style_code.code = <<-END_OF_STRING
-			* { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA
-AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
-9TXL0Y4OHwAAAABJRU5ErkJggg==); }
-		END_OF_STRING
-		assert style.style_code.valid?
+		style.style_code.code = "* { background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA\
+AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\
+9TXL0Y4OHwAAAABJRU5ErkJggg==); }"
+		assert style.valid?, style.errors.values
 	end
 
 	test "chrome: url() is allowed" do
@@ -159,7 +157,7 @@ AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(chrome://example/example.png); }
 		END_OF_STRING
-		assert style.style_code.valid?
+		assert style.valid?, style.errors.values
 	end
 
 	test "moz-icon: url() is allowed" do
@@ -167,7 +165,7 @@ AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(moz-icon://example.png); }
 		END_OF_STRING
-		assert style.style_code.valid?
+		assert style.valid?, style.errors.values
 	end
 
 	test "https: url() is allowed" do
@@ -175,7 +173,7 @@ AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(https://example.com/example.png); }
 		END_OF_STRING
-		assert style.style_code.valid?
+		assert style.valid?, style.errors.values
 	end
 
 	test "style setting is allowed" do
@@ -183,7 +181,12 @@ AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(/*[[setting]]*/); }
 		END_OF_STRING
-		assert style.style_code.valid?
+		so = StyleOption.new
+		so.option_type = 'image'
+		so.name = 'setting'
+		so.display_name = 'my setting'
+		style.style_options << so
+		assert style.valid?, style.errors.values
 	end
 	
 end

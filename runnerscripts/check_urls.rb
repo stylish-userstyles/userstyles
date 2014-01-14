@@ -61,10 +61,9 @@ def validate(url)
 end
 
 
-@styles = Style.find(:all, :conditions => 'obsolete = 0', :include => [:user, :style_code], :order => 'users.name, styles.id')#, :limit => 100)
-@styles.each do |style|
+Style.active.includes([:user, :style_code, {:style_options => :style_option_values}]).order('users.name, styles.id').find_each do |style|
 	next if style.style_code.nil?
-	refs = StyleCode.get_external_references(style.style_code.code)
+	refs = style.calculate_external_references
 	refs.each do |url|
 		next unless url.start_with?('http:') or url.start_with?('https:')
 		if $known_bad_urls.include?(url)
