@@ -116,11 +116,14 @@ class LoginController < ApplicationController
 			if !user.valid?
 				user.name = original_name
 			end
-			
-			original_email = user.email
-			user.email = sreg['email']
-			if !user.valid?
-				user.email = original_email
+
+			# Keep the e-mail if we didn't get one from OpenID - the user may have manually set it
+			if !sreg['email'].nil?
+				original_email = user.email
+				user.email = sreg['email']
+				if !user.valid?
+					user.email = original_email
+				end
 			end
 		end
 
