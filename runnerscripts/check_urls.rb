@@ -8,10 +8,9 @@ def fetch(uri_str, limit = 3)
 	raise ArgumentError, 'too many HTTP redirects' if limit == 0
 
 	uri = URI(uri_str.strip.gsub(' ', '%20').gsub('|', '%7C').gsub('[', '%5B').gsub(']', '%5D'))
-	req = Net::HTTP::Get.new(uri.to_s)
+	req = Net::HTTP::Get.new(uri.request_uri)
 	
 	#req['If-Modified-Since'] = file.mtime.rfc2822
-
 	con = Net::HTTP.new(uri.host, uri.port)
 	if uri.scheme == 'https'
 		con.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -61,13 +60,13 @@ def validate(url)
 end
 
 
-Style.active.includes([:user, :style_code, {:style_options => :style_option_values}]).order('users.name, styles.id').find_each do |style|
+Style.active.includes([:style_code, {:style_options => :style_option_values}]).order('styles.id').find_each do |style|
 	next if style.style_code.nil?
 	refs = style.calculate_external_references
 	refs.each do |url|
 		next unless url.start_with?('http:') or url.start_with?('https:')
 		if $known_bad_urls.include?(url)
-			puts style.user.name + ' ' + style.full_pretty_url + ' ' + url + ' ' + $known_bad_urls[url]
+			puts style.full_pretty_url + ' ' + url + ' ' + $known_bad_urls[url]
 			next
 		end
 		next if $known_good_urls.include?(url)
@@ -76,7 +75,7 @@ Style.active.includes([:user, :style_code, {:style_options => :style_option_valu
 			$known_good_urls << url
 		else
 			$known_bad_urls[url] = error
-			puts style.user.name + ' ' + style.full_pretty_url + ' ' + url + ' ' + error
+			puts style.full_pretty_url + ' ' + url + ' ' + error
 		end
 	end
 end
