@@ -5,9 +5,9 @@ def doc_has_agent_specific_stuff(doc)
 		rs.selectors.each do |s|
 			parent_has_anon = false
 			s.simple_selectors.each do |ss|
-				return true if ss.is_a?(CSSPool::Selectors::Type) and ss.name == 'scrollbar'
+				return true if ss.is_a?(CSSPool::Selectors::Type) and ['scrollbar', 'thumb', 'gripper', 'scrollbarbutton'].include?(ss.name)
 				ss.additional_selectors.each do |as|
-					return true if as.is_a?(CSSPool::Selectors::Type) and as.name == 'scrollbar'
+					return true if as.is_a?(CSSPool::Selectors::Type) and ['scrollbar', 'thumb', 'gripper', 'scrollbarbutton'].include?(ss.name)
 				end
 				if parent_has_anon
 					# these combinators indicate this is not a child of the previous element
