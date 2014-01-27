@@ -332,7 +332,7 @@ end %>
 				<% end %>
 			</div>
 		<% end %>
-		<input id="provide-screenshot" name="style[screenshot_type_preference]" type="radio" value="manual"  <%=@style.screenshot_type_preference == 'manual' ? 'checked' : ''%>> Use this screenshot (GIF, PNG, or JPG, &lt; 100KB):
+		<input id="provide-screenshot" name="style[screenshot_type_preference]" type="radio" value="manual"  <%=@style.screenshot_type_preference == 'manual' ? 'checked' : ''%>> Use this screenshot (GIF, PNG, or JPG, &lt; 200KB):
 		<div style="margin-left: 2em">
 			<% if @style != nil and @style.after_screenshot_name != nil %>
 				<a href="<%=@style.provided_after_screenshot_path%>" rel="lightbox[screenshot] nofollow" title="Provided primary screenshot"">
