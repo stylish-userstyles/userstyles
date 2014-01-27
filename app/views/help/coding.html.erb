@@ -37,36 +37,80 @@
 
 <h2 id="help-style-settings">Style settings</h2>
 
-<p>Style settings let you give users options for installing your style. The easiest way to explain is with an example.</p>
+<p>Style settings let you give users options for installing your style. The options chosen affect the CSS provided to the user. Uses of settings include:</p>
 
-<p>Here is the code:</p>
-<pre><code>* {
-	color: /*[[mycolor]]*/;
-	font-face: /*[[myfont]]*/;
+<ul>
+	<li>Providing alternatives in your style - for example: moving an element versus hiding it.</li>
+	<li>Having optional functionality in your style.</li>
+	<li>Allowing a user to choose between a number of background images, or provide their own.</li>
+	<li>Allowing a user to choose colors.</li>
+</ul>
+
+<p>Style settings can change a single value in your CSS or change entire blocks of code.</p>
+
+<h3 id="help-style-settings-type">Types of settings</h3>
+
+<p>Depending on the type of setting you choose, the user may be presented with pre-defined options of your choosing or be asked to provide a specific kind of value. The types of settings are:</p>
+
+<ul>
+	<li>Drop-down setting: all options are defined by you, the user is presented with a drop-down list of them to choose from. This is suitable for when you want to have different blocks of CSS included based on the option chosen, but should also be used when none of the other options fit.</li>
+	<li>Color setting: the user is presented with a color chooser. The color chosen will be inserted in the hex format (e.g. #FFFFFF).</li>
+	<li>Text setting: the user can enter free-form text. The text will have backslashes and quotes escaped. This is suitable inserting CSS string values, for example the "content" attribute.</li>
+	<li>Image setting: you can provide options for the user to choose from, but the user can also provide their own URL or upload an image which is transformed into a data URI. This is intended for image options.</li>
+</ul>
+
+<h3 id="help-style-settings-edit">Editing settings</h3>
+
+<p>On the edit screen, you can add, edit, delete, and move settings and options. The attributes of settings are:</p>
+
+<ul>
+	<li>Label: displayed to the user on your style's page. An example could be "Choose a font".</li>
+	<li>Install key: this matches the placeholder in your code (see "Placeholders" below). This is also used when updating your style (see "Updating" below).</li>
+	<li>Default: for color and text settings only, this is the initial value entered in the input presented to the user.</li>
+</ul>
+
+<p>The attributes of options are:</li>
+<ul>
+	<li>Label: displayed to the user on your style's page. An example could be "Times New Roman".</li>
+	<li>Install key: this is used when updating your style (see "Updating" below). This doesn't need to (and shouldn't) match the setting's install key.</li>
+	<li>Value: the text to be inserted at the location of the placeholder in your CSS (see "Placeholders" below).</li>
+	<li>Default: sets the initial option selected when the user loads the page.</li>
+</ul>
+
+<p>Setting install keys must be unique. Option install keys must be unique within a setting.</p>
+
+<h3 id="help-style-settings-placeholders">Placeholders</h3>
+
+<p>The placeholder is the location in your CSS where the option's value is inserted. It is defined with a specially-formatted comment containing the associated setting's install key.</p>
+
+<p>For a setting with an install key of "font" with two options with values "Times New Roman" and "Helvetica", the CSS you provide would look like this:</p>
+
+<pre><code>div {
+	font-face: "/*[[font]]*/" !important;
 }</code></pre>
 
-<p>Here is what you define as the settings</p>
+<p>Which, depending on the user's selection, will result in either:</p>
 
-<p><img src="http://<%=STATIC_DOMAIN%>/images/settings-example.png" alt="A style setting form showing two settings. The first's label is 'Choose your color' and the placeholder is 'mycolor'. The second's label is 'Choose your font' and the placeholder is 'myfont'. The second has two options defined, one for serif and one for sans-serif."></p>
-
-<p>The first input for each setting is displayed to the user. The second input matches the placeholder in your code. The indented lines after the second setting define the valid options for that setting.</p>
-
-<p>This will show the user this UI:</p>
-
-<p><img src="http://<%=STATIC_DOMAIN%>/images/settings-example-user.png"></p>
-
-<p>If the user selected "#FFFFFF" for the color and "Sans-serif" for the font, they would receive this code:</p>
-
-<pre><code>* {
-	color: #FFFFFF;
-	font-face: Times New Roman, serif;
+<pre><code>div {
+	font-face: "Times New Roman" !important;
 }</code></pre>
 
-<p>There are three types of settings. Text settings are the most versatile and can be used with anything - even whole code blocks. Color settings let the user pick a color from a color chooser; you do not give them predefined values. Image settings let you define certain images, but allow the user to provide their own.</p>
+<p>Or:</p>
 
-<p>Style settings can be nested two levels deep. That is, your code can reference setting A, whose value can reference setting B, but setting B's value can't then reference setting C.</p>
+<pre><code>div {
+	font-face: "Helvetica" !important;
+}</code></pre>
 
-<p>Styles with style settings are not updatable by Stylish.</p>
+<p>Placeholders can be include inside other options, effectively nesting options. Only two levels of nesting is supported.</p>
+
+<h3 id="help-style-settings-updating">Updating</h3>
+
+<p>(Stylish does not yet support updating styles with settings, but will soon...)</p>
+
+<p>When the user installs your style, Stylish will record the install keys of the settings and options the user chose. If you subsequently delete or rename install keys, anyone who chose the options with those install keys will not be update the style. Changing labels or values, reordering settings and options, and adding new options will still allow users to update.</p>
+
+<p>In other words, try to maintain your install keys when you change your style, if possible.</p>
+
 
 <h2 id="format">Format of style descriptions</h2>
 

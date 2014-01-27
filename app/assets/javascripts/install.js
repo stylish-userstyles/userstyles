@@ -58,17 +58,18 @@ function loadCode(callback, promptOnIncomplete) {
 	}
 	xhr.onreadystatechange = function(event) {
 		if (xhr.readyState == 4) {
-			if (xhr.status == 200) {
-				if ("textContent" in codeElement)
-					codeElement.textContent = xhr.responseText;
-				else
-					codeElement.innerText = xhr.responseText;
-				currentOptions = optionsString;
-				if (callback)
-					callback();
-			} else {
+			if (xhr.status != 200) {
+				document.body.style.cursor = "";
+				alert('Sorry, an error occurred loading the code - status ' + xhr.status + '.');
 				throw 'Sorry, an error occurred loading the code - status ' + xhr.status + '.';
 			}
+			if ("textContent" in codeElement)
+				codeElement.textContent = xhr.responseText;
+			else
+				codeElement.innerText = xhr.responseText;
+			currentOptions = optionsString;
+			if (callback)
+				callback();
 			document.body.style.cursor = "";
 		}
 	}
@@ -82,10 +83,10 @@ function loadCode(callback, promptOnIncomplete) {
 }
 
 function getOptions(promptOnIncomplete) {
-	var styleOptions = document.getElementById("style-options");
+	var styleOptions = document.getElementById("style-settings");
 	if (!styleOptions) {
 		return [];
-	}	
+	}
 	// dropdown
 	var selects = styleOptions.getElementsByTagName("select");
 	var params = [];
@@ -107,7 +108,7 @@ function getOptions(promptOnIncomplete) {
 	for (var i = 0; i < inputs.length; i++) {
 		switch (inputs[i].value) {
 			case "user-url":
-				var idParts = inputs[i].name.split("-");
+				var idParts = inputs[i].id.split("-");
 				var id = "option-user-url-" + idParts[idParts.length - 1];
 				var userInput = document.getElementById(id);
 				if (userInput.value == '') {
@@ -117,7 +118,7 @@ function getOptions(promptOnIncomplete) {
 				}
 				break;
 			case "user-upload":
-				var idParts = inputs[i].name.split("-");
+				var idParts = inputs[i].id.split("-");
 				var id = "option-user-upload-" + idParts[idParts.length - 1];
 				var userInput = document.getElementById(id);
 				if (!userInput.uploadedData) {
@@ -513,7 +514,7 @@ function addEvents() {
 	
 	addClickEvent("install-stylish-chrome", installStylishChrome);
 	
-	var optionValues = document.querySelectorAll('.style-option-value');
+	var optionValues = document.querySelectorAll('.style-setting-option');
 	for (var i = 0; i < optionValues.length; i++) {
 		optionValues[i].addEventListener("change", updateOption);
 	}
@@ -537,7 +538,7 @@ function updateOption(event) {
 function updateUserUrlOption(event) {
 	var idParts = event.target.id.split("-");
 	var id = idParts[idParts.length - 1];
-	document.getElementById("option-value-url-choice-" + id).checked = true;
+	document.getElementById("option-url-choice-" + id).checked = true;
 	updateOption(event);
 }
 
@@ -545,7 +546,7 @@ function updateUserUploadOption(event) {
 	var idParts = event.target.id.split("-");
 	var id = idParts[idParts.length - 1];
 	loadUpload(event.target);
-	document.getElementById("option-value-upload-choice-" + id).checked = true;
+	document.getElementById("option-upload-choice-" + id).checked = true;
 	updateOption(event);
 }
 

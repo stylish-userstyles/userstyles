@@ -547,8 +547,17 @@ a.btn-twitter:visited {
 #search-options {
 	font-size: smaller;
 }
-#edit-style-settings textarea {
-	width: 40em;
+.edit-setting {
+	background-color: #DDD;
+}
+.edit-setting-buttons, .edit-option-buttons {
+	float: right;
+}
+#edit-style-settings {
+	padding: 0;
+}
+#edit-style-settings textarea, .edit-option-value-url {
+	width: 100%;
 }
 #edit-style-settings, #edit-style-settings ul {
 	list-style-type: none;
@@ -556,11 +565,11 @@ a.btn-twitter:visited {
 .edit-color-setting input:not([type]) {
 	width: 200px;
 }
-#style-options ul {
+#style-settings ul {
 	list-style-type: none;
 	padding-left: 20px;
 }
-#style-options select {
+#style-settings select {
 	max-width: 25em;
 }
 

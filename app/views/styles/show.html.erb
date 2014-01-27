@@ -73,32 +73,37 @@
 			<%=format_user_text(@style.long_description[0, 1000])%>
 		</div>
 
-		<% if !@style.style_options.empty? %>
-			<ul id="style-options">
-				<% @style.style_options.each do |option|%>
-					<% if option.option_type == 'color' %>
+		<% if !@style.style_settings.empty? %>
+			<ul id="style-settings">
+				<% @style.style_settings.each do |setting|%>
+					<% if setting.setting_type == 'color' %>
 						<li>
-							<label for="option-<%=option.id%>"><%=option.display_name%></label>
-							<input id="option-<%=option.id%>" name="option-<%=option.id%>" type="text" class="style-option-value color {hash:true,required:true}" value="<%=option.style_option_values[0].value%>" size="7" maxlength="7">
+							<label for="setting-<%=setting.id%>"><%=setting.label%></label>
+							<input id="setting-<%=setting.id%>" name="ik-<%=setting.install_key%>" type="text" class="style-setting-option color {hash:true,required:true}" value="<%=setting.style_setting_options.first.value%>" size="7" maxlength="7">
 						</li>
-					<% elsif option.option_type == 'dropdown' %>
+					<% elsif setting.setting_type == 'text' %>
 						<li>
-							<label for="option-<%=option.id%>"><%=option.display_name%></label>
-							<select id="option-<%=option.id%>" name="option-<%=option.id%>" class="style-option-value">
-								<% option.style_option_values.each do |value|%>
-									<option value="<%=value.id%>" <%if value.default%>selected<%end%>><%=value.display_name%></option>
+							<label for="setting-<%=setting.id%>"><%=setting.label%></label>
+							<input id="setting-<%=setting.id%>" name="ik-<%=setting.install_key%>" type="text" class="style-setting-option" value="<%=setting.style_setting_options.first.value%>" size="10" maxlength="50">
+						</li>
+					<% elsif setting.setting_type == 'dropdown' %>
+						<li>
+							<label for="setting-<%=setting.id%>"><%=setting.label%></label>
+							<select id="setting-<%=setting.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option">
+								<% setting.style_setting_options.each do |option|%>
+									<option value="ik-<%=option.install_key%>" <%if option.default%>selected<%end%>><%=option.label%></option>
 								<% end %>
 							</select>
 						</li>
-					<% elsif option.option_type == 'image' %>
+					<% elsif setting.setting_type == 'image' %>
 						<li>
-							<label><%=option.display_name%></label>
+							<label><%=setting.label%></label>
 							<ul>
-								<% option.style_option_values.each do |value|%>
-									<li><input type="radio" id="option-value-<%=value.id%>" name="option-<%=option.id%>" class="style-option-value" <%if value.default%>checked<%end%> value="<%=value.value%>"> <label for="option-value-<%=h value.id%>"><%=value.display_name%></label> <a href="<%=value.value%>" rel="lightbox[option-<%=option.id%>] nofollow" title="<%=value.display_name%>">See it</a></li>
+								<% setting.style_setting_options.each do |option|%>
+									<li><input type="radio" id="option-<%=option.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option" <%if option.default%>checked<%end%> value="ik-<%=option.install_key%>"> <label for="option-<%=option.id%>"><%=option.label%></label> <a href="<%=option.value%>" rel="lightbox[option-<%=option.id%>] nofollow" title="<%=option.label%>">See it</a></li>
 								<% end %>
-								<li><input type="radio" id="option-value-url-choice-<%=h option.id%>" name="option-<%=h option.id%>" class="style-option-value" value="user-url" <%if option.style_option_values.empty?%>checked<%end%>> <label for="option-value-url-choice-<%=h option.id%>">Provide your own</label> <input id="option-user-url-<%=option.id%>" class="option-user-url" type="url" placeholder="URL"></li>
-								<li class="upload-control"><input type="radio" id="option-value-upload-choice-<%=h option.id%>" name="option-<%=option.id%>" class="style-option-value" value="user-upload"> <label for="option-value-upload-choice-<%=h option.id%>">Upload your own</label> <input id="option-user-upload-<%=option.id%>" class="option-user-upload" type="file" accept="image/*"></li>
+								<li><input type="radio" id="option-url-choice-<%=setting.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option" value="user-url" <%if setting.style_setting_options.empty?%>checked<%end%>> <label for="option-url-choice-<%=setting.id%>">Provide your own</label> <input id="option-user-url-<%=setting.id%>" class="option-user-url" type="url" placeholder="URL"></li>
+								<li class="upload-control"><input type="radio" id="option-upload-choice-<%=setting.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option" value="user-upload"> <label for="option-upload-choice-<%=setting.id%>">Upload your own</label> <input id="option-user-upload-<%=setting.id%>" class="option-user-upload" type="file" accept="image/*"></li>
 							</ul>
 						</li>
 					<% end %>
@@ -127,8 +132,8 @@
 	</div>
 
 	<% if @no_ads.nil? or !@no_ads %>
-		<% # this will be lower if there's options so that we can prevent option dropdowns from overlapping it
-			if @style.style_options.empty? %>
+		<% # this will be lower if there's options so that we can prevent setting dropdowns from overlapping it
+			if @style.style_settings.empty? %>
 			<div id="below-install-ad" class="ad">
 				<div class="ad-note"><span>Advertisement</span></div>
 				<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
@@ -242,7 +247,7 @@
 
 <% if @no_ads.nil? or !@no_ads %>
 	<% # see comment above
-		if !@style.style_options.empty? %>
+		if !@style.style_settings.empty? %>
 		<div id="below-install-ad" class="ad">
 			<div class="ad-note"><span>Advertisement</span></div>
 			<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>

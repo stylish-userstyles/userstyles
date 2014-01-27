@@ -13,7 +13,7 @@ class Style < ActiveRecord::Base
 
 	has_many :discussions, -> { readonly.order('DateInserted') }, :class_name => 'ForumDiscussion', :foreign_key => 'StyleID'
 	has_one :style_code
-	has_many :style_options, -> { order(:ordinal) }
+	has_many :style_settings, -> { order(:ordinal) }
 	belongs_to :user
 	has_many :screenshots
 	belongs_to :admin_delete_reason, -> { readonly }
@@ -37,7 +37,7 @@ class Style < ActiveRecord::Base
 	validates_length_of :name, :maximum => 50, :allow_nil => true
 	validates_length_of :description, :maximum => 1000, :allow_nil => true
 	validates_length_of :additional_info, :maximum => 10000, :allow_nil => true
-	validates_associated :style_code, :style_options, :screenshots
+	validates_associated :style_code, :style_settings, :screenshots
 	validates_numericality_of :pledgie_id, :allow_nil => true, :greather_than => 0, :message => 'campaign ID must be a number.'
 	validates_format_of :example_url, :with => URI::regexp(%w(http https)), :allow_nil => true, :message=> 'must be a http or https URL.'
 	validates_length_of :example_url, :maximum => 500, :allow_nil => true
@@ -124,6 +124,7 @@ class Style < ActiveRecord::Base
 		# @imports
 		if docs.nil?
 			record.code_possibilities.each do |p, c|
+				next if c.nil?
 				import_match = /@import\s*(?:url\(\s*)?[\'\"]?\s*([^\'\"]+)[\'\"]?\s*\)?/
 				c.scan(import_match).each do |url|
 					record.errors.add attr, "cannot contain non-chrome imports (they can cause hangs) - #{url[0]}" if !url[0].start_with?('chrome:')
@@ -141,6 +142,7 @@ class Style < ActiveRecord::Base
 		if docs.nil?
 			binding_match = /-moz-binding\s*:\s*url\s*\(\s*[\'\"]?([^\'\"]+)[\'\"]?\s*\)/
 			record.code_possibilities.each do |p, c|
+				next if c.nil?
 				c.scan(binding_match).each do |url|
 					record.errors.add attr, "cannot contain non-chrome protocol bindings - #{url[0]}" if !url[0].start_with?('chrome:')
 				end
@@ -158,23 +160,23 @@ class Style < ActiveRecord::Base
 			end
 		end
 
-		lengths = record.code_possibilities.map { |o, c| c.length }
+		lengths = record.code_possibilities.map { |o, c| c.nil? ? 0 : c.length }
 		record.errors.add(attr, 'is too short') if lengths.min < 5
 		allowed_length = record.allow_long_code? ? 400000 : 100000
 		record.errors.add(attr, "is too long. Code is #{lengths.max} bytes - max is #{allowed_length} bytes.") if lengths.max > allowed_length
 	end
-	
+
 	# Move child record errors onto main
 	validate do |style|
-		style.errors.delete(:style_options)
-		style.errors.delete(:style_option_values)
-		style.style_options.each do |so|
-			so.errors.each do |attr, msg|
-				style.errors.add("Style option #{attr}", msg) unless attr == 'style_option_values'
+		style.errors.delete(:style_settings)
+		style.errors.delete(:style_setting_options)
+		style.style_settings.each do |ss|
+			ss.errors.each do |attr, msg|
+				style.errors.add("Style setting #{attr}", msg) unless attr == :style_setting_options
 			end
-			so.style_option_values.each do |sov|
-				sov.errors.each do |attr, msg|
-					style.errors.add("Style option value #{attr}", msg)
+			ss.style_setting_options.each do |so|
+				so.errors.each do |attr, msg|
+					style.errors.add("Style setting option #{attr}", msg)
 				end
 			end
 		end
@@ -198,15 +200,15 @@ class Style < ActiveRecord::Base
 	end
 
 	# used when validating, because setting on the real property saves immediately
-	@_tmp_style_options = nil
-	def tmp_style_options
-		@_tmp_style_options
+	@_tmp_style_settings = nil
+	def tmp_style_settings
+		@_tmp_style_settings
 	end
-	def tmp_style_options=(tso)
-		@_tmp_style_options = tso
+	def tmp_style_settings=(tss)
+		@_tmp_style_settings = tss
 	end
-	def real_style_options
-		@_tmp_style_options.nil? ? style_options : @_tmp_style_options
+	def real_style_settings
+		@_tmp_style_settings.nil? ? style_settings : @_tmp_style_settings
 	end
 
 	attr_accessor :rating_avg, :rating_count
@@ -462,7 +464,7 @@ Replace = "$STOP()"
 		o = {:sections => []}
 		global_sections = []
 		
-		if style_options.empty?
+		if style_settings.empty?
 			sections = style_sections
 		else
 			code = optionned_code(passed_options)
@@ -507,7 +509,7 @@ Replace = "$STOP()"
 
 		o[:url] = "http://#{DOMAIN}/styles/#{id}"
 		# styles with options are not updatable
-		if style_options.empty?
+		if style_settings.empty?
 			o[:updateUrl] = "http://#{DOMAIN}/styles/chrome/#{id}.json" 
 		else
 			o[:updateUrl] = nil
@@ -780,24 +782,27 @@ Replace = "$STOP()"
 		File.open("#{Rails.root}/public/style_screenshots/#{filename}", "wb") { |f| f.write(data.read) }
 	end
 
-	# applies the style options to this style. the parameter is a hash of string style option id to (string style value id | text value)
+	# applies the style settings to this style
 	def optionned_code(params)
-		#raise "#{params.inspect}" if params["214001"] == "979983"
 		c = style_code.code.dup
-		so = real_style_options
+		ss = real_style_settings
 		# nest this two levels deep
 		2.times do
-			so.each do |option|
+			ss.each do |setting|
 				# missing an option?
-				return nil unless params.include?(option.parameter_id.to_s)
-				if option.option_type == "color" or option.option_type == "image"
+				return nil unless params.include?(setting.install_key)
+				# actual values
+				if !params[setting.install_key][:iskey]
+					return nil unless ['color', 'image', 'text'].include?(setting.setting_type)
+					# escape backslashes and double quotes
+					replacement_value = params[setting.install_key][:value].gsub('\\', '\\\\\\\\').gsub('"', '\\"')
 					# we need to escape any backslashes in the *replacement* value, as things like \0 are interpreted as regex groups. we're escaping them to 2 backslashes, which gets doubled to 4 when interpreted by the regex system, then 8 by being a ruby string
-					c.gsub!("/*[[#{option.name}]]*/", params[option.parameter_id.to_s].gsub('\\','\\\\\\\\'))
-				elsif option.option_type == "dropdown"
-					selected_values = option.style_option_values.select {|v| v.parameter_id.to_s == params[option.parameter_id.to_s].to_s}
-					if !selected_values.empty?
-						# ditto above
-						c.gsub!("/*[[#{option.name}]]*/", selected_values[0].value.gsub('\\','\\\\\\\\'))
+					c.gsub!("/*[[#{setting.install_key}]]*/", replacement_value.gsub('\\','\\\\\\\\'))
+				else
+					selected_options = setting.style_setting_options.select {|v| v.install_key == params[setting.install_key][:value]}
+					if !selected_options.empty?
+						# ditto above, but not double quotes
+						c.gsub!("/*[[#{setting.install_key}]]*/", selected_options.first.value.gsub('\\','\\\\\\\\'))
 					end
 				end
 			end
@@ -899,7 +904,7 @@ Replace = "$STOP()"
 
 	def write_md5
 		filename = "#{MD5_PATH}#{self.id}.md5"
-		if !self.redirect_page.nil? or !self.style_options.empty? or self.style_code.nil?
+		if !self.redirect_page.nil? or !self.style_settings.empty? or self.style_code.nil?
 			# delete the file
 			begin
 				File.delete(filename)
@@ -972,26 +977,25 @@ Replace = "$STOP()"
 	# number of options will be a+b+c...
 	def lazy_code_possibilities
 		#puts "lazying it up\n"
-		option_possibilities = real_style_options.map { |option| option.possibilities }
-		defaults = option_possibilities.map { |p| p.first }
-		value_possibilities = [defaults]
-		(0..option_possibilities.size-1).each do |i|
+		setting_possibilities = real_style_settings.map { |setting| setting.possibilities }
+		defaults = setting_possibilities.map { |p| p.first }
+		option_possibilities = [defaults]
+		(0..setting_possibilities.size-1).each do |i|
 			# if there's other options than the first, let's try them all out
-			if option_possibilities[i].size > 1
-				(1..option_possibilities[i].size-1).each do |j|
+			if setting_possibilities[i].size > 1
+				(1..setting_possibilities[i].size-1).each do |j|
 					values = Array.new(defaults)
-					values[i] = option_possibilities[i][j]
-					value_possibilities << values
+					values[i] = setting_possibilities[i][j]
+					option_possibilities << values
 				end
 			end
 		end
 
-		#puts "#{value_possibilities.length} values\n"
 		codes = []
-		value_possibilities.each do |p|
+		option_possibilities.each do |p|
 			param_has = {}
-			(0..real_style_options.length-1).each do |i|
-				param_has[real_style_options[i].parameter_id.to_s] = p[i]
+			(0..real_style_settings.length-1).each do |i|
+				param_has[real_style_settings[i].install_key] = p[i]
 			end
 			codes << [param_has, optionned_code(param_has)]
 		end
@@ -1002,37 +1006,36 @@ Replace = "$STOP()"
 	# returns an array of (options, code) for all possibilities for this style (due to options). 
 	def code_possibilities
 		return [] if style_code.nil?
-		return [[{}, style_code.code]] if real_style_options.empty?
-		
+		return [[{}, style_code.code]] if real_style_settings.empty?
+
 		#puts "checking options\n"
-		option_possibilities = real_style_options.map { |option| option.possibilities }
+		setting_possibilities = real_style_settings.map { |setting| setting.possibilities }
 
 		# let's see if this going to be a reasonable number. if it's unreasonable, we'll be lazy
 		total_count = 1
-		option_possibilities.each do |p|
+		setting_possibilities.each do |p|
 			total_count = total_count * p.size
 		end
 		#puts "#{total_count} combinations\n"
 		return lazy_code_possibilities if total_count > $possibilities_limit
 
 		#puts "creating combinations\n"
-		value_possibilities = nil
-		option_possibilities.each do |p|
-			if value_possibilities.nil?
-				value_possibilities = p.map {|v| [v]}
+		option_possibilities = nil
+		setting_possibilities.each do |p|
+			if option_possibilities.nil?
+				option_possibilities = p.map {|v| [v]}
 			else
-				value_possibilities = value_possibilities.product(p)
+				option_possibilities = option_possibilities.product(p)
 			end
 		end
-		#puts "#{value_possibilities.length} value_possibilities"
 		codes = []
 
 		#puts "creating codes\n"
-		value_possibilities.each do |p|
+		option_possibilities.each do |p|
 			param_has = {}
 			p.flatten!
-			(0..real_style_options.length-1).each do |i|
-				param_has[real_style_options[i].parameter_id.to_s] = p[i]
+			(0..real_style_settings.length-1).each do |i|
+				param_has[real_style_settings[i].install_key] = p[i]
 			end
 			codes << [param_has, optionned_code(param_has)]
 		end
@@ -1166,7 +1169,7 @@ Replace = "$STOP()"
 	end
 
 	def refresh_meta
-		if self.style_options.empty?
+		if self.style_settings.empty?
 			self.style_sections = Style.parse_moz_docs_for_code(style_code.code)
 		else
 			self.style_sections = []
@@ -1240,7 +1243,7 @@ Replace = "$STOP()"
 	@_cached_doc_code_hash = nil
 	def get_docs_or_nil
 		return nil if style_code.nil?
-		return @_cached_docs if (!@_cached_docs.nil? and @_cached_doc_code_hash == style_code.code.hash + real_style_options.hash)
+		return @_cached_docs if (!@_cached_docs.nil? and @_cached_doc_code_hash == style_code.code.hash + real_style_settings.hash)
 		docs = []
 		cp = code_possibilities
 		#logger.debug "#{cp.length} possibilities"
@@ -1258,7 +1261,7 @@ Replace = "$STOP()"
 			docs << doc
 		end
 		@_cached_docs = docs
-		@_cached_doc_code_hash = style_code.code.hash + real_style_options.hash
+		@_cached_doc_code_hash = style_code.code.hash + real_style_settings.hash
 		#logger.debug "done docs"
 		return docs
 	end
@@ -1374,8 +1377,10 @@ private
 
 	# returns a set of references in the code to external resources (things references via url(), minus namespaces and -moz-documents)
 	def self.old_calculate_external_references_for_code(code)
-		
 		references = Set.new
+
+		return references if code.nil?
+
 		code = code.gsub(/[\r\n]+/, '')
 
 		code = StyleCode.strip_comments(code)

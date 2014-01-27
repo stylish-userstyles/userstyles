@@ -51,7 +51,7 @@ end %>
 	<div class="form-controls">
 		<label>Style Settings (Optional)</label> <span class="linking-note"><a href="/help/coding#help-style-settings">Need help with style settings?</a></span>
 		<ul id="edit-style-settings">
-			<li id="new-setting"><input type="button" onclick="addTextSetting('text', false, '', '');return false" value="New Text Setting"> <input type="button" onclick="addTextSetting('image', false, '', '');return false" value="New Image Setting"> <input type="button" onclick="return addColorSetting('', '', null);" value="New Color Setting"></li>
+			<li id="new-setting"><input type="button" onclick="addOptionnedSetting('dropdown', false, '', '');return false" value="New Drop-Down Setting"> <input type="button" onclick="return addOptionlessSetting('color', '', '', null);" value="New Color Setting"> <input type="button" onclick="addOptionlessSetting('text', '', '', null);return false" value="New Text Setting"> <input type="button" onclick="addOptionnedSetting('image', false, '', '');return false" value="New Image Setting"></li>
 		</ul>
 		<script>
 			var settings = document.getElementById("edit-style-settings")
@@ -65,58 +65,70 @@ end %>
 				return f;
 			}
 
-			function addTextSetting(type, fromServer, name, placeholder) {
-				var code = '<li class="edit-settingType-setting"><input name="setting-display-name-fakeId" placeholder="Label" required maxlength="100" value="passedName"> <input name="setting-name-fakeId" placeholder="Placeholder" required maxlength="20" value="passedPlaceholder"><input type="hidden" name="style_options_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="serverSettingType"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(this.parentNode);" value="✖"><ul id="edit-style-options-fakeId" class="edit-style-options"><li class="new-option"><input type="button" onclick="return addTextOptionEvent(event, \'settingType\', fakeId, \'\', \'\', false)" value="Add Option"></li></ul></li>'
+			function addOptionnedSetting(type, fromServer, label, installKey) {
+				var code = '<li class="edit-settingType-setting"><div class="edit-setting"><div class="edit-setting-buttons"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(event);" value="✖"></div><input name="setting-label-fakeId" placeholder="Label" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key" required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"></div><ul id="edit-style-options-fakeId" class="edit-style-options"><li class="new-option"><input type="button" onclick="return addTextOptionEvent(event, \'settingType\', fakeId, \'\', \'\', \'\', false)" value="Add Option"></li></ul></li>'
 				var id = getFakeId();
-				var serverSettingType = type == 'text' ? 'dropdown' : type;
-				code = code.replace(/fakeId/g, id).replace(/settingType/g, type).replace(/serverSettingType/g, serverSettingType).replace(/passedName/g, name).replace(/passedPlaceholder/g, placeholder);
+				code = code.replace(/fakeId/g, id).replace(/settingType/g, type).replace(/passedLabel/g, label).replace(/passedInstallKey/g, installKey);
 				settings.insertBefore(html(code), newSetting);
-				if (!fromServer && type == 'text') {
+				if (!fromServer && type == 'dropdown') {
 					var optionsContainer = newSetting.previousSibling.querySelector("ul");
-					addTextOption(optionsContainer, type, id, '', '', false);
-					addTextOption(optionsContainer, type, id, '', '', false);
+					addTextOption(optionsContainer, type, id, '', '', '', false);
+					addTextOption(optionsContainer, type, id, '', '', '', false);
 				}
 				updateSettingButtons();
 				return id;
 			}
 
-			function addColorSetting(name, placeholder, defaultValue) {
-				var code = '<li class="edit-color-setting"><input name="setting-display-name-fakeId" placeholder="Label" required maxlength="100" value="passedName"> <input name="setting-name-fakeId" placeholder="Placeholder" required maxlength="20" value="passedPlaceholder"><input type="hidden" name="style_options_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="color"> <label for="option-default-fakeId">Default</label> <input type="text" class="color {hash:true,required:false}" id="option-default-fakeId" name="option-default-fakeId" value="" size="7" maxlength="7"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(this.parentNode);" value="✖"></li>';
+			function addOptionlessSetting(type, label, installKey, defaultValue) {
+				var code = '<li class="edit-settingType-setting"><input name="setting-label-fakeId" placeholder="Label" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key" required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"> <label for="option-default-fakeId">Default</label> ';
+				if (type == "color") {
+					code += '<input type="text" class="color {hash:true,required:false}" id="option-default-fakeId" name="option-default-fakeId" value="" size="7" maxlength="7">';
+				} else {
+					code += '<input type="text" id="option-default-fakeId" name="option-default-fakeId" value="" size="20" maxlength="20">';
+				}
+				code += '<input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(event);" value="✖"></li>';
 				var fakeId = getFakeId();
-				code = code.replace(/fakeId/g, fakeId).replace(/passedName/g, name).replace(/passedPlaceholder/g, placeholder);
+				code = code.replace(/fakeId/g, fakeId).replace(/settingType/g, type).replace(/passedLabel/g, label).replace(/passedInstallKey/g, installKey);
 				settings.insertBefore(html(code), newSetting);
-				var defaultField = document.getElementById("option-default-" + fakeId);
-				new jscolor.color(defaultField, {hash:true,required:true});
-				if (defaultValue) {
-					defaultField.value = defaultValue;
+				if (type == "color") {
+					var defaultField = document.getElementById("option-default-" + fakeId);
+					new jscolor.color(defaultField, {hash:true,required:true});
+					if (defaultValue) {
+						defaultField.value = defaultValue;
+					}
 				}
 				updateSettingButtons();
 			}
 
-			function addTextOptionEvent(e, type, fakeId, label, value, isDefault) {
-				addTextOption(getParent(e.target, "ul"), type, fakeId, label, value, isDefault);
+			function addTextOptionEvent(e, type, fakeId, label, installKey, value, isDefault) {
+				addTextOption(getParent(e.target, "ul"), type, fakeId, label, installKey, value, isDefault);
 			}
 
-			function addTextOption(ul, type, fakeId, label, value, isDefault) {
-				var code = '<li><div style="display: inline-block; vertical-align: top"><input name="option-display-name-fakeId[]" required maxlength="100" onchange="modifyValueName(event)" placeholder="Label" value="passedLabel"><br><input type="radio" name="option-default-fakeId" value="passedLabel"' + (isDefault ? 'checked' : '') + '> Default</div>';
-				if (type == 'text') {
-					code += '<textarea name="option-value-fakeId[]" rows="5" placeholder="Code">passedValue</textarea>';
-				} else {
-					code += '<input name="option-value-fakeId[]" type="url" placeholder="URL" value="passedValue">';
+			function addTextOption(ul, type, fakeId, label, installKey, value, isDefault) {
+				var code = '<li><div class="edit-option"><div class="edit-option-buttons"><input class="move-option-up" type="button" onclick="moveOption(event, true);return false;" value="↑"> <input class="move-option-down" type="button" onclick="moveOption(event, false);return false;" value="↓"> <input class="remove-option" type="button" onclick="removeTextOption(event);return false;" value="✖"></div><input name="option-label-fakeId[]" required maxlength="100" placeholder="Label" value="passedLabel"><input name="option-install-key-fakeId[]" required maxlength="20" placeholder="Install Key" value="passedInstallKey" onchange="modifyInstallKey(event)"><input type="radio" name="option-default-fakeId" value="passedInstallKey"' + (isDefault ? 'checked' : '') + '> Default</div>';
+				switch (type) {
+					case 'dropdown':
+						code += '<textarea name="option-value-fakeId[]" rows="5" placeholder="Code">passedValue</textarea>';
+						break;
+					case 'image':
+						code += '<input class="edit-option-value-url" name="option-value-fakeId[]" type="url" placeholder="URL" value="passedValue">';
+						break;
 				}
-				code += '<div style="display: inline-block; vertical-align: top"><input class="move-option-up" type="button" onclick="moveOption(event, true);return false;" value="↑"> <input class="move-option-down" type="button" onclick="moveOption(event, false);return false;" value="↓"> <input class="remove-option" type="button" onclick="removeTextOption(this.parentNode.parentNode);return false;" value="✖"></div></li>'
-				code = code.replace(/fakeId/g, fakeId).replace(/passedLabel/g, label).replace(/passedValue/g, value);
+				code += '</li>'
+				code = code.replace(/fakeId/g, fakeId).replace(/passedLabel/g, label).replace(/passedValue/g, value).replace(/passedInstallKey/g, installKey);
 				ul.insertBefore(html(code), ul.lastChild);
 				ensureDefault(ul);
 				updateOptionButtons(ul);
 			}
 
-			function removeSetting(li) {
+			function removeSetting(event) {
+				var li = getParent(event.target, "li");
 				removeEntry(li);
 				updateSettingButtons();
 			}
 
-			function removeTextOption(li) {
+			function removeTextOption(event) {
+				var li = getParent(event.target, "li");
 				var p = li.parentNode;
 				removeEntry(li);
 				ensureDefault(p);
@@ -188,7 +200,7 @@ end %>
 			}
 
 			function getFakeId() {
-				var fakeIdElements = document.querySelectorAll("input[name='style_options_ids[]']");
+				var fakeIdElements = document.querySelectorAll("input[name='style_settings_ids[]']");
 				var fakeId;
 				if (fakeIdElements.length == 0) {
 					return 100;
@@ -235,8 +247,8 @@ end %>
 				// remember the default selections. changing the names will change them
 				var default1 = row.querySelector("input:checked");
 				var default2 = switchRow.querySelector("input:checked");
-				var identifierInput = row.querySelector("input[name='style_options_ids[]']");
-				var switchIdentifierInput = switchRow.querySelector("input[name='style_options_ids[]']");
+				var identifierInput = row.querySelector("input[name='style_settings_ids[]']");
+				var switchIdentifierInput = switchRow.querySelector("input[name='style_settings_ids[]']");
 				var from = identifierInput.value;
 				var to = switchIdentifierInput.value;
 				switchIdentifiers(row, from, to);
@@ -280,7 +292,7 @@ end %>
 				}
 			}
 
-			function modifyValueName(e) {
+			function modifyInstallKey(e) {
 				// update the default radio button's value
 				var input = e.target.parentNode.parentNode.querySelector("input[type='radio']");
 				input.value = e.target.value;
@@ -288,18 +300,17 @@ end %>
 
 			var lastId = null;
 			<%
-			@new_style_options = @style.style_options if @new_style_options.nil? and !@style.nil? 
-			if @new_style_options
-				@new_style_options.each do |option|
-					if option.option_type == 'dropdown' or option.option_type == 'image'
-						js_type = option.option_type == 'dropdown' ? 'text' : 'image' %>
-						lastId = addTextSetting('<%=js_type%>', true, '<%=escape_javascript(h(option.display_name))%>', '<%=escape_javascript(h(option.name))%>');
-						<% option.style_option_values.each do |sov| %>
-							addTextOption(document.getElementById('edit-style-options-' + lastId), '<%=js_type%>', lastId, '<%=escape_javascript(h(sov.display_name))%>', '<%=escape_javascript(h(sov.value))%>', <%=sov.default%>);
+			@new_style_settings = @style.style_settings if @new_style_settings.nil? and !@style.nil? 
+			if @new_style_settings
+				@new_style_settings.each do |setting|
+					if setting.setting_type == 'dropdown' or setting.setting_type == 'image' %>
+						lastId = addOptionnedSetting('<%=setting.setting_type%>', true, '<%=escape_javascript(setting.label)%>', '<%=escape_javascript(setting.install_key)%>');
+						<% setting.style_setting_options.each do |sov| %>
+							addTextOption(document.getElementById('edit-style-options-' + lastId), '<%=setting.setting_type%>', lastId, '<%=escape_javascript(sov.label)%>', '<%=escape_javascript(sov.install_key)%>', '<%=escape_javascript(sov.value)%>', <%=sov.default%>);
 						<% end
 					else
-						defaultValue = option.style_option_values.first.value unless option.style_option_values.empty? %>
-						lastId = addColorSetting('<%=escape_javascript(h(option.display_name))%>', '<%=escape_javascript(h(option.name))%>', '<%=escape_javascript(h(defaultValue))%>');
+						defaultValue = setting.style_setting_options.first.value unless setting.style_setting_options.empty? %>
+						lastId = addOptionlessSetting('<%=setting.setting_type%>', '<%=escape_javascript(setting.label)%>', '<%=escape_javascript(setting.install_key)%>', '<%=escape_javascript(defaultValue)%>');
 					<% end
 				end	
 			end %>

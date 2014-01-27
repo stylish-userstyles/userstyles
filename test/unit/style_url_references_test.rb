@@ -181,11 +181,11 @@ AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO\
 		style.style_code.code = <<-END_OF_STRING
 			* { background-image: url(/*[[setting]]*/); }
 		END_OF_STRING
-		so = StyleOption.new
-		so.option_type = 'image'
-		so.name = 'setting'
-		so.display_name = 'my setting'
-		style.style_options << so
+		ss = StyleSetting.new
+		ss.setting_type = 'image'
+		ss.install_key = 'setting'
+		ss.label = 'my setting'
+		style.style_settings << ss
 		assert style.valid?, style.errors.values
 	end
 	

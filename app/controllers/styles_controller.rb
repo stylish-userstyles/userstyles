@@ -18,7 +18,7 @@ class StylesController < ApplicationController
 			format.html {
 				begin
 					@style = Rails.cache.fetch "styles/show/#{params[:id]}" do
-						Style.includes([:user, {:style_options => :style_option_values}, :screenshots, :admin_delete_reason, {:discussions => {:original_forum_poster => :users}}]).find(params[:id])
+						Style.includes([:user, {:style_settings => :style_setting_options}, :screenshots, :admin_delete_reason, {:discussions => {:original_forum_poster => :users}}]).find(params[:id])
 					end
 				rescue ActiveRecord::RecordNotFound
 					@no_ads = true
@@ -51,11 +51,11 @@ class StylesController < ApplicationController
 				@page_header = @style.short_description
 				@page_title = @page_title + " - Themes and Skins for " + @style.subcategory.capitalize unless @style.subcategory.nil?
 				@header_include = "<link rel='stylish-code' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n<script>document.querySelector(\"link[rel='stylish-code']\").setAttribute('href', '#stylish-code');</script>\n<link rel='stylish-description' href='#stylish-description'/>\n".html_safe
-				if @style.style_options.empty? 
+				if @style.style_settings.empty? 
 					@header_include += "<link rel='stylish-md5-url' href='http://#{UPDATE_DOMAIN}/#{@style.id}.md5'/>\n<link rel='stylish-update-url' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n".html_safe
 				else
-					@style.style_options.each do |option|
-						if option.option_type == "color"
+					@style.style_settings.each do |s|
+						if s.setting_type == "color"
 							@header_include += "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 							break
 						end
@@ -80,7 +80,7 @@ class StylesController < ApplicationController
 			}
 			format.css {
 				begin
-					style = Style.includes([:style_code, {:style_options => :style_option_values}]).find(params[:id])
+					style = Style.includes([:style_code, {:style_settings => :style_setting_options}]).find(params[:id])
 				rescue ActiveRecord::RecordNotFound
 					render :nothing => true, :status => 404
 					return
@@ -97,7 +97,7 @@ class StylesController < ApplicationController
 			}
 			format.json {
 				begin
-					style = Style.includes([:user, :style_code, {:style_options => :style_option_values}]).find(params[:id])
+					style = Style.includes([:user, :style_code, {:style_settings => :style_setting_options}]).find(params[:id])
 				rescue ActiveRecord::RecordNotFound
 					render :nothing => true, :status => 404
 					return
@@ -135,7 +135,7 @@ class StylesController < ApplicationController
 	end
 
 	def edit
-		@style = Style.includes(:style_code, :screenshots, {:style_options => :style_option_values}).find(params["id"])
+		@style = Style.includes(:style_code, :screenshots, {:style_settings => :style_setting_options}).find(params["id"])
 		@no_bots = true
 		@page_title = "Editing " + @style.short_description
 		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/lightbox.js'></script>\n".html_safe
@@ -491,7 +491,7 @@ class StylesController < ApplicationController
 			return
 		end
 		begin
-			style = Style.includes([{:style_sections => :style_section_rules}, {:style_options => :style_option_values}]).find(params["id"])
+			style = Style.includes([{:style_sections => :style_section_rules}, {:style_settings => :style_setting_options}]).find(params["id"])
 		rescue ActiveRecord::RecordNotFound
 			render :nothing => true, :status => 404
 			return
@@ -540,7 +540,7 @@ class StylesController < ApplicationController
 
 	def chrome_json
 		begin
-			style = Style.includes([{:style_sections => :style_section_rules}, {:style_options => :style_option_values}]).find(params[:id])
+			style = Style.includes([{:style_sections => :style_section_rules}, {:style_settings => :style_setting_options}]).find(params[:id])
 		rescue ActiveRecord::RecordNotFound
 			render :nothing => true, :status => 404
 			return
@@ -693,18 +693,26 @@ protected
 		return style.user_id == user_id
 	end
 
+	# Returns the style setting parameters in the format { settinginstallkey => {:iskey => boolean, :value => (optioninstallkey | literalvalue)}}
 	def get_option_params
 		op = {}
 		params.each do |k,v|
-			if k.index("option-") == 0
-				op[k[7, k.length]] = v
+			if k.index("ik-") == 0
+				op[k[3, k.length]] = v
 			end
 		end
 		if !flash[:settings].nil?
 			flash[:settings].each do |k,v|
-				if k.index("option-") == 0
-					op[k[7, k.length]] = v
+				if k.index("ik-") == 0
+					op[k[3, k.length]] = v
 				end
+			end
+		end
+		op.each do |k,v|
+			if v.start_with?('ik-')
+				op[k] = {:iskey => true, :value => v[3, v.length]}
+			else
+				op[k] = {:iskey => false, :value => v}
 			end
 		end
 		return op
@@ -801,7 +809,7 @@ private
 			@style["updated"] = now
 			@style.style_code = StyleCode.new
 		else
-			@style = Style.includes([{:style_options => :style_option_values}, :screenshots]).find(params["style"]["id"])
+			@style = Style.includes([{:style_settings => :style_setting_options}, :screenshots]).find(params["style"]["id"])
 			#only mark it as updated if the css changed
 			if @style.style_code.code != params["style"]["css"]
 				@style.updated = DateTime.now
@@ -855,75 +863,95 @@ private
 			end
 		end
 
-		# @new_style_options will be read by the edit page in case of a validation fail because setting 
-		# @style.style_options saves immediately.
-		@new_style_options = []
-		if !params['style_options_ids'].nil?
-			params['style_options_ids'].each do |style_option_id|
-				so = StyleOption.new
-				so.display_name = params["setting-display-name-#{style_option_id}"]
-				so.name = params["setting-name-#{style_option_id}"]
-				so.option_type = params["setting-type-#{style_option_id}"]
-				so.ordinal = style_option_id
-				if so.option_type == "dropdown" or so.option_type == "image"
-					if !params["option-display-name-#{style_option_id}"].nil?
-						(0..(params["option-display-name-#{style_option_id}"].size - 1)).each do |i|
-							sov = StyleOptionValue.new
-							sov.display_name = params["option-display-name-#{style_option_id}"][i]
-							sov.value = params["option-value-#{style_option_id}"][i]
-							sov.default = sov.display_name == params["option-default-#{style_option_id}"]
-							sov.ordinal = i
-							so.style_option_values << sov
+		# @new_style_settings will be read by the edit page in case of a validation fail because setting 
+		# @style.style_settings saves immediately.
+		@new_style_settings = []
+		if !params['style_settings_ids'].nil?
+			params['style_settings_ids'].each do |style_setting_id|
+				ss = StyleSetting.new
+				ss.label = params["setting-label-#{style_setting_id}"]
+				ss.install_key = params["setting-install-key-#{style_setting_id}"]
+				ss.setting_type = params["setting-type-#{style_setting_id}"]
+				ss.ordinal = style_setting_id
+				if ss.setting_type == "dropdown" or ss.setting_type == "image"
+					if !params["option-label-#{style_setting_id}"].nil?
+						(0..(params["option-label-#{style_setting_id}"].size - 1)).each do |i|
+							so = StyleSettingOption.new
+							so.label = params["option-label-#{style_setting_id}"][i]
+							so.install_key = params["option-install-key-#{style_setting_id}"][i]
+							so.value = params["option-value-#{style_setting_id}"][i]
+							so.default = so.install_key == params["option-default-#{style_setting_id}"]
+							so.ordinal = i
+							ss.style_setting_options << so
 						end
 					end
 				else
-					sov = StyleOptionValue.new
-					sov.display_name = 'placeholder'
-					sov.value = params["option-default-#{style_option_id}"]
-					sov.default = true
-					sov.ordinal = 1
-					so.style_option_values << sov
+					# this just represents the default value and not an actual option
+					so = StyleSettingOption.new
+					so.label = 'placeholder'
+					so.install_key = 'placeholder'
+					so.value = params["option-default-#{style_setting_id}"]
+					so.default = true
+					so.ordinal = 1
+					ss.style_setting_options << so
 				end
-				@new_style_options << so
+				@new_style_settings << ss
 			end
 		end
 
-		# let's also verify a name isn't reused. we can't rely on 
+		# let's also verify an install_key isn't reused. we can't rely on 
 		# rails validations because they only work after the style
 		# is saved
-		style_option_used_names = []
-		@new_style_options.each do |style_option|
-			if style_option_used_names.include?(style_option.name)
-				non_ar_errors << ["style options", "contain duplicate placeholder '#{style_option.name}'"]
+		style_setting_used_install_keys = []
+		@new_style_settings.each do |style_setting|
+			style_setting.valid?
+			style_setting.errors.each do |attr, msg|
+				non_ar_errors << ["style setting #{attr}", msg]
+			end
+			if style_setting_used_install_keys.include?(style_setting.install_key)
+				non_ar_errors << ["style settings", "contain duplicate install key '#{style_setting.install_key}'"]
 			else
-				style_option_used_names << style_option.name
+				style_setting_used_install_keys << style_setting.install_key
+			end
+			style_setting_options_used_install_keys = []
+			style_setting.style_setting_options.each do |so|
+				so.valid?
+				so.errors.each do |attr, msg|
+					non_ar_errors << ["style setting option #{attr}", msg]
+				end
+				so.errors.clear
+				if style_setting_options_used_install_keys.include?(so.install_key)
+					non_ar_errors << ["style setting options", "contain duplicate install key '#{so.install_key}'"]
+				else
+					style_setting_options_used_install_keys << so.install_key
+				end
 			end
 		end
-		
+
 		begin
-		
+
 			# db doesn't support transactions, so we can't use rails transactions.
-			# when we set the options just below, they will attempt to save immediately,
-			# which can result in the options being saved but the style itself not.
-			# to try to prevent this, check validity first. we'll set the options on a temp
+			# when we set the setting just below, they will attempt to save immediately,
+			# which can result in the settings being saved but the style itself not.
+			# to try to prevent this, check validity first. we'll set the settings on a temp
 			# object for the code validator to use
-			@style.tmp_style_options = @new_style_options
+			@style.tmp_style_settings = @new_style_settings
 
 			@style.refresh_meta
-			
+
 			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or !$tld_specific_bad_domains.index{|d| @style.style_code.code.include?(d)}.nil?
 				@style.errors.add("Styles", "for adult sites are not allowed on userstyles.org.")
 			end
 
-			raise ActiveRecord::RecordInvalid.new(@style) if !@style.valid? or !non_ar_errors.empty?
+			raise ActiveRecord::RecordInvalid.new(@style) if !non_ar_errors.empty? or !@style.valid?
 
-			@style.tmp_style_options = nil
-			@style.style_options.destroy_all
-			@style.style_options = @new_style_options
+			@style.tmp_style_settings = nil
+			@style.style_settings.destroy_all
+			@style.style_settings = @new_style_settings
 
 			@style.save!
 			@style.style_code.save!
-			
+
 		rescue ActiveRecord::RecordInvalid
 			non_ar_errors.each do |attr, msg|
 				@style.errors.add(attr, msg)
