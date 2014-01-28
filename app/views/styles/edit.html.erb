@@ -66,7 +66,7 @@ end %>
 			}
 
 			function addOptionnedSetting(type, fromServer, label, installKey) {
-				var code = '<li class="edit-settingType-setting"><div class="edit-setting"><div class="edit-setting-buttons"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(event);" value="✖"></div><input name="setting-label-fakeId" placeholder="Label" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key" required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"></div><ul id="edit-style-options-fakeId" class="edit-style-options"><li class="new-option"><input type="button" onclick="return addTextOptionEvent(event, \'settingType\', fakeId, \'\', \'\', \'\', false)" value="Add Option"></li></ul></li>'
+				var code = '<li class="edit-settingType-setting"><div class="edit-setting"><div class="edit-setting-buttons"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(event);" value="✖"></div><input name="setting-label-fakeId" placeholder="Label" title="Label displayed to the user" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key" title="Install key - matches the placeholder comment in your code" required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"></div><ul id="edit-style-options-fakeId" class="edit-style-options"><li class="new-option"><input type="button" onclick="return addTextOptionEvent(event, \'settingType\', fakeId, \'\', \'\', \'\', false)" value="Add Option"></li></ul></li>'
 				var id = getFakeId();
 				code = code.replace(/fakeId/g, id).replace(/settingType/g, type).replace(/passedLabel/g, label).replace(/passedInstallKey/g, installKey);
 				settings.insertBefore(html(code), newSetting);
@@ -80,7 +80,7 @@ end %>
 			}
 
 			function addOptionlessSetting(type, label, installKey, defaultValue) {
-				var code = '<li class="edit-settingType-setting"><input name="setting-label-fakeId" placeholder="Label" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key" required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"> <label for="option-default-fakeId">Default</label> ';
+				var code = '<li class="edit-settingType-setting"><input name="setting-label-fakeId" placeholder="Label" title="Label displayed to the user" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key"  title="Install key - matches the placeholder comment in your code"required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"> <label for="option-default-fakeId">Default</label> ';
 				if (type == "color") {
 					code += '<input type="text" class="color {hash:true,required:false}" id="option-default-fakeId" name="option-default-fakeId" value="" size="7" maxlength="7">';
 				} else {
@@ -105,13 +105,13 @@ end %>
 			}
 
 			function addTextOption(ul, type, fakeId, label, installKey, value, isDefault) {
-				var code = '<li><div class="edit-option"><div class="edit-option-buttons"><input class="move-option-up" type="button" onclick="moveOption(event, true);return false;" value="↑"> <input class="move-option-down" type="button" onclick="moveOption(event, false);return false;" value="↓"> <input class="remove-option" type="button" onclick="removeTextOption(event);return false;" value="✖"></div><input name="option-label-fakeId[]" required maxlength="100" placeholder="Label" value="passedLabel"><input name="option-install-key-fakeId[]" required maxlength="20" placeholder="Install Key" value="passedInstallKey" onchange="modifyInstallKey(event)"><input type="radio" name="option-default-fakeId" value="passedInstallKey"' + (isDefault ? 'checked' : '') + '> Default</div>';
+				var code = '<li><div class="edit-option"><div class="edit-option-buttons"><input class="move-option-up" type="button" onclick="moveOption(event, true);return false;" value="↑"> <input class="move-option-down" type="button" onclick="moveOption(event, false);return false;" value="↓"> <input class="remove-option" type="button" onclick="removeTextOption(event);return false;" value="✖"></div><input name="option-label-fakeId[]" required maxlength="100" placeholder="Label" title="Label displayed to the user" value="passedLabel"><input name="option-install-key-fakeId[]" required maxlength="20" placeholder="Install Key" title="Install key - used to keep track of selections when the user updates" value="passedInstallKey" onchange="modifyInstallKey(event)"><input type="radio" name="option-default-fakeId" value="passedInstallKey"' + (isDefault ? 'checked' : '') + '> Default</div>';
 				switch (type) {
 					case 'dropdown':
-						code += '<textarea name="option-value-fakeId[]" rows="5" placeholder="Code">passedValue</textarea>';
+						code += '<textarea name="option-value-fakeId[]" rows="5" placeholder="Code" title="Code inserted into your CSS">passedValue</textarea>';
 						break;
 					case 'image':
-						code += '<input class="edit-option-value-url" name="option-value-fakeId[]" type="url" placeholder="URL" value="passedValue">';
+						code += '<input class="edit-option-value-url" name="option-value-fakeId[]" type="url" placeholder="URL" title="URL inserted into your CSS" value="passedValue">';
 						break;
 				}
 				code += '</li>'
