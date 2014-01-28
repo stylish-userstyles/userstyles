@@ -152,7 +152,7 @@ function getOptions(promptOnIncomplete) {
 
 function toQueryString(optionsArray) {
 	return optionsArray.map(function(a) {
-		return a[0] + "=" + encodeURIComponent(a[1]);
+		return encodeURIComponent(a[0]) + "=" + encodeURIComponent(a[1]);
 	}).join("&");
 }
 
