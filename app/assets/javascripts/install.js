@@ -173,18 +173,20 @@ function stylishInstall(event) {
 	loadCode(stylishInstall2, true);
 }
 function stylishInstall2() {
-	fireCustomEvent("stylishInstall");
+	updateLinkThenFire("stylish-update-url", "stylishInstall");
 }
 function stylishInstallIE(event) {
-	fireCustomEvent("stylishInstall");
+	updateLinkThenFire("stylish-update-url", "stylishInstall");
 }
 
 function updateLinkThenFire(linkRel, eventName) {
 	var options = getOptions(true);
 	if (options != null) {
 		var link = document.querySelector("link[rel='" + linkRel + "']");
-		var url = link.href.split("?")[0];
-		link.setAttribute("href", url + "?" + toQueryString(options));
+		if (link) {
+			var url = link.href.split("?")[0];
+			link.setAttribute("href", url + "?" + toQueryString(options));
+		}
 		fireCustomEvent(eventName);
 	}
 }
@@ -207,8 +209,7 @@ function stylishUpdate() {
 }
 function stylishUpdate2() {
 	var stylishEvent = document.createEvent("Events");
-	stylishEvent.initEvent("stylishUpdate", false, false, window, null);
-	document.dispatchEvent(stylishEvent);
+	updateLinkThenFire("stylish-update-url", "stylishUpdate");
 }
 
 function fireCustomEvent(name) {
@@ -365,8 +366,13 @@ function genericStyleCanBeInstalled(panel) {
 	stylishActivatedPanel = panel;
 }
 
-function styleAlreadyInstalled() {
-	styleInstalled();
+function styleAlreadyInstalled(event) {
+	// assuming anything with settings can be updated if already installed
+	if (styleHasSettings()) {
+		styleCanBeUpdated(event);
+	} else {
+		styleInstalled();
+	}
 }
 function styleAlreadyInstalledChrome() {
 	styleInstalledChrome();
@@ -375,18 +381,76 @@ function styleAlreadyInstalledOpera() {
 	styleInstalledOpera();
 }
 
-function styleCanBeUpdated() {
-	genericStyleCanBeUpdated("stylish-installed-style-needs-update");
+function styleCanBeUpdated(event) {
+	genericStyleCanBeUpdated("stylish-installed-style-needs-update", "detail" in event ? event.detail : null);
 }
 function styleCanBeUpdatedChrome() {
-	genericStyleCanBeUpdated("stylish-installed-style-needs-update-chrome");
+	genericStyleCanBeUpdated("stylish-installed-style-needs-update-chrome", null);
 }
 function styleCanBeUpdatedOpera() {
-	genericStyleCanBeUpdated("stylish-installed-style-needs-update-opera");
+	genericStyleCanBeUpdated("stylish-installed-style-needs-update-opera", null);
 }
-function genericStyleCanBeUpdated(panel) {
+function genericStyleCanBeUpdated(panel, detail) {
 	switchToPanel(panel);
 	stylishActivatedPanel = panel;
+	if (detail && "updateUrl" in detail) {
+		var params = parseQueryString(detail.updateUrl);
+		for (var i in params) {
+			setFormValue(i, params[i]);
+		}
+	}
+}
+
+function setFormValue(name, value) {
+	var els = document.getElementsByName(name);
+	if (els.length == 0) {
+		return;
+	}
+	var firstEl = els.item(0);
+	if (firstEl.nodeName.toLowerCase() == "input") {
+		if (firstEl.type == "text") {
+			firstEl.value = value;
+			return;
+		}
+		if (firstEl.type == "radio") {
+			for (var i = 0; i < els.length; i++) {
+				if (els.item(i).value == value) {
+					els.item(i).checked = true;
+					return;
+				}
+				if (els.item(i).hasAttribute("data-related-input")) {
+					els.item(i).checked = true;
+					document.getElementById(els.item(i).getAttribute("data-related-input")).value = value;
+					return;
+				}
+			}
+		}
+		return;
+	}
+	if (firstEl.nodeName.toLowerCase() == "select") {
+		firstEl.value = value;
+	}
+}
+
+function parseQueryString(url) {
+	var paramMap = {};
+	var urlParts = url.split("?");
+	if (urlParts.length != 2) {
+		return paramMap;
+	}
+	var queryString = urlParts[1];
+	var paramStrings = queryString.split("&");
+	for (var i = 0; i < paramStrings.length; i++) {
+		var paramParts = paramStrings[i].split("=");
+		if (paramParts.length == 2) {
+			paramMap[decodeURIComponent(paramParts[0])] = decodeURIComponent(paramParts[1]);
+		}
+	}
+	return paramMap;
+}
+
+function styleHasSettings() {
+	return document.getElementById("style-settings") != null;
 }
 
 function initInstall() {
@@ -487,8 +551,7 @@ function addStylishListeners() {
 	addCustomEventListener("styleCanBeUpdatedOpera", styleCanBeUpdatedOpera);
 	addCustomEventListener("styleLoadCode", function() {
 		if (!loadCode(codeLoaded, false)) {
-			// if this returns false, then it has options. if the user has it installed (even with different options), mark it as installed
-			styleInstalled();
+			codeCantBeLoaded();
 		}
 	});
 	// defined in standard_layout.html.erb, see note there.
@@ -558,6 +621,12 @@ function installStylishChrome(event) {
 function codeLoaded() {
 	var stylishEvent = document.createEvent("Events");
 	stylishEvent.initEvent("stylishCodeLoaded", false, false, window, null);
+	document.dispatchEvent(stylishEvent);
+}
+
+function codeCantBeLoaded() {
+	var stylishEvent = document.createEvent("Events");
+	stylishEvent.initEvent("stylishCodeCantBeLoaded", false, false, window, null);
 	document.dispatchEvent(stylishEvent);
 }
 

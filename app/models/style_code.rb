@@ -7,10 +7,6 @@ class StyleCode < ActiveRecord::Base
 		StyleCode.get_old_style_rules(self.code)
 	end
 
-	def md5
-		Digest::MD5.hexdigest(code)
-	end
-
 	def old_parse_moz_docs
 		#strip whitespace and comments
 		clean_code = self.code.gsub(/\/\*.*?\*\//m, '')#.gsub(/(\r\n|[\r\n])/, '\n')

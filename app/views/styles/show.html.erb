@@ -102,7 +102,7 @@
 								<% setting.style_setting_options.each do |option|%>
 									<li><input type="radio" id="option-<%=option.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option" <%if option.default%>checked<%end%> value="ik-<%=option.install_key%>"> <label for="option-<%=option.id%>"><%=option.label%></label> <a href="<%=option.value%>" rel="lightbox[option-<%=option.id%>] nofollow" title="<%=option.label%>">See it</a></li>
 								<% end %>
-								<li><input type="radio" id="option-url-choice-<%=setting.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option" value="user-url" <%if setting.style_setting_options.empty?%>checked<%end%>> <label for="option-url-choice-<%=setting.id%>">Provide your own</label> <input id="option-user-url-<%=setting.id%>" class="option-user-url" type="url" placeholder="URL"></li>
+								<li><input type="radio" id="option-url-choice-<%=setting.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option" value="user-url" <%if setting.style_setting_options.empty?%>checked<%end%> data-related-input="option-user-url-<%=setting.id%>"> <label for="option-url-choice-<%=setting.id%>">Provide your own</label> <input id="option-user-url-<%=setting.id%>" class="option-user-url" type="url" placeholder="URL"></li>
 								<li class="upload-control"><input type="radio" id="option-upload-choice-<%=setting.id%>" name="ik-<%=setting.install_key%>" class="style-setting-option" value="user-upload"> <label for="option-upload-choice-<%=setting.id%>">Upload your own</label> <input id="option-user-upload-<%=setting.id%>" class="option-user-upload" type="file" accept="image/*"></li>
 							</ul>
 						</li>

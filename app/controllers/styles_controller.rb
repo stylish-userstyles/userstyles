@@ -50,18 +50,31 @@ class StylesController < ApplicationController
 				@page_title = @style.short_description
 				@page_header = @style.short_description
 				@page_title = @page_title + " - Themes and Skins for " + @style.subcategory.capitalize unless @style.subcategory.nil?
-				@header_include = "<link rel='stylish-code' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n<script>document.querySelector(\"link[rel='stylish-code']\").setAttribute('href', '#stylish-code');</script>\n<link rel='stylish-description' href='#stylish-description'/>\n".html_safe
-				if @style.style_settings.empty? 
-					@header_include += "<link rel='stylish-md5-url' href='http://#{UPDATE_DOMAIN}/#{@style.id}.md5'/>\n<link rel='stylish-update-url' href='#{url_for(:id => params['id'], :host => DOMAIN)}.css'/>\n".html_safe
-				else
-					@style.style_settings.each do |s|
-						if s.setting_type == "color"
-							@header_include += "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
-							break
-						end
+				@header_include = <<-THEEND
+					<link rel="stylish-code" href="#{url_for(:id => params['id'], :host => DOMAIN)}.css">
+					<script>document.querySelector("link[rel='stylish-code']").setAttribute("href", "#stylish-code");</script>
+					<link rel="stylish-description" href="#stylish-description">
+					<link rel="stylish-install-ping-url" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN)}">
+					<link rel="stylish-install-ping-url-chrome" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN)}">
+					<link rel="stylish-install-ping-url-opera" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN)}">
+					<link rel="stylish-code-ie" href="#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN))}">
+					<link rel="stylish-code-chrome" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}">
+					<link rel="stylish-code-opera" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}">
+					<link rel="stylish-id-url" href="http://#{DOMAIN}/styles/#{@style.id}">
+				THEEND
+				# temporarily disabled until new Stylish is out that supports this
+				if @style.style_settings.empty?
+					@header_include += <<-THEEND
+						<link rel="stylish-md5-url" href="http://#{UPDATE_DOMAIN}/#{@style.id}.md5">
+						<link rel="stylish-update-url" href="#{url_for(:id => params['id'], :host => DOMAIN)}.css">
+					THEEND
+				end
+				@style.style_settings.each do |s|
+					if s.setting_type == "color"
+						@header_include += "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
+						break
 					end
 				end
-				@header_include += "<link rel=\"stylish-install-ping-url\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN)}\">\n<link rel=\"stylish-install-ping-url-chrome\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN)}\">\n<link rel=\"stylish-install-ping-url-opera\" href=\"#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN)}\">\n<link rel=\"stylish-code-ie\" href=\"#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN))}\">\n<link rel=\"stylish-code-chrome\" href=\"#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}\">\n<link rel=\"stylish-code-opera\" href=\"#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}\">\n<link rel=\"stylish-id-url\" href=\"http://#{DOMAIN}/styles/#{@style.id}\">\n".html_safe
 				if !@style.screenshot_url.nil?
 					@header_include += "<link rel=\"stylish-example-url\" href=\"#{CGI.escapeHTML(@style.screenshot_url)}\">".html_safe
 				end
@@ -70,6 +83,7 @@ class StylesController < ApplicationController
 				else
 					@meta_description = "Customize your #{@style.subcategory} experience with this user style." 
 				end
+				@header_include = @header_include.html_safe
 				@canonical = @style.full_pretty_url
 				@feeds = []
 				@feeds << {:title => @style.short_description, :href => "/styles/#{@style.id}.json", :type => "application/json"}

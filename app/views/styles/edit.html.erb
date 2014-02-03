@@ -90,12 +90,12 @@ end %>
 				var fakeId = getFakeId();
 				code = code.replace(/fakeId/g, fakeId).replace(/settingType/g, type).replace(/passedLabel/g, label).replace(/passedInstallKey/g, installKey);
 				settings.insertBefore(html(code), newSetting);
+				var defaultField = document.getElementById("option-default-" + fakeId);
 				if (type == "color") {
-					var defaultField = document.getElementById("option-default-" + fakeId);
 					new jscolor.color(defaultField, {hash:true,required:true});
-					if (defaultValue) {
-						defaultField.value = defaultValue;
-					}
+				}
+				if (defaultValue) {
+					defaultField.value = defaultValue;
 				}
 				updateSettingButtons();
 			}

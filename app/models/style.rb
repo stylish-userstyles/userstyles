@@ -789,22 +789,22 @@ Replace = "$STOP()"
 		# nest this two levels deep
 		2.times do
 			ss.each do |setting|
-				# missing an option?
-				return nil unless params.include?(setting.install_key)
-				# actual values
-				if !params[setting.install_key][:iskey]
-					return nil unless ['color', 'image', 'text'].include?(setting.setting_type)
-					# escape backslashes and double quotes
-					replacement_value = params[setting.install_key][:value].gsub('\\', '\\\\\\\\').gsub('"', '\\"')
-					# we need to escape any backslashes in the *replacement* value, as things like \0 are interpreted as regex groups. we're escaping them to 2 backslashes, which gets doubled to 4 when interpreted by the regex system, then 8 by being a ruby string
-					c.gsub!("/*[[#{setting.install_key}]]*/", replacement_value.gsub('\\','\\\\\\\\'))
-				else
-					selected_options = setting.style_setting_options.select {|v| v.install_key == params[setting.install_key][:value]}
-					if !selected_options.empty?
-						# ditto above, but not double quotes
-						c.gsub!("/*[[#{setting.install_key}]]*/", selected_options.first.value.gsub('\\','\\\\\\\\'))
+				replacement_value = nil
+				if params.has_key?(setting.install_key)
+					# actual values
+					if !params[setting.install_key][:iskey] and ['color', 'image', 'text'].include?(setting.setting_type)
+						# escape backslashes and double quotes
+						replacement_value = params[setting.install_key][:value].gsub('"', '\\"')
+					else
+						selected_option = setting.style_setting_options.select {|v| v.install_key == params[setting.install_key][:value]}.first
+						replacement_value = selected_option.value unless selected_option.nil?
 					end
 				end
+				# use the default option if none was selected
+				replacement_value = setting.default_option_value if replacement_value.nil?
+				return nil if replacement_value.nil?
+				# we need to escape any backslashes in the *replacement* value, as things like \0 are interpreted as regex groups. we're escaping them to 2 backslashes, which gets doubled to 4 when interpreted by the regex system, then 8 by being a ruby string
+				c.gsub!("/*[[#{setting.install_key}]]*/", replacement_value.gsub('\\','\\\\\\\\'))
 			end
 		end
 		return c
@@ -902,9 +902,31 @@ Replace = "$STOP()"
 		return nil
 	end
 
+	# The md5 is based on the code and options. If these have changed, we consider the style as requiring an update for people
+	# who have already installed.
+	def md5
+		content = style_code.code
+		if !style_settings.empty?
+			# make a hash of install keys and values. 
+			settings_content = {}
+			style_settings.each do |setting|
+				option_content = {}
+				# these are always user-defined
+				if !['color', 'text'].include?(setting.setting_type)
+					setting.style_setting_options.each do |option|
+						option_content[option.install_key] = option.value
+					end
+				end
+				settings_content[setting.install_key] = option_content
+			end
+			content += settings_content.hash.to_s
+		end
+		return Digest::MD5.hexdigest(content)
+	end
+
 	def write_md5
 		filename = "#{MD5_PATH}#{self.id}.md5"
-		if !self.redirect_page.nil? or !self.style_settings.empty? or self.style_code.nil?
+		if !self.redirect_page.nil? or self.style_code.nil?
 			# delete the file
 			begin
 				File.delete(filename)
@@ -914,7 +936,7 @@ Replace = "$STOP()"
 		else
 			# make the file
 			File.open(filename, 'w') do |f|
-				f.print self.style_code.md5
+				f.print self.md5
 			end
 			File.chmod(0666, filename)
 		end

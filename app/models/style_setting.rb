@@ -13,8 +13,19 @@ class StyleSetting < ActiveRecord::Base
 	def possibilities
 		return [{:iskey => false, :value => '#FFFFFF'}] if setting_type == "color"
 		return [{:iskey => false, :value => 'http://example.com/image.gif'}] if setting_type == "image"
-		return [{:iskey => false, :value => 'example text'}] if setting_type == "text"
+		if setting_type == "text"
+			# Let the author's default value be the thing to validate with, otherwise it would be impossible to validate in certain
+			# situations where a specific kind of string is expected (like a domain).
+			return [{:iskey => false, :value => default_option_value}] unless default_option_value.empty?
+			return [{:iskey => false, :value => 'example text'}]
+		end
 		return style_setting_options.map {|v| {:iskey => true, :value => v.install_key}}
+	end
+
+	def default_option_value
+		option = style_setting_options.select {|v| v.default }.first
+		return option.value unless option.nil?
+		return nil
 	end
 
 end
