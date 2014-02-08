@@ -375,7 +375,12 @@ function styleAlreadyInstalled(event) {
 	}
 }
 function styleAlreadyInstalledChrome() {
-	styleInstalledChrome();
+	// assuming anything with settings can be updated if already installed
+	if (styleHasSettings()) {
+		styleCanBeUpdatedChrome(event);
+	} else {
+		styleInstalledChrome();
+	}
 }
 function styleAlreadyInstalledOpera() {
 	styleInstalledOpera();
@@ -384,8 +389,8 @@ function styleAlreadyInstalledOpera() {
 function styleCanBeUpdated(event) {
 	genericStyleCanBeUpdated("stylish-installed-style-needs-update", "detail" in event ? event.detail : null);
 }
-function styleCanBeUpdatedChrome() {
-	genericStyleCanBeUpdated("stylish-installed-style-needs-update-chrome", null);
+function styleCanBeUpdatedChrome(event) {
+	genericStyleCanBeUpdated("stylish-installed-style-needs-update-chrome", "detail" in event ? event.detail : null);
 }
 function styleCanBeUpdatedOpera() {
 	genericStyleCanBeUpdated("stylish-installed-style-needs-update-opera", null);

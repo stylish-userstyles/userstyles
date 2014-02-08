@@ -508,13 +508,12 @@ Replace = "$STOP()"
 		end
 
 		o[:url] = "http://#{DOMAIN}/styles/#{id}"
-		# styles with options are not updatable
-		if style_settings.empty?
-			o[:updateUrl] = "http://#{DOMAIN}/styles/chrome/#{id}.json" 
-		else
-			o[:updateUrl] = nil
-		end
+		# temporarily disabled until stylish supports it
+		o[:updateUrl] = "http://#{DOMAIN}/styles/chrome/#{id}.json" + Style.option_params_to_query_string(passed_options) if style_settings.empty?
+		o[:md5Url] = "http://#{UPDATE_DOMAIN}/#{id}.md5" 
+		o[:originalMd5] = md5
 		o[:name] = short_description
+
 		return o.to_json
 	end
 
@@ -904,7 +903,7 @@ Replace = "$STOP()"
 
 	# The md5 is based on the code and options. If these have changed, we consider the style as requiring an update for people
 	# who have already installed.
-	def md5
+	def calculate_md5
 		content = style_code.code
 		if !style_settings.empty?
 			# make a hash of install keys and values. 
@@ -1211,6 +1210,7 @@ Replace = "$STOP()"
 			self.moz_doc_error = errory_moz_docs.join(' ')
 		end
 		self.unintentional_global = self.calculate_unintentional_global
+		self.md5 = self.calculate_md5
 	end
 
 	def calculate_external_references
@@ -1505,5 +1505,10 @@ private
 			doc.namespaces.empty? and
 			doc.keyframes_rules.empty?
 		)
+	end
+
+	def self.option_params_to_query_string(option_params)
+		return '' if option_params.nil? or option_params.empty?
+		return '?' + option_params.map {|k, v| CGI::escape('ik-' + k) + '=' + CGI::escape(v[:iskey] ? 'ik-' + v[:value] : v[:value])}.join('&')
 	end
 end

@@ -563,11 +563,11 @@ class StylesController < ApplicationController
 		if style.chrome_json_available?
 			json = style.chrome_json(get_option_params())
 		end
-		if json.nil?			
+		if json.nil?
 			render :nothing => true, :status => 404
 		else
 			send_data(json, :type => "application/json", :disposition => "inline")
-		end		
+		end
 	end
 
 	def proxomitron
