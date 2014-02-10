@@ -38,9 +38,11 @@ class UsersController < ApplicationController
 				render :text => callback + '(' + @styles.to_json + ');'
 			}
 			format.atom {
+				@page_title = "Styles by #{@user_displayed.name}"
 				render(:template => '/styles/style_atom.xml.builder', :content_type => 'application/atom+xml')
 			}
 			format.rss {
+				@page_title = "Styles by #{@user_displayed.name}"
 				render(:template => '/styles/style_rss.xml.builder', :content_type => 'application/rss+xml')
 			}
 		end
