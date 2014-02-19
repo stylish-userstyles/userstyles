@@ -11,6 +11,7 @@ gem 'thinking-sphinx', '~> 3.0.6',
 	:git    => 'git://github.com/pat/thinking-sphinx.git',
 	:branch => 'develop',
 	:ref    => 'ed9b39ae84'
+gem 'riddle', '1.5.9'
 gem 'ts-delayed-delta', '~> 2.0.0'
 gem 'delayed_job', '~> 4.0.0'
 gem 'delayed_job_active_record', '~> 4.0.0'
