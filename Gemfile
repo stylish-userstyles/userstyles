@@ -22,6 +22,7 @@ gem 'dalli', '~> 2.6.4'
 gem 'rails-observers', '~> 0.1.2'
 gem 'ignorable', '~> 0.2.0'
 gem 'daemons'
+gem 'newrelic_rpm'
 
 gem 'sass-rails'
 gem 'uglifier'
