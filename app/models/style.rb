@@ -508,8 +508,7 @@ Replace = "$STOP()"
 		end
 
 		o[:url] = "http://#{DOMAIN}/styles/#{id}"
-		# temporarily disabled until stylish supports it
-		o[:updateUrl] = "http://#{DOMAIN}/styles/chrome/#{id}.json" + Style.option_params_to_query_string(passed_options) if style_settings.empty?
+		o[:updateUrl] = "http://#{DOMAIN}/styles/chrome/#{id}.json" + Style.option_params_to_query_string(passed_options)
 		o[:md5Url] = "http://#{UPDATE_DOMAIN}/#{id}.md5" 
 		o[:originalMd5] = md5
 		o[:name] = short_description
