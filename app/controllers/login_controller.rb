@@ -33,7 +33,7 @@ class LoginController < ApplicationController
 				if user.token.nil?
 					user.token = user.generate_login_token
 				end
-				cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now}
+				cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 			end
 			user.ip = request.remote_ip()
 			user.lost_password_key = nil
@@ -95,7 +95,7 @@ class LoginController < ApplicationController
 						user.token = user.generate_login_token
 						user.save
 					end
-					cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now}
+					cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 				end
 				session[:user_id] = user.id
 				go_to_return_to()
@@ -131,7 +131,7 @@ class LoginController < ApplicationController
 			if user.token.nil?
 				user.token = user.generate_login_token
 			end
-			cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now}
+			cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 		end
 		user.ip = request.remote_ip()
 		user.save(:validate => user_was_valid)

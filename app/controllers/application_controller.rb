@@ -19,7 +19,7 @@ protected
 		if !user.nil?
 			session[:user_id] = user.id
 			#restart the clock
-			cookies[:login] = { :value => cookies[:login], :expires => 2.weeks.from_now}
+			cookies[:login] = { :value => cookies[:login], :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 		end
 	end
 
