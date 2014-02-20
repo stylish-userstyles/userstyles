@@ -875,12 +875,12 @@ Replace = "$STOP()"
 	end
 
 	def auto_after_screenshot_path
-		return "http://#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil? or self.auto_screenshots_same
+		return "#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil? or self.auto_screenshots_same
 		return nil
 	end
 
 	def provided_after_screenshot_path
-		return "http://#{SCREENSHOT_DOMAIN}/style_screenshots/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
+		return "#{SCREENSHOT_DOMAIN}/style_screenshots/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
 	end
 
 	def after_screenshot_thumbnail_path
@@ -891,12 +891,12 @@ Replace = "$STOP()"
 	end
 
 	def provided_after_screenshot_thumbnail_path
-		return "http://#{SCREENSHOT_DOMAIN}/style_screenshot_thumbnails/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
+		return "#{SCREENSHOT_DOMAIN}/style_screenshot_thumbnails/#{self.after_screenshot_name}#{cdn_buster_param}" unless self.after_screenshot_name.nil?
 		return nil
 	end
 
 	def auto_after_screenshot_thumbnail_path
-		return "http://#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after-thumbnail.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil?
+		return "#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after-thumbnail.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil?
 		return nil
 	end
 

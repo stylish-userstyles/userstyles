@@ -71,7 +71,7 @@ class StylesController < ApplicationController
 				end
 				@style.style_settings.each do |s|
 					if s.setting_type == "color"
-						@header_include += "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
+						@header_include += "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 						break
 					end
 				end
@@ -144,7 +144,7 @@ class StylesController < ApplicationController
 		@style.user_id = session[:user_id]
 		@page_title = "New style"
 		@no_bots = true
-		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
+		@header_include = "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 		render :action => "edit"
 	end
 
@@ -152,7 +152,7 @@ class StylesController < ApplicationController
 		@style = Style.includes(:style_code, :screenshots, {:style_settings => :style_setting_options}).find(params["id"])
 		@no_bots = true
 		@page_title = "Editing " + @style.short_description
-		@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/lightbox.js'></script>\n".html_safe
+		@header_include = "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/lightbox.js'></script>\n".html_safe
 	end
 
 	def test
@@ -970,7 +970,7 @@ private
 			non_ar_errors.each do |attr, msg|
 				@style.errors.add(attr, msg)
 			end
-			@header_include = "<script type='text/javascript' src='http://#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
+			@header_include = "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 			if new
 				@page_title = "New style"
 			else

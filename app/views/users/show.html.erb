@@ -47,7 +47,7 @@
 			<input type="hidden" name="business" value="<%=obfuscate(@user_displayed.paypal_email)%>">
 			<input type="hidden" name="item_name" value="Styles on userstyles.org">
 			Send <%=@user_displayed.name%> a donation via PayPal:
-			<input type="image" src="http://<%=STATIC_DOMAIN%>/images/donate-button.gif" alt="Donate">.
+			<input type="image" src="<%=STATIC_DOMAIN%>/images/donate-button.gif" alt="Donate">.
 		</form>
 	</dd>
 <% end %>
@@ -89,11 +89,11 @@
 							<% if style.rating.nil? %>
 								-
 							<% elsif style.rating < 1.5 %>
-								<img class="bad-average-rating" src="http://<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
+								<img class="bad-average-rating" src="<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
 							<% elsif style.rating < 2.5 %>
-								<img class="ok-average-rating" src="http://<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
+								<img class="ok-average-rating" src="<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
 							<% else %>
-								<img class="good-average-rating" src="http://<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
+								<img class="good-average-rating" src="<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
 							<% end %>
 						</td>
 						<td class="date-value">
@@ -108,7 +108,7 @@
 							<%=link_to style.obsolete? ? "Undelete" : "Delete", :controller => 'styles', :action => "delete", :id => style.id%>
 							<%=link_to "Stats", :controller => 'styles', :action => "stats", :id => style.id%>
 							<% if !warnings.empty? %>
-								<img src="http://<%=STATIC_DOMAIN%>/images/warning.png" class="style-warning-icon" alt="Warning" height="15" width="15" onclick="document.getElementById('style-warnings-<%=style.id%>').style.display = 'table-row'">
+								<img src="<%=STATIC_DOMAIN%>/images/warning.png" class="style-warning-icon" alt="Warning" height="15" width="15" onclick="document.getElementById('style-warnings-<%=style.id%>').style.display = 'table-row'">
 							<% end %>
 						</td>
 					</tr>

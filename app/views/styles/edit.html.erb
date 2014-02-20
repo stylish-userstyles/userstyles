@@ -365,7 +365,7 @@ end %>
 						<td><input name="screenshot_<%=screenshot.id%>" type="file" accept="image/gif,image/png,image/jpeg"></td>
 						<td style="text-align:center"><input id="remove_screenshot_<%=screenshot.id%>" name="remove_screenshot_<%=screenshot.id%>" type="checkbox"></td>
 						</td>
-						<td style="text-align:center"><img src="http://<%=STATIC_DOMAIN%>/style_screenshots/<%=screenshot.path%>?r=<%=Time.now.to_i%>"></td>
+						<td style="text-align:center"><img src="<%=STATIC_DOMAIN%>/style_screenshots/<%=screenshot.path%>?r=<%=Time.now.to_i%>"></td>
 					</tr>
 				<% end %>
 				<% (1..(5 - @style.screenshots.size)).each do |i| %>

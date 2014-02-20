@@ -201,11 +201,11 @@
 				<th>Average rating</th>
 				<td>
 					<% if @style.rating_string == 'bad' %>
-						<img class="bad-average-rating" src="http://<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
+						<img class="bad-average-rating" src="<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
 					<% elsif @style.rating_string == 'ok' %>
-						<img class="ok-average-rating" src="http://<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
+						<img class="ok-average-rating" src="<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
 					<% else %>
-						<img class="good-average-rating" src="http://<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
+						<img class="good-average-rating" src="<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
 					<% end %>
 				</td>
 			</tr>
@@ -275,7 +275,7 @@
 			<input type="hidden" name="business" value="<%=obfuscate(@style.user.paypal_email)%>">
 			<input type="hidden" name="item_name" value="'<%=@style.short_description%>' on userstyles.org">
 			<p>Thank <%= link_to (h @style.user.name), {:controller => "users", :action => "show", :id => @style.user.id}, :rel => 'nofollow' %> for creating this style by donating via PayPal:
-			<input type="image" src="http://<%=STATIC_DOMAIN%>/images/donate-button.gif" alt="Donate">.
+			<input type="image" src="<%=STATIC_DOMAIN%>/images/donate-button.gif" alt="Donate">.
 			</p>
 		</form>
 	<% end %>

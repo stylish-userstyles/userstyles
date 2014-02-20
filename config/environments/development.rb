@@ -36,9 +36,9 @@ end
 
 DOMAIN = 'userstyles.local'
 FORUM_DOMAIN = 'forum.userstyles.local'
-STATIC_DOMAIN = 'userstyles.local'
+STATIC_DOMAIN = 'http://userstyles.local'
 UPDATE_DOMAIN = 'update.userstyles.local'
-SCREENSHOT_DOMAIN = 'cdn.userstyles.org'
+SCREENSHOT_DOMAIN = 'http://cdn.userstyles.org'
 MD5_PATH = '/www/md5/'
 COOKIE_DOMAIN = '.userstyles.local'
 

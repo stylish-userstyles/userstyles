@@ -38,7 +38,7 @@ body {
 
 <body>
 	<div class="logo">
-    	 <a href="/"><img src="http://<%=STATIC_DOMAIN%>/images/159.png"></a><br>
+    	 <a href="/"><img src="<%=STATIC_DOMAIN%>/images/159.png"></a><br>
          Restyle the web with Stylish!<br>
          <p> <a href="/">userstyles.org home »</a></p>
 	</div>
@@ -228,7 +228,7 @@ body {
 
 	<p style="font-size:larger;">Before you start styling...</p>
 
-	<a href="http://www.addonfox.com/download/?s=82" rel="nofollow" onclick='return install(event, {"AddonFox": "http://www.addonfox.com/download/?s=82"}, "http://<%=STATIC_DOMAIN%>/images/install-img.png");'><img src="http://<%=STATIC_DOMAIN%>/images/ads/addonfox.png" width="600"></a>
+	<a href="http://www.addonfox.com/download/?s=82" rel="nofollow" onclick='return install(event, {"AddonFox": "http://www.addonfox.com/download/?s=82"}, "<%=STATIC_DOMAIN%>/images/install-img.png");'><img src="<%=STATIC_DOMAIN%>/images/ads/addonfox.png" width="600"></a>
 
 	<p style="margin-top: 2em">You can now use styles like <%=link_to h(@best[0].short_description), @best[0]%>, <%=link_to h(@best[1].short_description), @best[1]%>, and <%=link_to h(@best[2].short_description), @best[2]%>. <a href="/categories">Start browsing the site to find other styles.</a></p>
 
