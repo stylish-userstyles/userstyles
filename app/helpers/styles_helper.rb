@@ -39,7 +39,7 @@ module StylesHelper
 
 	def format_user_text(text)
 		yes_follow = lambda do |env|
-			follow_domains = ['mozillazine.org', 'mozilla.org', 'mozilla.com', 'userscripts.org', 'userstyles.org', 'mozdev.org', 'photobucket.com', 'facebook.com', 'chrome.google.com', 'github.com']
+			follow_domains = ['mozillazine.org', 'mozilla.org', 'mozilla.com', 'userscripts.org', 'userstyles.org', 'mozdev.org', 'photobucket.com', 'facebook.com', 'chrome.google.com', 'github.com', 'greasyfork.org']
 			return unless env[:node_name] == 'a'
 			node = env[:node]
 			href = nil
