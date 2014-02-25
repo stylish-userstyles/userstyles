@@ -59,9 +59,9 @@ end
 
 DOMAIN = 'userstyles.org'
 FORUM_DOMAIN = 'forum.userstyles.org'
-STATIC_DOMAIN = 'http://cdn.userstyles.org'
+STATIC_DOMAIN = 'https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org'
 UPDATE_DOMAIN = 'update.userstyles.org'
-SCREENSHOT_DOMAIN = 'http://cdn.userstyles.org'
+SCREENSHOT_DOMAIN = 'https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org'
 MD5_PATH = '/home/www/update/'
 COOKIE_DOMAIN = '.userstyles.org'
 
