@@ -36,7 +36,7 @@ Userstyles::Application.configure do
   config.assets.css_compressor = :yui
   config.assets.compile = false
   config.assets.digest = true
-  config.action_controller.asset_host = "http://cdn.userstyles.org"
+  config.action_controller.asset_host = "https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org"
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false
