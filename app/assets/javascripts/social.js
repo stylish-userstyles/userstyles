@@ -8,7 +8,7 @@ function asyncScript(url) {
 window.addEventListener('load', function() {
 	asyncScript('//connect.facebook.net/en_US/all.js#xfbml=1');
 	asyncScript('https://apis.google.com/js/plusone.js');
-	asyncScript('http://platform.twitter.com/widgets.js');
+	asyncScript('https://platform.twitter.com/widgets.js');
 	asyncScript("//assets.pinterest.com/js/pinit.js");
 }, false);
 
