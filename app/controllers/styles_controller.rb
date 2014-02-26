@@ -62,13 +62,10 @@ class StylesController < ApplicationController
 					<link rel="stylish-code-opera" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}">
 					<link rel="stylish-id-url" href="http://#{DOMAIN}/styles/#{@style.id}">
 				THEEND
-				# temporarily disabled until new Stylish is out that supports this
-				if @style.style_settings.empty?
-					@header_include += <<-THEEND
-						<link rel="stylish-md5-url" href="http://#{UPDATE_DOMAIN}/#{@style.id}.md5">
-						<link rel="stylish-update-url" href="#{url_for(:id => params['id'], :host => DOMAIN)}.css">
-					THEEND
-				end
+				@header_include += <<-THEEND
+					<link rel="stylish-md5-url" href="http://#{UPDATE_DOMAIN}/#{@style.id}.md5">
+					<link rel="stylish-update-url" href="#{url_for(:id => params['id'], :host => DOMAIN)}.css">
+				THEEND
 				@style.style_settings.each do |s|
 					if s.setting_type == "color"
 						@header_include += "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
