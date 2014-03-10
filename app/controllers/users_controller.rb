@@ -6,22 +6,22 @@ class UsersController < ApplicationController
 
 	def show
 		@user_displayed = User.find(params[:id])
-		if @user_displayed.id == session[:user_id]
-			@styles = Style.where(:user_id => @user_displayed.id).order('obsolete, short_description')
-			# prevent 2n loads
-			@style_forum_stats = @user_displayed.style_forum_stats
-		else
-			if !params[:per_page].nil? and params[:per_page].to_i > 0 and params[:per_page].to_i <= 200
-				per_page = params[:per_page].to_i
-			else
-				per_page = 10
-			end
-			@styles = Style.active.where(:user_id => @user_displayed.id).order('short_description').paginate({:per_page => per_page, :page => params[:page]})
-			@no_ads = @styles.empty?
-		end
+		@styles = Style.where(:user_id => @user_displayed.id).order('obsolete, short_description')
 
 		respond_to do |format|
 			format.html {
+				if @user_displayed.id == session[:user_id]
+					# prevent 2n loads
+					@style_forum_stats = @user_displayed.style_forum_stats
+				else 
+					if !params[:per_page].nil? and params[:per_page].to_i > 0 and params[:per_page].to_i <= 200
+						per_page = params[:per_page].to_i
+					else
+						per_page = 10
+					end
+					@styles = @styles.active.paginate({:per_page => per_page, :page => params[:page]})
+				end
+				@no_ads = @styles.empty?
 				@page_title = @user_displayed.name
 				@feeds = []
 				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'rss'), :type => "application/rss+xml"}
@@ -30,18 +30,22 @@ class UsersController < ApplicationController
 				@feeds << {:title => "Styles by this user", :href => url_for(:format => 'jsonp'), :type => "text/javascript"}
 			}
 			format.json {
+				@styles = @styles.active
 				render :text => @styles.to_json
 			}
 			format.jsonp {
+				@styles = @styles.active
 				callback = params[:callback]
 				callback = 'handleUserstylesData' if callback.nil? or /^[$A-Za-z_][0-9A-Za-z_\.]*$/.match(callback).nil?
 				render :text => callback + '(' + @styles.to_json + ');'
 			}
 			format.atom {
+				@styles = @styles.active
 				@page_title = "Styles by #{@user_displayed.name}"
 				render(:template => '/styles/style_atom.xml.builder', :content_type => 'application/atom+xml')
 			}
 			format.rss {
+				@styles = @styles.active
 				@page_title = "Styles by #{@user_displayed.name}"
 				render(:template => '/styles/style_rss.xml.builder', :content_type => 'application/rss+xml')
 			}
