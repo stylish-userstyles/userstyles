@@ -125,23 +125,26 @@
 		<div id="subcategory"><%=@style.subcategory%></div>
 	</div>
 
-	<% if @no_ads.nil? or !@no_ads %>
-		<% # this will be lower if there's options so that we can prevent setting dropdowns from overlapping it
-			if @style.style_settings.empty? %>
-			<div id="below-install-ad" class="ad">
-				<div class="ad-note"><span>Advertisement</span></div>
-				<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-				<!-- Style pages responsive -->
-				<ins class="adsbygoogle"
-					 style="display:block"
-					 data-ad-client="ca-pub-2247465624637408"
-					 data-ad-slot="7996428119"
-					 data-ad-format="auto"></ins>
-				<script>
-				(adsbygoogle = window.adsbygoogle || []).push({});
-				</script>
-			</div>
-		<% end %>
+	<%
+	# We can't overlap the ads, even with select boxes. If we have anything that might overlap it, show it further below.
+	# - Text and image are OK
+	# - Color opens a pop-up, not OK
+	# - Dropdown settings past a certain length, not OK
+	show_ad_above_meta = @style.style_settings.all? {|ss| ['text', 'image'].include?(ss.setting_type) or (ss.setting_type == 'dropdown' and ss.style_setting_options.length <= 3) }
+	if (@no_ads.nil? or !@no_ads) and show_ad_above_meta %>
+		<div id="below-install-ad" class="ad">
+			<div class="ad-note"><span>Advertisement</span></div>
+			<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+			<!-- Style pages below install responsive -->
+			<ins class="adsbygoogle"
+				 style="display:block"
+				 data-ad-client="ca-pub-2247465624637408"
+				 data-ad-slot="7996428119"
+				 data-ad-format="auto"></ins>
+			<script>
+			(adsbygoogle = window.adsbygoogle || []).push({});
+			</script>
+		</div>
 	<% end %>
 
 	<div id="info-tables">
@@ -239,23 +242,20 @@
 	</section>
 <% end %>
 
-<% if @no_ads.nil? or !@no_ads %>
-	<% # see comment above
-		if !@style.style_settings.empty? %>
-		<div id="below-install-ad" class="ad">
-			<div class="ad-note"><span>Advertisement</span></div>
-			<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-			<!-- Style pages responsive -->
-			<ins class="adsbygoogle"
-				 style="display:block"
-				 data-ad-client="ca-pub-2247465624637408"
-				 data-ad-slot="7996428119"
-				 data-ad-format="auto"></ins>
-			<script>
-			(adsbygoogle = window.adsbygoogle || []).push({});
-			</script>
-		</div>
-	<% end %>
+<% if (@no_ads.nil? or !@no_ads) and !show_ad_above_meta %>
+	<div id="below-meta-ad" class="ad">
+		<div class="ad-note"><span>Advertisement</span></div>
+		<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+		<!-- Style pages below meta responsive -->
+		<ins class="adsbygoogle"
+			 style="display:block"
+			 data-ad-client="ca-pub-2247465624637408"
+			 data-ad-slot="8140651313"
+			 data-ad-format="auto"></ins>
+		<script>
+		(adsbygoogle = window.adsbygoogle || []).push({});
+		</script>
+	</div>
 <% end %>
 
 <section id="discussions-area">
