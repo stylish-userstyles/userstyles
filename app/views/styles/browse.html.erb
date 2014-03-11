@@ -49,6 +49,14 @@
 
 	<% if !@styles.empty? %>
 		<%= will_paginate @styles %>
+		<% content_for :link_rel_next_prev do %>
+			<% if @styles.previous_page %>
+				<link rel="prev" href="<%=url_for(params.merge(:page => @styles.previous_page, :only_path => false))%>">
+			<% end %>
+			<% if @styles.next_page %>
+				<link rel="next" href="<%=url_for(params.merge(:page => @styles.next_page, :only_path => false))%>">
+			<% end %>
+		<% end %>
 	<% end %>
 
 <% end %>

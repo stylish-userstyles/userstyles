@@ -10,11 +10,12 @@
 		</title>
 		<% if @no_bots %>
 			<meta name="robots" content="noindex">
-		<% elsif @no_index_but_follow %>
-			<meta name="robots" content="noindex,follow">
 		<% end %>
 		<% if !@canonical.nil? %>
 			<link rel="canonical" href="<%= @canonical%>">
+		<% end %>
+		<% if content_for?(:link_rel_next_prev) %>
+			<%=content_for(:link_rel_next_prev)%>
 		<% end %>
 		<% if @meta_description %>
 			<meta name="description" content="<%=@meta_description%>">
@@ -82,7 +83,7 @@
 			dimensions['dimension1'] = h @style.category
 			dimensions['dimension2'] = h @style.subcategory
 		end
-		dimensions['dimension3'] = @no_bots ? 'noindex' : (@no_index_but_follow ? 'noindexfollow' : 'none') %>
+		dimensions['dimension3'] = @no_bots ? 'noindex' : 'none' %>
 		ga('send', 'pageview', <%=raw dimensions.to_json%>);
 		</script>
 		<!-- End Google Analytics -->
