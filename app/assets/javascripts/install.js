@@ -677,6 +677,13 @@ function switchBrowser(select) {
 	}
 }
 
+function loadSettingsBasedOnUrl() {
+	var params = parseQueryString(location.href);
+	for (var i in params) {
+		setFormValue(i, params[i]);
+	}
+}
+
 function init() {
 	if (document.getElementById("show-button")) {
 		initShowCode();
@@ -684,6 +691,7 @@ function init() {
 		updateNonStylishInstallLinks();
 		initInstall();
 		addEvents();
+		loadSettingsBasedOnUrl();
 	}
 }
 
