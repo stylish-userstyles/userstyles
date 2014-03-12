@@ -113,9 +113,27 @@
 
 		<%= render :partial => 'install', :locals => {:style => @style} %>
 
-		<div id="post-install-ad" class="afterdownload-ad" style="display: none">
-			<iframe scrolling="no" frameborder="0" allowtransparency="true" height="250" width="300" style="border:0;" src="http://d.delivery45.com/widget/render/hash/6827d19122799f24c0d420689bf42199"></iframe>
-		</div>
+		<% if Time.now.to_i % 2 == 1 %>
+			<div id="post-install-ad" class="afterdownload-ad" style="display: none">
+				<iframe scrolling="no" frameborder="0" allowtransparency="true" height="250" width="300" style="border:0;" src="http://d.delivery45.com/widget/render/hash/6827d19122799f24c0d420689bf42199"></iframe>
+			</div>
+		<% else %>
+			<div id="post-install-ad" class="chitika-ad" style="display: none">
+				<script type="text/javascript">
+				  ( function() {
+					if (window.CHITIKA === undefined) { window.CHITIKA = { 'units' : [] }; };
+					var unit = {"publisher":"jasonbarnabe","width":300,"height":250,"sid":"Chitika Default"};
+					var placement_id = window.CHITIKA.units.length;
+					window.CHITIKA.units.push(unit);
+					document.write('<div id="chitikaAdBlock-' + placement_id + '"></div>');
+					var s = document.createElement('script');
+					s.type = 'text/javascript';
+					s.src = '//cdn.chitika.net/getads.js';
+					try { document.getElementsByTagName('head')[0].appendChild(s); } catch(e) { document.write(s.outerHTML); }
+				}());
+				</script>
+			</div>
+		<% end %>
 	</div>
 
 	<div id="hidden-meta">
