@@ -508,8 +508,8 @@ Replace = "$STOP()"
 		end
 
 		o[:url] = "http://#{DOMAIN}/styles/#{id}"
-		o[:updateUrl] = "http://#{DOMAIN}/styles/chrome/#{id}.json" + Style.option_params_to_query_string(passed_options)
-		o[:md5Url] = "http://#{UPDATE_DOMAIN}/#{id}.md5" 
+		o[:updateUrl] = "https://#{DOMAIN}/styles/chrome/#{id}.json" + Style.option_params_to_query_string(passed_options)
+		o[:md5Url] = "#{UPDATE_DOMAIN}/#{id}.md5" 
 		o[:originalMd5] = md5
 		o[:name] = short_description
 

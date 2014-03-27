@@ -35,9 +35,10 @@ end
 
 
 DOMAIN = 'userstyles.local'
+DOMAIN_PROTOCOL = 'http'
 FORUM_DOMAIN = 'forum.userstyles.local'
 STATIC_DOMAIN = 'http://userstyles.local'
-UPDATE_DOMAIN = 'update.userstyles.local'
+UPDATE_DOMAIN = 'http://update.userstyles.local'
 SCREENSHOT_DOMAIN = 'http://cdn.userstyles.org'
 MD5_PATH = '/www/md5/'
 COOKIE_DOMAIN = '.userstyles.local'

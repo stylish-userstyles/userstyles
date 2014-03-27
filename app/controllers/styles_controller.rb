@@ -51,20 +51,20 @@ class StylesController < ApplicationController
 				@page_header = @style.short_description
 				@page_title = @page_title + " - Themes and Skins for " + @style.subcategory.capitalize unless @style.subcategory.nil?
 				@header_include = <<-THEEND
-					<link rel="stylish-code" href="#{url_for(:id => params['id'], :host => DOMAIN)}.css">
+					<link rel="stylish-code" href="#{url_for(:id => params['id'], :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}.css">
 					<script>document.querySelector("link[rel='stylish-code']").setAttribute("href", "#stylish-code");</script>
 					<link rel="stylish-description" href="#stylish-description">
-					<link rel="stylish-install-ping-url" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN)}">
-					<link rel="stylish-install-ping-url-chrome" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN)}">
-					<link rel="stylish-install-ping-url-opera" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN)}">
-					<link rel="stylish-code-ie" href="#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN))}">
-					<link rel="stylish-code-chrome" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}">
-					<link rel="stylish-code-opera" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN))}">
+					<link rel="stylish-install-ping-url" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
+					<link rel="stylish-install-ping-url-chrome" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
+					<link rel="stylish-install-ping-url-opera" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
+					<link rel="stylish-code-ie" href="#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
+					<link rel="stylish-code-chrome" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
+					<link rel="stylish-code-opera" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
 					<link rel="stylish-id-url" href="http://#{DOMAIN}/styles/#{@style.id}">
 				THEEND
 				@header_include += <<-THEEND
-					<link rel="stylish-md5-url" href="http://#{UPDATE_DOMAIN}/#{@style.id}.md5">
-					<link rel="stylish-update-url" href="#{url_for(:id => params['id'], :host => DOMAIN)}.css">
+					<link rel="stylish-md5-url" href="#{UPDATE_DOMAIN}/#{@style.id}.md5">
+					<link rel="stylish-update-url" href="#{url_for(:id => params['id'], :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}.css">
 				THEEND
 				@style.style_settings.each do |s|
 					if s.setting_type == "color"
@@ -104,7 +104,7 @@ class StylesController < ApplicationController
 				end
 			}
 			format.md5 {
-				redirect_to "http://#{UPDATE_DOMAIN}/#{params[:id]}.md5", :status => 301
+				redirect_to "#{UPDATE_DOMAIN}/#{params[:id]}.md5", :status => 301
 			}
 			format.json {
 				begin

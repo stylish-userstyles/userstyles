@@ -58,9 +58,10 @@ Userstyles::Application.configure do
 end
 
 DOMAIN = 'userstyles.org'
+DOMAIN_PROTOCOL = 'https'
 FORUM_DOMAIN = 'forum.userstyles.org'
 STATIC_DOMAIN = 'https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org'
-UPDATE_DOMAIN = 'update.userstyles.org'
+UPDATE_DOMAIN = 'https://update.userstyles.org'
 SCREENSHOT_DOMAIN = 'https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org'
 MD5_PATH = '/home/www/update/'
 COOKIE_DOMAIN = '.userstyles.org'
