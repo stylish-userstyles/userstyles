@@ -137,10 +137,21 @@
 
 	<div id="stylish-installed-style-not-installed-chrome" class="install-status install" style="display:none">
 		<span class="install-symbol">+</span> Install with Stylish
-<div style="clear: left"></div>
+		<div style="clear: left"></div>
+	</div>
+
+	<div id="style-install-safari" class="install-status install-info" style="display: none">
+		<p>To use this style, first <a id="install-stylish-chrome" href="http://sobolev.us/stylish/">install Stylish</a>.</p>
+	</div>
+
+	<div id="stylish-installed-style-not-installed-chrome" class="install-status install" style="display:none">
+		<span class="install-symbol">+</span> Install with Stylish
+		<div style="clear: left"></div>
 	</div>
 <% else %>
 	<div id="style-install-chrome" class="install-status no-install" style="display:none"><span class="install-symbol">X</span> Not available on Chrome.</div>
+
+	<div id="style-install-chrome" class="install-status no-install" style="display:none"><span class="install-symbol">X</span> Not available on Safari.</div>
 
 	<div id="stylish-installed-style-not-installed-chrome" class="install-status no-install" style="display: none"><span class="install-symbol">X</span> Not available on Chrome.</div>
 <% end %>

@@ -482,6 +482,10 @@ function initInstall() {
 			switchToPanel("style-install-opera");
 			switchBrowserValue("opera");
 			break;
+		case "Safari":
+			switchToPanel("style-install-safari");
+			switchBrowserValue("safari");
+			break;
 		case "Explorer":
 			switchToPanel("style-install-ie");
 			switchBrowserValue("ie");
