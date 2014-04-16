@@ -57,6 +57,7 @@ class StylesController < ApplicationController
 					<link rel="stylish-install-ping-url" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
 					<link rel="stylish-install-ping-url-chrome" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
 					<link rel="stylish-install-ping-url-opera" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
+					<link rel="stylish-install-ping-url-safari" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-sf', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
 					<link rel="stylish-code-ie" href="#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
 					<link rel="stylish-code-chrome" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
 					<link rel="stylish-code-opera" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
@@ -130,7 +131,7 @@ class StylesController < ApplicationController
 	def install
 		@no_bots = true
 		source = params[:source]
-		if source == 'stylish-ch' or source == 'stylish-fx' or source == 'stylish-op'
+		if source == 'stylish-ch' or source == 'stylish-fx' or source == 'stylish-op' or source == 'stylish-sf'
 			Style.increment_installs(params[:id], source, request.remote_ip)
 		end
 		render :nothing => true, :status => 200
