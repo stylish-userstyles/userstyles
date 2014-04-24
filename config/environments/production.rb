@@ -36,7 +36,7 @@ Userstyles::Application.configure do
   config.assets.css_compressor = :yui
   config.assets.compile = false
   config.assets.digest = true
-  config.action_controller.asset_host = "https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org"
+  config.action_controller.asset_host = "https://df6a.https.cdn.softlayer.net/80723D/static.userstyles.org"
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false
@@ -60,9 +60,9 @@ end
 DOMAIN = 'userstyles.org'
 DOMAIN_PROTOCOL = 'https'
 FORUM_DOMAIN = 'forum.userstyles.org'
-STATIC_DOMAIN = 'https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org'
+STATIC_DOMAIN = 'https://df6a.https.cdn.softlayer.net/80723D/static.userstyles.org'
 UPDATE_DOMAIN = 'https://update.userstyles.org'
-SCREENSHOT_DOMAIN = 'https://723d.https.cdn.softlayer.net/80723D/static.userstyles.org'
+SCREENSHOT_DOMAIN = 'https://df6a.https.cdn.softlayer.net/80723D/static.userstyles.org'
 MD5_PATH = '/home/www/update/'
 COOKIE_DOMAIN = '.userstyles.org'
 
