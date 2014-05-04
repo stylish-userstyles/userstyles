@@ -1,0 +1,9 @@
+.PanelCategories li:first-child, .PanelCategories li:nth-last-child(2) {
+	border-bottom: 2px solid black;
+}
+#Menu .Activity {
+	display: none;
+}
+kbd, samp {
+	font-family: monospace !important;
+}
