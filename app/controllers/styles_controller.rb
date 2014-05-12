@@ -949,7 +949,7 @@ private
 			# object for the code validator to use
 			@style.tmp_style_settings = @new_style_settings
 
-			@style.refresh_meta
+			@style.refresh_meta(false)
 
 			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or !$tld_specific_bad_domains.index{|d| @style.style_code.code.include?(d)}.nil?
 				@style.errors.add("Styles", "for adult sites are not allowed on userstyles.org.")
@@ -960,6 +960,8 @@ private
 			@style.tmp_style_settings = nil
 			@style.style_settings.destroy_all
 			@style.style_settings = @new_style_settings
+
+			@style.refresh_meta(true)
 
 			@style.save!
 			@style.style_code.save!

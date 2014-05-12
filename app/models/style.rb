@@ -1188,11 +1188,13 @@ Replace = "$STOP()"
 		return warnings
 	end
 
-	def refresh_meta
-		if self.style_settings.empty?
-			self.style_sections = Style.parse_moz_docs_for_code(style_code.code)
-		else
-			self.style_sections = []
+	def refresh_meta(update_sections = true)
+		if update_sections
+			if self.style_settings.empty?
+				self.style_sections = Style.parse_moz_docs_for_code(style_code.code)
+			else
+				self.style_sections = []
+			end
 		end
 		self.screenshot_url = self.calculate_screenshot_url
 		self.category = self.calculate_category
