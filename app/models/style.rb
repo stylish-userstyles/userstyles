@@ -77,7 +77,7 @@ class Style < ActiveRecord::Base
 		# check validity, global, namespaces
 		e = record.get_parse_error
 		if !e.nil?
-			record.errors.add(attr, "has an error - #{e}. If you need help, post your code at http://forum.userstyles.org/discussion/34614/new-css-parservalidator .") unless e.nil?
+			record.errors.add(attr, "has an error - #{e}. If you need help, post a new discussion at https://forum.userstyles.org/post/discussion/5 .") unless e.nil?
 		else
 			record.errors.add(attr, "looks unintentionally global. Please read https://github.com/JasonBarnabe/stylish/wiki/Preventing-global-styles .") if record.calculate_unintentional_global
 			namespaces = record.calculate_namespaces
