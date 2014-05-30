@@ -1008,7 +1008,7 @@ private
 
 	def fix_bad_chars(s)
 		return s if s.nil?
-		return s.encode('UTF-8', 'binary', :invalid => :replace, :undef => :replace, :replace => '')
+		return s.encode('UTF-8', :invalid => :replace, :undef => :replace, :replace => '')
 	end
 
 end
