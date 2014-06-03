@@ -113,11 +113,12 @@
 
 		<%= render :partial => 'install', :locals => {:style => @style} %>
 
-		<% if false %>
+		<% experiment_chitika_on = Time.now.to_i.even?
+		if false %>
 			<div id="post-install-ad" class="afterdownload-ad" style="display: none">
 				<iframe scrolling="no" frameborder="0" allowtransparency="true" height="250" width="300" style="border:0;" src="http://d.delivery45.com/widget/render/hash/6827d19122799f24c0d420689bf42199"></iframe>
 			</div>
-		<% else %>
+		<% elsif experiment_chitika_on %>
 			<div id="post-install-ad" class="chitika-ad" style="display: none">
 				<script type="text/javascript">
 				  ( function() {
@@ -157,7 +158,11 @@
 			<ins class="adsbygoogle"
 				 style="display:block"
 				 data-ad-client="ca-pub-2247465624637408"
+				 <% if experiment_chitika_on %>
 				 data-ad-slot="7996428119"
+				 <% else %>
+				 data-ad-slot="1865604119"
+				 <% end %>
 				 data-ad-format="auto"></ins>
 			<script>
 			(adsbygoogle = window.adsbygoogle || []).push({});
