@@ -115,7 +115,7 @@ Style.active.includes([:style_code, {:style_settings => :style_setting_options}]
 end
 #puts "done calculating refs"
 
-thread_count = 10
+thread_count = 5
 threads = []
 (0..(thread_count - 1)).each do |i|
 	threads << Thread.new {
