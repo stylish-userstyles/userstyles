@@ -242,7 +242,7 @@ class Style < ActiveRecord::Base
 			#grab the top n
 			possibilities = Style.where(:obsolete => 0).order("popularity_score DESC").limit(choose_from)
 			#randomize
-			a = possibilities.dup
+			a = possibilities.to_a.dup
 			possibilities = possibilities.collect { a.slice!(rand(a.length)) }
 			#limit to a certain number per subcategory to avoid facebook craziness
 			limit_per_category = (limit / 5.0).ceil
