@@ -289,7 +289,7 @@
 	<% if !@style.pledgie_id.nil? %>
 		<p id="pledgie">
 			Thank <%= link_to (h @style.user.name), {:controller => "users", :action => "show", :id => @style.user.id}, :rel => 'nofollow' %> for creating this style by donating via Pledgie:
-			<a href='http://www.pledgie.com/campaigns/<%=@style.pledgie_id%>'><img alt='Donate for <%=@style.short_description%>' src='http://www.pledgie.com/campaigns/<%=@style.pledgie_id%>.png?skin_name=chrome' height='37' width='149' border='0'></a>.
+			<a href='https://www.pledgie.com/campaigns/<%=@style.pledgie_id%>'><img alt='Donate for <%=@style.short_description%>' src='https://www.pledgie.com/campaigns/<%=@style.pledgie_id%>.png?skin_name=chrome' height='37' width='149' border='0'></a>.
 		</p>
 	<% end %>
 	<% if !@style.user.paypal_email.nil?%>
@@ -312,11 +312,11 @@
 	</div>
 
 	<% if @style.discussions.empty? %>
-		<p id="no-discussions">No discussions posted yet. <a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Be the first to ask a question or review this style.</a></p>
+		<p id="no-discussions">No discussions posted yet. <a id="start-discussion" href="//<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Be the first to ask a question or review this style.</a></p>
 	<% elsif @style.recent_discussions.empty? %>
-		<p id="no-discussions">No discussions posted in the last year. <a href="http://<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See older discussions.</a> <a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Ask a new question or add a review for this style.</a></p>
+		<p id="no-discussions">No discussions posted in the last year. <a href="//<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See older discussions.</a> <a id="start-discussion" href="//<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Ask a new question or add a review for this style.</a></p>
 	<% else %>
-		<p id="no-discussions"><a id="start-discussion" href="http://<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Ask a new question or add a review for this style.</a></p>
+		<p id="no-discussions"><a id="start-discussion" href="//<%=FORUM_DOMAIN%>/post/discussion?Discussion/StyleID=<%=@style.id%>" rel="nofollow">Ask a new question or add a review for this style.</a></p>
 		<ul id="discussions">
 			<% @style.recent_discussions.reverse.each do |discussion|
 				rating_class = nil
@@ -333,7 +333,7 @@
 				<li class="<%=rating_class%>"><%=link_to h(discussion.name), discussion.url, {:rel => 'nofollow'}%> by <%=link_to h(discussion.original_poster.name), {:controller => 'users', :action => 'show', :id => discussion.original_poster.id}, {:rel => 'nofollow'}%><%if !discussion.created.nil?%>, <%=discussion.created.strftime('%B %e, %Y')%><% end %></li>
 			<% end %>
 			<% if @style.discussions.size != @style.recent_discussions.size %>
-				<li><a href="http://<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See more discussions</a></li>
+				<li><a href="//<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See more discussions</a></li>
 			<% end %>
 		</ul>
 	<% end %>
