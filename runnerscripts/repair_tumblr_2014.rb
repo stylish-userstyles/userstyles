@@ -17,8 +17,11 @@ data.each do |id, rules|
 	rules.each do |type, value|
 		new_code = new_code.sub(Regexp.new("(@\\-moz\\-document\\s+#{Regexp.escape(type)}\\s*\\(\\s*[\"']?#{Regexp.escape(value)}[\"']?\\s*\\))((?:\\s+|/\\*[^\\*]*?\\*/)*)\\{"), "\\1, #{type}('#{value.sub(/^http:/, "https:")}') \\2 {")
 	end
-	File.open("tumblrfix/#{style.id}.css", 'w') { |file| file.write(new_code) }
-	puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> <a href=\"#{style.id}.css\">Code</a></div>"
-	puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> unchanged</div>" if style.style_code.code == new_code
-	CSSPool::CSS::Document.parse(new_code) if !starting_code_invalid
+	#File.open("tumblrfix/#{style.id}.css", 'w') { |file| file.write(new_code) }
+	#puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> <a href=\"#{style.id}.css\">Code</a></div>"
+	#puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> unchanged</div>" if style.style_code.code == new_code
+	#CSSPool::CSS::Document.parse(new_code) if !starting_code_invalid
+	puts style.id.to_s
+	style.style_code.code = new_code
+	style.style_code.save
 end
