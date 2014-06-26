@@ -92,22 +92,18 @@ module StylesHelper
 		linkify_urls = lambda do |env|
 			node = env[:node]
 			return unless node.text?
-			return if has_anchor_ancestor(node)
+			return if has_ancestor(node, 'a')
+			return if has_ancestor(node, 'pre')
 			url_reference = node.text.match(/(\s|^|\()(https?:\/\/[^\s\)\]]*)/i)
 			return if url_reference.nil?
 			resulting_nodes = replace_text_with_link(node, url_reference[2], url_reference[2], url_reference[2])
-			# sanitize the new nodes ourselves; they won't be picked up otherwise.
-			resulting_nodes.delete(node)
-			resulting_nodes.each do |new_node|
-
-				Sanitize.clean_node!(new_node, env[:config])
-			end
 		end
 
 		linkify_styles = lambda do |env|
 			node = env[:node]
 			return unless node.text?
-			return if has_anchor_ancestor(node)
+			return if has_ancestor(node, 'a')
+			return if has_ancestor(node, 'pre')
 			style_pattern = /(\s|^|\()(style ([0-9]+))/i
 			style_reference = node.text.match(style_pattern)
 			return if style_reference.nil?
@@ -121,11 +117,6 @@ module StylesHelper
 					style = Style.find(style_id)
 					resulting_nodes = replace_text_with_link(node, original_text, style.short_description, style.pretty_url)
 					# the current node will not contain any more references as all subsequent text will be in the newly created nodes.
-					# sanitize the new nodes ourselves; they won't be picked up otherwise.
-					resulting_nodes.delete(node)
-					resulting_nodes.each do |new_node|
-						Sanitize.clean_node!(new_node, env[:config])
-					end
 					return
 				rescue ActiveRecord::RecordNotFound => ex
 					# not a valid reference, move on to the next
@@ -138,7 +129,8 @@ module StylesHelper
 		linkify_users = lambda do |env|
 			node = env[:node]
 			return unless node.text?
-			return if has_anchor_ancestor(node)
+			return if has_ancestor(node, 'a')
+			return if has_ancestor(node, 'pre')
 			user_pattern = /(\s|^|\()(user ([0-9]+))/i
 			user_reference = node.text.match(user_pattern)
 			return if user_reference.nil?
@@ -152,11 +144,6 @@ module StylesHelper
 					user = User.find(user_id)
 					resulting_nodes = replace_text_with_link(node, original_text, user.name, url_for(:controller => "users", :action => "show", :id => user.id))
 					# the current node will not contain any more references as all subsequent text will be in the newly created nodes.
-					# sanitize the new nodes ourselves; they won't be picked up otherwise.
-					resulting_nodes.delete(node)
-					resulting_nodes.each do |new_node|
-						Sanitize.clean_node!(new_node, env[:config])
-					end
 					return
 				rescue ActiveRecord::RecordNotFound => ex
 					# not a valid reference, move on to the next
@@ -169,21 +156,12 @@ module StylesHelper
 		fix_whitespace = lambda do |env|
 			node = env[:node]
 			return unless node.text?
-			# stupid workaround for https://github.com/JasonBarnabe/userstyles/issues/1 - give up if the stack is too big
-			if caller.size > 2000
-				node.content = ''
-				return
-			end
-			node.content = node.content.lstrip if node.previous_sibling.nil? or (!node.previous_sibling.description.nil? and node.previous_sibling.description.block?)
-			node.content = node.content.rstrip if node.next_sibling.nil? or (!node.next_sibling.description.nil? and node.next_sibling.description.block?)
+			return if has_ancestor(node, 'pre')
+			node.content = node.content.lstrip if element_is_block(node.previous_sibling)
+			node.content = node.content.rstrip if element_is_block(node.next_sibling)
 			return if node.text.empty?
 			return unless node.text.include?("\n")
 			resulting_nodes = replace_text_with_node(node, "\n", Nokogiri::XML::Node.new('br', node.document))
-			# sanitize the new nodes ourselves; they won't be picked up otherwise.
-			resulting_nodes.delete(node)
-			resulting_nodes.each do |new_node|
-				Sanitize.clean_node!(new_node, env[:config])
-			end
 		end
 
 		config = Sanitize::Config::BASIC.merge({
@@ -214,13 +192,19 @@ private
 			return [node, node.next_sibling, node.next_sibling.next_sibling]
 	end
 
-	def has_anchor_ancestor(node)
+	def has_ancestor(node, ancestor_node_name)
 		until node.nil?
-			return true if node.name == 'a'
+			return true if node.name == ancestor_node_name
 			node = node.parent
 		end
 		return false
 	end
 
+	def element_is_block(node)
+		return false if node.nil?
+		# https://github.com/rgrove/sanitize/issues/108
+		d = Nokogiri::HTML::ElementDescription[node.name]
+		return !d.nil? && d.block?
+	end
 
 end
