@@ -1,3 +1,5 @@
+require 'js_connect'
+
 class LoginController < ApplicationController
 
 	def index
@@ -271,11 +273,31 @@ class LoginController < ApplicationController
 		end
 	end
 
+	def single_sign_on_json
+		user = {}
+		client_id = Userstyles::Application.config.vanilla_jsconnect_clientid
+		secret = Userstyles::Application.config.vanilla_jsconnect_secret
+
+		if !session[:user_id].nil?
+			u = User.find(session[:user_id])
+			user["uniqueid"] = u.id.to_s
+			user["name"] = u.name
+			email = u.email
+			email = 'user' + u.id.to_s + '@userstyles.org' if email.nil?
+			user["email"] = email
+			user["photourl"] = ""
+		end
+
+		secure = true # this should be true unless you are testing.
+		json = JsConnect.getJsConnectString(user, self.params, client_id, secret, secure)
+
+		render :text => json
+	end
 
 private
 
 	def public_action?
-		['index', 'check', 'forum', 'authenticate_normal', 'authenticate_openid', 'authenticate_openid_complete', 'name_conflict', 'name_required', 'resolve_name_conflict', 'resolve_name_required', 'policy', 'lost_password', 'lost_password_start', 'lost_password_done', 'single_sign_on'].include?(action_name)
+		['index', 'check', 'forum', 'authenticate_normal', 'authenticate_openid', 'authenticate_openid_complete', 'name_conflict', 'name_required', 'resolve_name_conflict', 'resolve_name_required', 'policy', 'lost_password', 'lost_password_start', 'lost_password_done', 'single_sign_on', 'single_sign_on_json'].include?(action_name)
 	end
 	
 	def admin_action?
