@@ -857,7 +857,7 @@ Replace = "$STOP()"
 	end
 
 	def full_pretty_url
-		return 'http://' + DOMAIN + pretty_url
+		return DOMAIN_PROTOCOL + '://' + DOMAIN + pretty_url
 	end
 
 	def pretty_url

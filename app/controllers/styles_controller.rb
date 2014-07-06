@@ -363,7 +363,7 @@ class StylesController < ApplicationController
 				@feeds << {:title => @page_title, :href => url_for(:category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort], :sort_direction => params[:sort_direction], :format => "rss", :host => DOMAIN), :type => "application/rss+xml"}
 				@feeds << {:title => @page_title, :href => url_for(:category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort], :sort_direction => params[:sort_direction], :format => "json", :host => DOMAIN), :type => "application/json"}
 				@feeds << {:title => @page_title, :href => url_for(:category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort], :sort_direction => params[:sort_direction], :format => "jsonp", :host => DOMAIN), :type => "text/javascript"}
-				@canonical = url_for(:controller => 'styles', :action => 'browse', :page => params[:page], :category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort] == 'relevance' ? nil : params[:sort], :sort_direction => params[:sort_direction], :per_page => params[:per_page], :format => nil, :host => DOMAIN)
+				@canonical = url_for(:controller => 'styles', :action => 'browse', :page => params[:page], :category => feed_category, :search_terms => params[:search_terms], :sort => params[:sort] == 'relevance' ? nil : params[:sort], :sort_direction => params[:sort_direction], :per_page => params[:per_page], :format => nil, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)
 				render :action => 'browse'
 			}
 			format.rss {
