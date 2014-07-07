@@ -12,8 +12,8 @@ class LogoutController < ApplicationController
 		cookies.delete(:login)
 		cookies.delete(:session_id)
 		# log out of vanilla too
-		cookies.delete 'Vanilla'
-		cookies.delete 'Vanilla-Volatile'
+		cookies.delete('Vanilla', :domain => COOKIE_DOMAIN)
+		cookies.delete('Vanilla-Volatile', :domain => COOKIE_DOMAIN)
 		redirect_to '/'
 	end
 	
