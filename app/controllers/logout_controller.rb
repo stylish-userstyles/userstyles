@@ -11,6 +11,9 @@ class LogoutController < ApplicationController
 		reset_session
 		cookies.delete(:login)
 		cookies.delete(:session_id)
+		# log out of vanilla too
+		cookies.delete 'Vanilla'
+		cookies.delete 'Vanilla-Volatile'
 		redirect_to '/'
 	end
 	
