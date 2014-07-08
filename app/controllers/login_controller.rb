@@ -291,7 +291,7 @@ class LoginController < ApplicationController
 		secure = true # this should be true unless you are testing.
 		json = JsConnect.getJsConnectString(user, self.params, client_id, secret, secure)
 
-		render :text => json
+		render :json => json
 	end
 
 private
