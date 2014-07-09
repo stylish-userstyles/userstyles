@@ -1,7 +1,12 @@
 /* Index rating image - move to left of title  */
-.rating-image {
-	float: left;
-	margin-right: 5px;
+.DataList .ItemDiscussion {
+	position: relative;
+	padding-left: 22px;
+}
+.DataList .rating-image {
+	position: absolute;
+	left: 3px;
+	top: 12px;
 }
 /* Form rating options */
 label[for*="Rating"] {
