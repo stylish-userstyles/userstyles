@@ -140,5 +140,15 @@ class UserstylesPlugin extends Gdn_Plugin {
 		}
 		$Sender->SQL->Database->DatabasePrefix = $prefix;
 	}
+
+	public function SpamModel_CheckSpam_Handler($Sender) {
+		if ($Sender->EventArguments['RecordType'] != 'Discussion') {
+			return;
+		}
+
+		if (preg_match('/9815331734/', $Sender->EventArguments['Data']['Name'])) {
+			$Sender->EventArguments['IsSpam'] = true;
+		}
+	}
 }
 
