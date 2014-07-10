@@ -4,3 +4,4 @@
 //= require install.js
 //= require forum.js
 //= require social.js
+//= require Chart.js
