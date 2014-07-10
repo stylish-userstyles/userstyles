@@ -634,6 +634,7 @@ class StylesController < ApplicationController
 	end
 
 	def stats
+		@no_bots = !params['all-stats'].nil?
 		@style = Style.find(params[:id])
 		@page_title = @style.short_description + ' stats'
 		raw_counts = StyleInstallCount.where(:style_id => params[:id])
