@@ -146,7 +146,7 @@ class UserstylesPlugin extends Gdn_Plugin {
 			return;
 		}
 
-		if (preg_match('/9815331734/', $Sender->EventArguments['Data']['Name'])) {
+		if (preg_match('/[0-9]{10}/', $Sender->EventArguments['Data']['Name'])) {
 			$Sender->EventArguments['IsSpam'] = true;
 		}
 	}
