@@ -348,7 +348,7 @@ class StylesController < ApplicationController
 
 		@chosen_sort = params[:sort].nil? ? 'relevance' : params[:sort]
 		@direction = params[:sort_direction].nil? ? 'desc' : params[:sort_direction].downcase
-		@no_bots = !(@chosen_sort == 'relevance' && @direction == 'desc' && (params[:per_page].nil? or params[:per_page].to_i == 10))
+		@no_index = !(@chosen_sort == 'relevance' && @direction == 'desc' && (params[:per_page].nil? or params[:per_page].to_i == 10))
 
 		feed_category = params[:category]
 		feed_category = 'all' if feed_category.nil? and !params[:search_terms].nil?

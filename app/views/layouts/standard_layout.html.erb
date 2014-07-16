@@ -10,6 +10,8 @@
 		</title>
 		<% if @no_bots %>
 			<meta name="robots" content="noindex">
+		<% elsif @no_index %>
+			<meta name="robots" content="noindex,follow">
 		<% end %>
 		<% if !@canonical.nil? %>
 			<link rel="canonical" href="<%= @canonical%>">
