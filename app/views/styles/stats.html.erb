@@ -75,7 +75,7 @@ max_labels = 30
 label_skip = max_labels > day_totals.keys.length ? 1 : (day_totals.keys.length / 30)
 
 max_installs = day_totals.values.max
-if max_installs > 0
+if !max_installs.nil? and max_installs > 0
 	x = Math.log10(max_installs).floor
 	scale_top=(max_installs/(10.0**x)).ceil*10**x
 	scale_steps = [10,max_installs].min
