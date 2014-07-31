@@ -4,6 +4,8 @@ class UsersController < ApplicationController
 	helper :styles
 	helper :users
 
+	protect_from_forgery :except => [:show]
+
 	def show
 		@user_displayed = User.find(params[:id])
 		@styles = Style.where(:user_id => @user_displayed.id).order('obsolete, short_description')
