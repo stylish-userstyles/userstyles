@@ -308,7 +308,7 @@
 	<div id="post-discussion"></div>
 
 	<div id="login-form" style="display:none">
-		<%= render(:partial => 'login/form', :locals => {:skip_remember => true, :login_reason => 'You need to be logged in to be able to start a discussion.', :return_to => url_for() + '#post-discussion'}) %>
+		<%= render(:partial => 'login/form', :locals => {:skip_remember => true, :login_reason => 'You need to be logged in to be able to start a discussion.', :return_to => "//#{FORUM_DOMAIN}/post/discussion?Discussion/StyleID=#{@style.id}"}) %>
 	</div>
 
 	<% if @style.discussions.empty? %>

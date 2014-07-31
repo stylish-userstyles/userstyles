@@ -32,11 +32,7 @@ function addDiscussion() {
 }
 
 function showAddDiscussionUI() {
-	var iframe = document.createElement("iframe");
-	iframe.setAttribute("id", "add-review");
-	iframe.setAttribute("src", document.getElementById("start-discussion").href + "&minimal=true");
-	document.getElementById("post-discussion").appendChild(iframe);
-	location.href = "#post-discussion";
+	location.href = document.getElementById("start-discussion").href;
 }
 
 function showLogInUI() {
@@ -52,19 +48,12 @@ function addClickEvent(id, fn) {
 }
 
 function init() {
-	showAppropriateUIForParameter();
 	addClickEvent("start-discussion", startDiscussion)
 }
 
 function startDiscussion(event) {
 	addDiscussion();
 	event.preventDefault()
-}
-
-function showAppropriateUIForParameter() {
-	if (location.hash == "#post-discussion") {
-		addDiscussion();
-	}
 }
 
 if (document.getElementById("post-discussion")) {
