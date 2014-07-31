@@ -2,6 +2,8 @@ require 'js_connect'
 
 class LoginController < ApplicationController
 
+	protect_from_forgery :except => [:single_sign_on, :single_sign_on_json]
+
 	def index
 		if !session[:user_id].nil?
 			go_to_return_to
