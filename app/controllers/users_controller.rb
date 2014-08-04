@@ -261,15 +261,15 @@ class UsersController < ApplicationController
 			return
 		end
 		
-		existing_ua = UserAuthenticator.where(:provider_identifier => params[:provider_identifier]).where(:provider => 'openid').first
+		existing_ua = UserAuthenticator.find(params[:user_authenticator_id])
 		if existing_ua.nil? or existing_ua.user_id != @user.id
-			@message = 'OpenID remove failed - could not find authenticator.'
+			@message = 'Authenticator remove failed - could not find authenticator.'
 			render :action => 'edit_login_methods'
 			return
 		end
 		
 		if !@user.has_spare_login_methods
-			@message = "OpenID remove failed - you'd have no way to log in!"
+			@message = "Authenticator remove failed - you'd have no way to log in!"
 			render :action => 'edit_login_methods'
 			return
 		end

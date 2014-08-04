@@ -1,0 +1,5 @@
+<p>Google has deprecated their OpenID implementation, which is what userstyles.org used until August 2014. To migrate existing users, we need to know if you've signed in to userstyles.org with Google before.</p>
+
+<p><a href="/login/resolve_openid_migration">No, I've never signed in to userstyles.org with Google before.</a> (We'll make you a new account.)</p>
+
+<p><a href="<%=url_for(:controller => 'login', :action => 'authenticate_openid', :openid => 'https://www.google.com/accounts/o8/id')%>">Yes, I've signed in to userstyles.org with Google before.</a> (We'll verify who you are using OpenID, then connect your account to Google's new system.)</p>

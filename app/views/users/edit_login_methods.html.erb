@@ -73,7 +73,7 @@
 	<% end %>
 <% end %>
 
-<p>Authenticators let another service handle your login info. Currently the only supported authenticator is OpenID.</p>
+<p>Authenticators let another service handle your login info.</p>
 
 <% 
 google_open_id_set = false
@@ -85,38 +85,45 @@ if @user.user_authenticators.empty? %>
 	<ul>
 	<% @user.user_authenticators.each do |ua| %>
 		<li>
-			<% if ua.provider_identifier.starts_with?('https://www.google.com/accounts/') 
-				google_open_id_set = true %>
-				OpenID (Google):
-			<% elsif ua.provider_identifier.starts_with?('https://me.yahoo.com/') 
-				yahoo_open_id_set = true %>
-				OpenID (Yahoo):
-			<% else %>
-				OpenID:
-			<% end %>
-			<a href="<%= h ua.provider_identifier %>"><%= h ua.provider_identifier %></a>
-			<% if @user.has_spare_login_methods %>
-				<%=form_for(:user, :url => {:action => :remove_authenticator, :id => @user.id}) do |u| %>
-					<input type="hidden" name="provider_identifier" value="<%= h ua.provider_identifier %>">
-					<input type="submit" value="Remove">
-				<% end
+			<% if ua.provider == 'openid'
+				if ua.provider_identifier.starts_with?('https://www.google.com/accounts/') 
+					google_open_id_set = true %>
+					OpenID (Google):
+				<% elsif ua.provider_identifier.starts_with?('https://me.yahoo.com/') 
+					yahoo_open_id_set = true %>
+					OpenID (Yahoo):
+				<% else %>
+					OpenID:
+				<% end %>
+				<a href="<%= h ua.provider_identifier %>"><%=ua.provider_identifier%></a>
+				<% if @user.has_spare_login_methods %>
+					<%=form_for(:user, :url => {:action => :remove_authenticator, :id => @user.id}) do |u| %>
+						<input type="hidden" name="user_authenticator_id" value="<%=ua.id%>">
+						<input type="submit" value="Remove">
+					<% end
+				end
+			else %>
+				<%=ua.pretty_provider%>: <a href="<%=ua.url%>"><%=ua.url%></a>
+				<% if @user.has_spare_login_methods %>
+					<%=form_for(:user, :url => {:action => :remove_authenticator, :id => @user.id}) do |u| %>
+						<input type="hidden" name="user_authenticator_id" value="<%=ua.id%>">
+						<input type="submit" value="Remove">
+					<% end
+				end
 			end %>
 		</li>
 	<% end %>
 	</ul>
 <% end %>
 
+<% Rails.application.config.available_auths.keys.select{|provider| !@user.user_authenticators.any?{|ua|ua.provider == provider}}.each do |provider| %>
+	<p><%=link_to 'Add ' + UserAuthenticator.pretty_provider(provider), "/auth/#{provider}" + ('?' + {:origin => url_for()}.to_query)%>
+<% end %>
+
+
 <p>Add OpenID:</p>
 <ul>
-	<% if !google_open_id_set %>
-		<li>
-			<%= form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
-				<input type="hidden" name="provider_identifier" value="https://www.google.com/accounts/o8/id">
-				<input type="submit" value="Add your Google account as an OpenID provider">
-			<% end %>
-		</li>
-	<% end
-	if !yahoo_open_id_set %>
+	<% if !yahoo_open_id_set %>
 		<li>
 			<%= form_for(:user, :url => {:action => :add_authenticator, :id => @user.id}) do |u| %>
 				<input type="hidden" name="provider_identifier" value="https://me.yahoo.com/">

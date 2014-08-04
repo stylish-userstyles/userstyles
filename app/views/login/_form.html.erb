@@ -16,20 +16,25 @@ end %>
 	<%=form_tag({:controller => 'login', :action => 'authenticate_openid'}, {:id => 'openid-login-form', :style => (params['view'].nil? or params['view'] == 'openid') ? '' : 'display:none'}) do |f| %>
 		<div id="login-options" style="<%=params['view'].nil? ? '' : 'display:none'%>">
 			<p class="login-option-explanation">Log in with:</p>
+
+			<% Rails.application.config.available_auths.keys.each do |provider| %>
+				<%=link_to UserAuthenticator.pretty_provider(provider), "/auth/#{provider}" + (return_to.nil? ? '' : ('?' + {:origin => return_to}.to_query)), {:class => "#{provider}-login btn-auth btn-google"}%>
+			<% end %>
+
 			<%
 				openid_logins = [
 					#{:name => 'Facebook', :class => 'facebook', :url => ''},
 					#{:name => 'Twitter', :class => 'twitter', :url => ''},
-					{:name => 'Google', :class => 'google', :url => 'https://www.google.com/accounts/o8/id'},
+					#{:name => 'Google', :class => 'google', :url => 'https://www.google.com/accounts/o8/id'},
 					#{:name => 'GitHub', :class => 'github', :url => ''},
 					{:name => 'Yahoo!', :class => 'yahoo', :url => 'https://me.yahoo.com/'},
 					#{:name => 'Windows Live ID', :class => 'windows', :url => ''},	
 				]
 				openid_logins.each do |provider| %>
-			    <a class="btn-auth btn-<%=provider[:class]%>" href="<%=url_for(:controller => 'login', :action => 'authenticate_openid', :openid => provider[:url])%>" onclick="return logInWithOpenId('<%= provider[:url]%>')"><%=provider[:name]%></a>
+					<a class="btn-auth btn-<%=provider[:class]%>" href="<%=url_for(:controller => 'login', :action => 'authenticate_openid', :openid => provider[:url])%>" onclick="return logInWithOpenId('<%= provider[:url]%>')"><%=provider[:name]%></a>
 				<% end %>
-	    <a class="btn-auth btn-openid" href="?view=openid" onclick="return showOpenIdEntry();">OpenID</a>
-	    <a class="btn-auth btn-password" href="?view=password" onclick="return showPasswordEntry();">User name/password</a>
+		<a class="btn-auth btn-openid" href="?view=openid" onclick="return showOpenIdEntry();">OpenID</a>
+		<a class="btn-auth btn-password" href="?view=password" onclick="return showPasswordEntry();">User name/password</a>
 		</div>
 
 		<script>

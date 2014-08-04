@@ -2,7 +2,7 @@ require 'js_connect'
 
 class LoginController < ApplicationController
 
-	protect_from_forgery :except => [:single_sign_on, :single_sign_on_json]
+	protect_from_forgery :except => [:single_sign_on, :single_sign_on_json, :omniauth_callback]
 
 	def index
 		if !session[:user_id].nil?
@@ -66,10 +66,10 @@ class LoginController < ApplicationController
 	def authenticate_openid_complete
 
 		response = self.complete(params, url_for(:controller => :login, :action => :authenticate_openid_complete));
-	    sreg = OpenID::SReg::Response.from_success_response(response)
-	    ua = UserAuthenticator.where(:provider => 'openid').where(:provider_identifier => response.identity_url).first
-	    user = nil
-	    user = ua.user unless ua.nil?
+		sreg = OpenID::SReg::Response.from_success_response(response)
+		ua = UserAuthenticator.where(:provider => 'openid').where(:provider_identifier => response.identity_url).first
+		user = nil
+		user = ua.user unless ua.nil?
 		if user.nil?
 			user = User.new
 			user.login = nil
@@ -77,19 +77,28 @@ class LoginController < ApplicationController
 			user.ip = request.remote_ip()
 			#user.openid_url = response.identity_url
 			ua = UserAuthenticator.new
-			ua.provider = 'openid'
-			ua.provider_identifier = response.identity_url
+			if session[:oauth_migration].nil?
+				ua.provider = 'openid'
+				ua.provider_identifier = response.identity_url
+			else
+				# someone said they signed in before, but didn't.
+				ua.provider = session[:oauth_migration][:provider]
+				ua.provider_identifier = session[:oauth_migration][:provider_identifier]
+				ua.url = session[:oauth_migration][:url]
+				session[:return_to] = session[:oauth_migration][:return_to] if session[:return_to].nil?
+				session.delete(:oauth_migration)
+			end
 			user.user_authenticators << ua
 			user.email = sreg['email']
 			begin
 				user.name = sreg['nickname']
 			rescue Exception => e
-				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email']}
+				session[:temp_login_details] = {:provider_identifier => ua.provider_identifier, :email => sreg['email'], :name => sreg['nickname'], :provider => ua.provider, :url => ua.url}
 				redirect_to(:action => 'name_required')
 				return
 			end
 			if user.name.nil? or user.name.length == 0
-				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email']}
+				session[:temp_login_details] = {:provider_identifier => ua.provider_identifier, :email => sreg['email'], :name => sreg['nickname'], :provider => ua.provider, :url => ua.url}
 				redirect_to(:action => 'name_required')
 				return
 			end
@@ -104,7 +113,7 @@ class LoginController < ApplicationController
 				session[:user_id] = user.id
 				go_to_return_to()
 			else
-				session[:temp_login_details] = {:provider_identifier => response.identity_url, :email => sreg['email'], :name => sreg['nickname']}
+				session[:temp_login_details] = {:provider_identifier => ua.provider_identifier, :email => sreg['email'], :name => sreg['nickname'], :provider => ua.provider, :url => ua.url}
 				redirect_to(:action => 'name_conflict')
 			end
 			return
@@ -129,6 +138,17 @@ class LoginController < ApplicationController
 					user.email = original_email
 				end
 			end
+		end
+
+		# migration from OpenID
+		if !session[:oauth_migration].nil?
+			ua = UserAuthenticator.new
+			ua.provider = session[:oauth_migration][:provider]
+			ua.provider_identifier = session[:oauth_migration][:provider_identifier]
+			ua.url = session[:oauth_migration][:url]
+			session[:return_to] = session[:oauth_migration][:return_to] if session[:return_to].nil?
+			session.delete(:oauth_migration)
+			user.user_authenticators << ua
 		end
 
 		if session[:remember]
@@ -170,8 +190,9 @@ class LoginController < ApplicationController
 		
 		@user[:email] = session[:temp_login_details][:email]
 		ua = UserAuthenticator.new
-		ua.provider = 'openid'
+		ua.provider = session[:temp_login_details][:provider]
 		ua.provider_identifier = session[:temp_login_details][:provider_identifier]
+		ua.url = session[:temp_login_details][:url]
 		@user.user_authenticators << ua
 		
 		@user.name = params[:name]
@@ -205,8 +226,9 @@ class LoginController < ApplicationController
 		
 		@user[:email] = session[:temp_login_details][:email]
 		ua = UserAuthenticator.new
-		ua.provider = 'openid'
+		ua.provider = session[:temp_login_details][:provider]
 		ua.provider_identifier = session[:temp_login_details][:provider_identifier]
+		ua.url = session[:temp_login_details][:url]
 		@user.user_authenticators << ua
 		
 		@user.name = params[:name]
@@ -296,10 +318,143 @@ class LoginController < ApplicationController
 		render :js => json
 	end
 
+	def omniauth_callback
+
+		if !params[:failure].nil?
+			handle_omniauth_failure
+			return
+		end
+
+		if !params[:error].nil?
+			handle_omniauth_failure(params[:error])
+			return
+		end
+
+		if !request.env['omniauth.origin'].nil?
+			origin_uri = URI.parse(request.env['omniauth.origin'])
+			# avoid open redirects
+			return_to = request.env['omniauth.origin'] if origin_uri.host.nil? or origin_uri.host.ends_with?(DOMAIN)
+		end
+		o = request.env['omniauth.auth']
+
+		provider = o[:provider]
+		uid = o[:uid]
+		email = o[:info][:email]
+		email = nil if !email.nil? and email.empty?
+		if session[:chosen_name]
+			# from name conflict
+			name = session[:chosen_name]
+			session.delete(:chosen_name)
+			# don't go to omniauth.origin (the first sign in attempt), go to *its* omniauth.origin
+			request.env['omniauth.origin'] = params[:origin]
+		else
+		name = o[:info][:nickname] || # GitHub
+			(provider == 'browser_id' ? o[:info][:name].split('@').first : nil) || # Persona
+			o[:info][:name] # Google
+		end
+		url = (o[:extra] && o[:extra][:raw_info] && o[:extra][:raw_info][:html_url]) || # GitHub
+			(o[:extra] && o[:extra][:raw_info] && o[:extra][:raw_info][:profile]) # Google
+
+		# does the identity already exist?
+		identity = UserAuthenticator.find_by_provider_and_provider_identifier(provider, uid)
+		if !identity.nil?
+			# existing user
+			user = identity.user
+			if !session[:user_id].nil? and user.id != session[:user_id]
+				# another user has this already!
+				flash[:notice] = "Addition of #{UserAuthenticator.pretty_provider(provider)} sign in failed: that sign in is already being used by user '#{user.name}'."
+				rt = return_to
+				if !rt.nil?
+					redirect_to rt
+				else
+					go_to_return_to()
+				end
+				return
+			end
+			session[:user_id] = user.id
+			if !return_to.nil?
+				redirect_to return_to
+			else
+				go_to_return_to()
+			end
+			return
+		end
+
+		# identity did not previously exist
+
+		# user already logged in - add identity to their account
+		if !session[:user_id].nil?
+			user = User.find(session[:user_id])
+			identity = UserAuthenticator.new({:provider => provider, :provider_identifier => uid, :user => user, :url => url})
+			if !identity.valid?
+				handle_omniauth_failure(identity.errors.full_messages.join(', '))
+				return
+			end
+			identity.save(:validate => false)
+			flash[:notice] = "#{UserAuthenticator.pretty_provider(provider)} sign in added."
+			rt = return_to
+			if !rt.nil?
+				redirect_to rt
+			else
+				go_to_return_to()
+			end
+			return
+		end
+
+		if provider == 'google_oauth2' and !session[:openid_dont_migrate]
+			session[:oauth_migration] = {:provider => provider, :provider_identifier => uid, :url => url, :name => name, :email => email, :return_to => return_to || request.env['omniauth.origin']}
+			render 'google_migration'
+			return
+		end
+
+		# does another user already have that name?
+		same_name_user = User.find_by_name(name)
+		if !same_name_user.nil?
+			session[:temp_login_details] = {:provider_identifier => uid, :email => email, :name => name, :provider => provider, :url => url}
+			redirect_to(:action => 'name_conflict')
+			return
+		end
+
+		# create a new user
+		user = User.new({:name => name, :email => email, :user_authenticators => [UserAuthenticator.new({:provider => provider, :provider_identifier => uid, :url => url})]})
+		if !user.save
+			handle_omniauth_failure(user.errors.full_messages.join(', '))
+			return
+		end
+		session[:user_id] = user.id
+		if !return_to.nil?
+			redirect_to return_to
+		else
+			go_to_return_to()
+		end
+	end
+
+	def omniauth_failure
+		handle_omniauth_failure(params[:message])
+	end
+
+	def resolve_openid_migration
+		session[:openid_dont_migrate] = true
+		redirect_to '/auth/google_oauth2'
+	end
+
 private
 
+	def handle_omniauth_failure(error = 'unknown')
+		flash[:notice] = "#{UserAuthenticator.pretty_provider(params[:provider] || params[:strategy])} sign in failed: #{error}."
+		render :action => 'index'
+		#redirect_to clean_redirect_param(:origin) || request.env['omniauth.origin'] || {:action => 'index'}
+	end
+
+	def clean_redirect_param(param_name)
+		v = params[param_name]
+		return nil if v.nil?
+		return nil if v.include?('failure')
+		return URI.parse(v).path
+	end
+
 	def public_action?
-		['index', 'check', 'forum', 'authenticate_normal', 'authenticate_openid', 'authenticate_openid_complete', 'name_conflict', 'name_required', 'resolve_name_conflict', 'resolve_name_required', 'policy', 'lost_password', 'lost_password_start', 'lost_password_done', 'single_sign_on', 'single_sign_on_json'].include?(action_name)
+		['index', 'check', 'forum', 'authenticate_normal', 'authenticate_openid', 'authenticate_openid_complete', 'name_conflict', 'name_required', 'resolve_name_conflict', 'resolve_name_required', 'policy', 'lost_password', 'lost_password_start', 'lost_password_done', 'single_sign_on', 'single_sign_on_json', 'omniauth_callback', 'omniauth_failure', 'resolve_openid_migration'].include?(action_name)
 	end
 	
 	def admin_action?

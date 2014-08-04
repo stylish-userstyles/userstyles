@@ -3,6 +3,12 @@ Userstyles::Application.routes.draw do
   get 'categories' => 'categories#show'
   get 'categories/:id' => 'categories#show'
 
+  get '/auth/:provider/callback', to: 'login#omniauth_callback', :as => 'omniauth_callback'
+  # BrowserID POSTs
+  post '/auth/:provider/callback', to: 'login#omniauth_callback'
+  get '/auth/failure', to: 'login#omniauth_failure'
+  get '/auth/failure2', to: 'login#omniauth_failure'
+
   resources :users
   get 'user/list' => 'users#index'
   get 'user/show/:id' => 'users#show'

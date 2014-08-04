@@ -106,6 +106,12 @@
 
 		<div id="content-wrapper">
 			<article id="main-article">
+				<% if !flash['notice'].nil? %>
+					<p class="notice"><%= raw(flash['notice']) %></p>
+				<% end %>
+				<% if !alert.nil? %>
+					<p class="alert"><%= raw(alert) %></p>
+				<% end %>
 				<%=yield%>
 			</article>
 		</div>
