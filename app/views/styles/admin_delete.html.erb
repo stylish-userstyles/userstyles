@@ -5,7 +5,7 @@
 	<p>
 		<label for="admin_delete_reason_id">Reason</label>
 		<select id="admin_delete_reason_id" name="admin_delete_reason_id">
-			<% AdminDeleteReason.find(:all).each do |adr| %>
+			<% AdminDeleteReason.all.each do |adr| %>
 				<option value="<%=h adr.id%>" <%= (!@style.admin_delete_reason_id.nil? and @style.admin_delete_reason.id == adr.id) ? 'selected' : ''%>><%=h adr.reason%></option>
 			<% end %>
 		</select>
