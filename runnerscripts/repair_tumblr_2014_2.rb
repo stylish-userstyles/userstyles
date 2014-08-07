@@ -16,12 +16,15 @@ data.each do |id, rules|
 	end
 	new_code = new_code.gsub(/#content(?![a-zA-Z0-9\-\_])/, "div.l-content\\1").gsub(/#header(?![a-zA-Z0-9\-\_])/, "div.l-header\\1")
 	if style.style_code.code != new_code
-		File.open("public/tumblrfix/#{style.id}.css", 'w') { |file| file.write(new_code) }
-		puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> <a href=\"#{style.id}.css\">Code</a></div>"
-		puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> unchanged</div>" if style.style_code.code == new_code
+		#File.open("public/tumblrfix/#{style.id}.css", 'w') { |file| file.write(new_code) }
+		#puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> <a href=\"#{style.id}.css\">Code</a></div>"
+		#puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> unchanged</div>" if style.style_code.code == new_code
 		CSSPool::CSS::Document.parse(new_code) if !starting_code_invalid
-		#puts style.id.to_s
-		#style.style_code.code = new_code
-		#style.style_code.save
+		puts style.id.to_s
+		style.style_code.code = new_code
+		style.style_code.save
+		style.refresh_meta
+		style.write_md5
+		style.save(:validate => false)
 	end
 end
