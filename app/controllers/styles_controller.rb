@@ -79,11 +79,7 @@ class StylesController < ApplicationController
 				if !@style.screenshot_url.nil?
 					@header_include += "<link rel=\"stylish-example-url\" href=\"#{CGI.escapeHTML(@style.screenshot_url)}\">".html_safe
 				end
-				if @style.subcategory.nil?
-					@meta_description = "Customize your web browser with this user style." 
-				else
-					@meta_description = "Customize your #{@style.subcategory} experience with this user style." 
-				end
+				@meta_description = @style.long_description.gsub(/[\r\n\t]/, ' ').gsub(/\s+{2,}/, ' ').truncate(150)
 				@header_include = @header_include.html_safe
 				@canonical = @style.full_pretty_url
 				@feeds = []
