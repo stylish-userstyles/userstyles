@@ -17,7 +17,7 @@ data.each do |id, rules|
 	new_code = new_code.gsub(/div\.l\-header\s+\.iconic\s*\>\s*a\s*\{/, "div.l-header .tab.iconic > a {").gsub(/div\.l\-content\s*\{/, "#left_column, #right_column {background-color: transparent !important;}\n\ndiv.l-content.l-content.l-content {")
 	if style.style_code.code != new_code
 		CSSPool::CSS::Document.parse(new_code) if !starting_code_invalid
-		if true
+		if false
 			File.open("public/tumblrfix/#{style.id}.css", 'w') { |file| file.write(new_code) }
 			puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> <a href=\"#{style.id}.css\">Code</a></div>"
 			puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> unchanged</div>" if style.style_code.code == new_code
