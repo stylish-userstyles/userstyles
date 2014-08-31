@@ -7,7 +7,7 @@ ids = Style.connection.select_values("select style_id from styles join style_cod
 
 ids.each do |id|
 	style = Style.includes(:style_code).find(id)
-	new_code = style.style_code.code
+	new_code = style.style_code.code.dup
 	starting_code_invalid = false
 	begin
 		doc = CSSPool::CSS::Document.parse(new_code)
