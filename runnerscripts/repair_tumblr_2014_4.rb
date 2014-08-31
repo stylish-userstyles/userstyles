@@ -46,13 +46,13 @@ ids.each do |id|
 		)
 		#puts new_code
 	end
+	next if new_code == style.style_code.code
 	# make sure it remains valid code
 	CSSPool::CSS::Document.parse(new_code)
 
 	if true
 		File.open("public/tumblrfix/#{style.id}.css", 'w') { |file| file.write(new_code) }
 		puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> <a href=\"#{style.id}.css\">Code</a></div>"
-		puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> unchanged</div>" if style.style_code.code == new_code
 	else
 		puts style.id.to_s
 		style.style_code.code = new_code
