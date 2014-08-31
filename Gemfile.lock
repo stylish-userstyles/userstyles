@@ -37,7 +37,7 @@ GEM
       execjs
     coffee-script-source (1.7.1)
     crass (0.2.1)
-    csspool (4.0.2)
+    csspool (4.0.1)
     daemons (1.1.9)
     dalli (2.6.4)
     delayed_job (4.0.2)
