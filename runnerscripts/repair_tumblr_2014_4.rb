@@ -50,7 +50,7 @@ ids.each do |id|
 	# make sure it remains valid code
 	CSSPool::CSS::Document.parse(new_code)
 
-	if true
+	if false
 		File.open("public/tumblrfix/#{style.id}.css", 'w') { |file| file.write(new_code) }
 		puts "<div><a href=\"#{style.pretty_url}\">#{CGI::escapeHTML(style.name)}</a> <a href=\"#{style.id}.css\">Code</a></div>"
 	else
