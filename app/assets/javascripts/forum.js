@@ -44,7 +44,7 @@ function addClickEvent(id, fn) {
 	var el = document.getElementById(id);
 	if (!el)
 		return;
-	el.addEventListener("click", fn);
+	el.addEventListener("click", fn, false);
 }
 
 function init() {
@@ -59,7 +59,7 @@ function startDiscussion(event) {
 if (document.getElementById("post-discussion")) {
 	init();
 } else {
-	window.addEventListener("DOMContentLoaded", init);
+	window.addEventListener("DOMContentLoaded", init, false);
 }
 
 })();

@@ -542,7 +542,7 @@ function addClickEvent(id, fn) {
 	var el = document.getElementById(id);
 	if (!el)
 		return;
-	el.addEventListener("click", fn);
+	el.addEventListener("click", fn, false);
 }
 
 function addStylishListeners() {
@@ -588,17 +588,17 @@ function addEvents() {
 	
 	var optionValues = document.querySelectorAll('.style-setting-option');
 	for (var i = 0; i < optionValues.length; i++) {
-		optionValues[i].addEventListener("change", updateOption);
+		optionValues[i].addEventListener("change", updateOption, false);
 	}
 	
 	var optionUserUrls = document.querySelectorAll(".option-user-url");
 	for (var i = 0; i < optionUserUrls.length; i++) {
-		optionUserUrls[i].addEventListener("change", updateUserUrlOption);
+		optionUserUrls[i].addEventListener("change", updateUserUrlOption, false);
 	}
 
 	var optionUserUploads = document.querySelectorAll(".option-user-upload");
 	for (var i = 0; i < optionUserUploads.length; i++) {
-		optionUserUploads[i].addEventListener("change", updateUserUploadOption);
+		optionUserUploads[i].addEventListener("change", updateUserUploadOption, false);
 	}
 }
 
@@ -703,7 +703,7 @@ function init() {
 addStylishListeners();
 
 if (document.readyState == "loading") {
-	window.addEventListener("DOMContentLoaded", init);
+	window.addEventListener("DOMContentLoaded", init, false);
 } else {
 	init();
 }
