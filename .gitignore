@@ -2,7 +2,6 @@
 db/*.sqlite3
 log/
 tmp/
-db
 config/initializers/secret_token.rb
 config/database.yml
 config/*.sphinx.conf
@@ -13,3 +12,5 @@ public/auto_style_screenshots
 config/initializers/password_salt.rb
 config/initializers/vanilla.rb
 config/initializers/omniauth.rb
+db/sphinx
+db/cstore
