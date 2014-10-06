@@ -6,6 +6,12 @@
 		</div>
 	<% end %>
 
+	<% if @styles.any?{|s| !s.precalculated_warnings.empty?} %>
+		<div class="notice">
+			Some of your styles have non-loading images - consult the warnings in the list below for details. Styles containing non-loading images will be subject to deletion November 1.
+		</div>
+	<% end %>
+
 	<ul>
 		<li><%= link_to "Create new style", :action => "new", :controller => "styles" %></li>
 		<li><%= link_to "Change details", :action => "edit" %></li>

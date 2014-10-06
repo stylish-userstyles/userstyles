@@ -940,6 +940,9 @@ private
 			end
 		end
 
+		# whatever they did, assume they handled the warning
+		@style.precalculated_warnings.each {|pcw| pcw.mark_for_destruction}
+
 		begin
 
 			# db doesn't support transactions, so we can't use rails transactions.

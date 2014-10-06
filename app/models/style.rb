@@ -18,6 +18,7 @@ class Style < ActiveRecord::Base
 	has_many :screenshots
 	belongs_to :admin_delete_reason, -> { readonly }
 	has_many :style_sections, -> { order(:ordinal) }, :dependent => :destroy
+	has_many :precalculated_warnings, :autosave => true
 
 	alias_attribute :name, :short_description
 	alias_attribute :description, :long_description
@@ -1185,6 +1186,9 @@ Replace = "$STOP()"
 		# give them a week to have screenshots
 		warnings << {:message => "This style is missing a screenshot. Please read <a href=\"/help/coding#screenshots-doc\">tips for posting screenshots</a>.", :type => :screenshot} if after_screenshot_path.nil? and !(screenshot_type_preference == 'auto' and (updated >= 7.days.ago or auto_screenshots_same))
 		warnings << {:message => "This style's automatically generated screenshots don't show any changes caused by this style. Please read <a href=\"/help/coding#screenshots-doc\">tips for posting screenshots</a>.", :type => :screenshot} if auto_screenshots_same and screenshot_type_preference == 'auto' and auto_screenshot_date >= updated.to_date
+		precalculated_warnings.each do |pcw|
+			warnings << {:message => "This style contains non-loading images - " + pcw.detail, :type => pcw.warning_type}
+		end
 		return warnings
 	end
 
