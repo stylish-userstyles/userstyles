@@ -529,7 +529,7 @@ Replace = "$STOP()"
 	def self.increment_installs(style_id, source, ip)
 		Style.connection.execute("INSERT IGNORE INTO daily_install_counts (style_id, ip, source) VALUES (#{Style.connection.quote_string(style_id)}, '#{Style.connection.quote_string(ip)}', '#{Style.connection.quote_string(source)}');")
 	end
-	
+
 	# returns an array of the namespace urls for this style, empty array if none, or null if parse error
 	def calculate_namespaces
 		namespaces = []
