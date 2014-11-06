@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.38, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.19, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: userstyles
 -- ------------------------------------------------------
--- Server version	5.5.38-0ubuntu0.14.04.1
+-- Server version	5.6.19-1~exp1ubuntu2
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -51,7 +51,7 @@ CREATE TABLE `GDN_Activity` (
   KEY `IX_Activity_Recent` (`NotifyUserID`,`DateUpdated`),
   KEY `IX_Activity_Feed` (`NotifyUserID`,`ActivityUserID`,`DateUpdated`),
   KEY `IX_Activity_DateUpdated` (`DateUpdated`)
-) ENGINE=MyISAM AUTO_INCREMENT=158182 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=159778 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -238,7 +238,7 @@ CREATE TABLE `GDN_Comment` (
   KEY `IX_Comment_1` (`DiscussionID`,`DateInserted`),
   KEY `IX_Comment_DateInserted` (`DateInserted`),
   FULLTEXT KEY `TX_Comment` (`Body`)
-) ENGINE=MyISAM AUTO_INCREMENT=92067 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=92828 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -268,7 +268,7 @@ CREATE TABLE `GDN_Conversation` (
   KEY `FK_Conversation_DateInserted` (`DateInserted`),
   KEY `FK_Conversation_UpdateUserID` (`UpdateUserID`),
   KEY `IX_Conversation_RegardingID` (`RegardingID`)
-) ENGINE=MyISAM AUTO_INCREMENT=5524 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=5578 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -289,7 +289,7 @@ CREATE TABLE `GDN_ConversationMessage` (
   PRIMARY KEY (`MessageID`),
   KEY `FK_ConversationMessage_ConversationID` (`ConversationID`),
   KEY `FK_ConversationMessage_InsertUserID` (`InsertUserID`)
-) ENGINE=MyISAM AUTO_INCREMENT=10570 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=10667 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -339,7 +339,7 @@ CREATE TABLE `GDN_Discussion` (
   KEY `IX_Discussion_DateInserted` (`DateInserted`),
   KEY `IX_Discussion_CategoryPages` (`CategoryID`,`DateLastComment`),
   FULLTEXT KEY `TX_Discussion` (`Name`,`Body`)
-) ENGINE=MyISAM AUTO_INCREMENT=43846 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=44192 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -368,7 +368,7 @@ CREATE TABLE `GDN_Draft` (
   KEY `FK_Draft_DiscussionID` (`DiscussionID`),
   KEY `FK_Draft_CategoryID` (`CategoryID`),
   KEY `FK_Draft_InsertUserID` (`InsertUserID`)
-) ENGINE=MyISAM AUTO_INCREMENT=41636 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=42519 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -444,7 +444,7 @@ CREATE TABLE `GDN_Log` (
   KEY `IX_Log_RecordIPAddress` (`RecordIPAddress`),
   KEY `IX_Log_ParentRecordID` (`ParentRecordID`),
   KEY `FK_Log_CategoryID` (`CategoryID`)
-) ENGINE=InnoDB AUTO_INCREMENT=15273 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15460 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -471,7 +471,7 @@ CREATE TABLE `GDN_Media` (
   `ForeignID` int(11) DEFAULT NULL,
   `ForeignTable` varchar(24) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`MediaID`)
-) ENGINE=MyISAM AUTO_INCREMENT=9472 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=9657 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -737,7 +737,7 @@ CREATE TABLE `GDN_User` (
   KEY `IX_User_Email` (`Email`),
   KEY `IX_User_DateLastActive` (`DateLastActive`),
   KEY `IX_User_DateInserted` (`DateInserted`)
-) ENGINE=MyISAM AUTO_INCREMENT=160809 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=161199 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1356,6 +1356,23 @@ CREATE TABLE `daily_install_counts` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `daily_report_counts`
+--
+
+DROP TABLE IF EXISTS `daily_report_counts`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `daily_report_counts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `style_id` int(11) NOT NULL,
+  `ip` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
+  `report_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index_daily_report_counts_on_style_id_and_ip` (`style_id`,`ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `delayed_jobs`
 --
 
@@ -1376,7 +1393,7 @@ CREATE TABLE `delayed_jobs` (
   `updated_at` datetime DEFAULT NULL,
   `queue` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1722832 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1771309 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1423,11 +1440,11 @@ DROP TABLE IF EXISTS `precalculated_warnings`;
 CREATE TABLE `precalculated_warnings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `style_id` int(11) NOT NULL,
-  `warning_type` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-  `detail` varchar(1000) COLLATE utf8_unicode_ci NOT NULL,
+  `warning_type` varchar(20) NOT NULL,
+  `detail` varchar(1000) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `index_precalculated_warnings_on_style_id` (`style_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14383 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1469,7 +1486,7 @@ CREATE TABLE `screenshots` (
   `path` varchar(50) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `style_id` (`style_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=12567 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=12827 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1518,7 +1535,7 @@ CREATE TABLE `style_codes` (
   `code` mediumtext NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `style_id` (`style_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=106176 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=107197 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1538,7 +1555,7 @@ CREATE TABLE `style_install_counts` (
   KEY `id` (`id`),
   KEY `style_id` (`style_id`),
   KEY `date` (`date`)
-) ENGINE=MyISAM AUTO_INCREMENT=31874082 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=32365967 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1557,6 +1574,26 @@ CREATE TABLE `style_install_counts_archive` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `style_install_counts_new`
+--
+
+DROP TABLE IF EXISTS `style_install_counts_new`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `style_install_counts_new` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `style_id` int(11) NOT NULL DEFAULT '0',
+  `date` date NOT NULL DEFAULT '0000-00-00',
+  `install_count` int(11) NOT NULL DEFAULT '0',
+  `source` varchar(10) NOT NULL,
+  UNIQUE KEY `unique_style_source_and_date` (`style_id`,`date`,`source`),
+  KEY `id` (`id`),
+  KEY `style_id` (`style_id`),
+  KEY `date` (`date`)
+) ENGINE=InnoDB AUTO_INCREMENT=22088723 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `style_section_rules`
 --
 
@@ -1570,7 +1607,7 @@ CREATE TABLE `style_section_rules` (
   `rule_value` varchar(1000) CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY (`id`),
   KEY `style_section_rules_style_section_id` (`style_section_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1412165 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=1460969 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1588,7 +1625,7 @@ CREATE TABLE `style_sections` (
   `css` mediumtext CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY (`id`),
   KEY `style_sections_style_id` (`style_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=910374 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=930032 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1609,7 +1646,7 @@ CREATE TABLE `style_setting_options` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `ix_style_setting_id_install_key` (`style_setting_id`,`install_key`),
   KEY `style_option_values_style_option_id` (`style_setting_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1406892 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1430378 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1628,7 +1665,7 @@ CREATE TABLE `style_settings` (
   `setting_type` varchar(10) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ix_style_options_style_id_name` (`style_id`,`install_key`)
-) ENGINE=MyISAM AUTO_INCREMENT=361364 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=370634 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1688,7 +1725,7 @@ CREATE TABLE `styles` (
   KEY `subcategory` (`subcategory`),
   KEY `popularity_score` (`popularity_score`),
   KEY `admin_delete_reason_id` (`admin_delete_reason_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=105928 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=106952 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1708,7 +1745,7 @@ CREATE TABLE `user_authenticators` (
   UNIQUE KEY `provider_identifier` (`provider_identifier`),
   KEY `user_id_fk` (`user_id`),
   KEY `provider_provider_identifier_ix` (`provider`,`provider_identifier`)
-) ENGINE=MyISAM AUTO_INCREMENT=73894 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=75531 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1741,7 +1778,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `unique_login` (`login`),
   KEY `token` (`token`),
   KEY `LUM_User_id` (`LUM_User_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=275041 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=277486 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -1753,12 +1790,14 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-10-05 17:13:28
+-- Dump completed on 2014-11-06 12:19:32
 INSERT INTO schema_migrations (version) VALUES ('20111007022556');
 
 INSERT INTO schema_migrations (version) VALUES ('20131104171052');
 
 INSERT INTO schema_migrations (version) VALUES ('20141005210800');
+
+INSERT INTO schema_migrations (version) VALUES ('20141106175043');
 
 INSERT INTO schema_migrations (version) VALUES ('6');
 

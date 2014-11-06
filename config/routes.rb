@@ -77,6 +77,7 @@ Userstyles::Application.routes.draw do
   get 'style/show/:id' => 'styles#show_redirect'
   get 'style/raw/:id' => 'styles#show', :format => 'css'
   get 'styles/raw/:id' => 'styles#show', :format => 'css'
+  post 'report' => 'styles#report'
 
   get 'stylish' => 'index#index'
   get 'firstrun' => 'index#firstrun'

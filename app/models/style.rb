@@ -530,6 +530,10 @@ Replace = "$STOP()"
 		Style.connection.execute("INSERT IGNORE INTO daily_install_counts (style_id, ip, source) VALUES (#{Style.connection.quote_string(style_id)}, '#{Style.connection.quote_string(ip)}', '#{Style.connection.quote_string(source)}');")
 	end
 
+	def self.record_report(style_id, ip)
+		Style.connection.execute("INSERT IGNORE INTO daily_report_counts (style_id, ip) VALUES (#{Style.connection.quote_string(style_id)}, '#{Style.connection.quote_string(ip)}');")
+	end
+
 	# returns an array of the namespace urls for this style, empty array if none, or null if parse error
 	def calculate_namespaces
 		namespaces = []

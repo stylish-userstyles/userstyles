@@ -8,7 +8,7 @@ class StylesController < ApplicationController
 
 	cache_sweeper :style_sweeper
 
-	protect_from_forgery :except => [:show, :js, :opera_css, :ie_css, :chrome_json, :browse]
+	protect_from_forgery :except => [:show, :js, :opera_css, :ie_css, :chrome_json, :browse, :report]
 
 	$bad_content_subcategories = ["keezmovies", "xvideos", "jizzhut", "pornhub", "redtube", "tube8", "xnxx", "youjizz", "geisha-porn", "4tube", "xhamster", "youporn", "pussy", "imagefap", "pornbits", "xvideosadult", "youskbe", "moez-m", "dokidokibox", "emflix", "erogeba", "eromate", "xxeronetxx", "exploader", "hardsextube", "iqoo", "lovemake", "pornhost", "shufuni", "slutload", "spankwire", "xxxblog", "xvideosmovie", "free-sexvideosfc2", "yaaabooking", "yvhmovie", "oshirimania", "fakku", "e-hentai", "skins", "megaporn", "pussytorrents", "empflix", "xvideos-userporn", "xvideos-porn", "xvideos-collector", "exhentai", "sextube", "yobt", "asstr", "scor", "pornotube", "pornbb", "iafd", "artinude", "motherless", "keyboardporn", "empornium", "eporner", "freeporn", "fritchy", "lettherebeporn", "literotica", "masterporn", "mywebporno", "peniscult", "saff", "porn-w", "pornerbros", "porntown", "sexotorrent", "userporn", "vintage-erotica-forum", "wkdporn", "xxx-tracker", "livejasmin", "myfreecams", "cheggit", "dumparump", "fapomatic", "playboy", "bareback", "brazzers", "hentairules", "h-zip", "sankakucomplex",  "gelbooru", "konachan", "donmai", "gz-loader", "pinktower", "artemisweb", "suomi-neito", "tokyo-tube", "nukistream", "elog-ch", "adultghibli", "fleshbot", "ascii2d", "doujin-loli-school", "daimajin", "chaturbate", "cam4", "danshiryo", "yuvutu", "mcstories",  "storiesonline", "bestgfe", "stripclublist", "fuskator", "4gifs", "amateurindex", "freeones", "playboy", "adultfanfiction", "hi5", "minkch", "yande", "sexinsex", "eroino", "perfectgirls", "cpz", "ecchi", "eromodels", "erolight", "erolash", "nijie", "okazu24", "bravoteens", "tblop", "elephanttube", "pumbaporn", "pinkworld", "zegaporn", "abcpornsearch", "forhertube", "wtchporn", "1000mg", "sexfotka", 'yiff', 'fetlife', 'rule34', 'pornolab', 'thiendia', 'fusker', 'e621', 'paheal', 'femjoy', 'rei-ayanami', 'kmlg', 'anidub', 'ipmart-forum', 'hentaiverse', 'cinenovinhas', 'mallandrinhas', 'dl-hentaimanga']
 	$tld_specific_bad_domains = ["dmm.co.jp"]
@@ -678,12 +678,17 @@ class StylesController < ApplicationController
 		@page_title = "Reviewable styles (#{@styles.empty? ? 0 : @styles.total_entries})"
 		render :action => 'browse'
 	end
-	
+
+	def report
+		id = params[:idUrl].split('/').last
+		Style.record_report(id, request.remote_ip)
+		render :nothing => true, :status => 200
+	end
 
 protected
 
 	def public_action?
-		['show', 'show_redirect', 'install', 'search_url', 'search_text', 'search', 'browse_r', 'browse', 'graveyard', 'updated', 'js', 'opera_css', 'ie_css', 'chrome_json', 'proxomitron', 'by_user', 'expire_by_id', 'screenshotable', 'automation_page', 'test'].include?(action_name)
+		['show', 'show_redirect', 'install', 'search_url', 'search_text', 'search', 'browse_r', 'browse', 'graveyard', 'updated', 'js', 'opera_css', 'ie_css', 'chrome_json', 'proxomitron', 'by_user', 'expire_by_id', 'screenshotable', 'automation_page', 'test', 'report'].include?(action_name)
 	end
 	
 	def admin_action?
