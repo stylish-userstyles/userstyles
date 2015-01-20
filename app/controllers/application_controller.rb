@@ -83,7 +83,7 @@ protected
 	# Is the user a jerk?
 	helper_method :jerk_user
 	def jerk_user
-		return false if !defined?(Userstyles::Application.config.jerk_ips)
+		return false if !Userstyles::Application.config.respond_to?('jerk_ips')
 		return Userstyles::Application.config.jerk_ips.include?(request.ip)
 	end
 
