@@ -1,4 +1,4 @@
-<% cache_unless(session[:user_id] == @style.user_id, @style) do %>
+<% cache_unless(session[:user_id] == @style.user_id || jerk_user, @style) do %>
 
 <% if @style.obsolete > 0 %>
 	<section id="obsoletion-message">

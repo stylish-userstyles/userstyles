@@ -80,6 +80,19 @@ protected
 		render :text => 'Access denied.', :status => 403, :layout => true
 	end
 
+	# Is the user a jerk?
+	helper_method :jerk_user
+	def jerk_user
+		return false if !defined?(Userstyles::Application.config.jerk_ips)
+		return Userstyles::Application.config.jerk_ips.include?(request.ip)
+	end
+
+	def fake_style(style)
+		style.short_description = Faker::Internet.domain_name + "  " + Faker::Lorem.words(4).join(' ')
+		style.long_description = Faker::Lorem.paragraphs(3).join("\n\n")
+		return style
+	end
+
 
 private
 

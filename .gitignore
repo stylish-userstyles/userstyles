@@ -14,3 +14,4 @@ config/initializers/vanilla.rb
 config/initializers/omniauth.rb
 db/sphinx
 db/cstore
+config/initializers/jerks.rb

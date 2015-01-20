@@ -49,6 +49,7 @@ class StylesController < ApplicationController
 					end
 					return
 				end
+				fake_style(@style) if jerk_user
 				@page_title = @style.short_description
 				@page_header = @style.short_description
 				@page_title = @page_title + " - Themes and Skins for " + @style.subcategory.capitalize unless @style.subcategory.nil?
