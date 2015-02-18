@@ -276,7 +276,7 @@ class Style < ActiveRecord::Base
 	end
 
 	$namespace_pattern = /^\s*@namespace\s+((url\()|['"])[^"')]+(\)|['"]);?$/i
-	def userjs(options)
+	def userjs(options = {})
 		has_global = false
 		has_non_includable = false
 		includes = []
@@ -314,8 +314,6 @@ class Style < ActiveRecord::Base
 					end
 				end
 			end
-			section[:css].gsub!(/\\/, '\&\&')
-			section[:css].gsub!('"', '\"')
 		end
 
 		include_str = ""
@@ -331,13 +329,13 @@ class Style < ActiveRecord::Base
 // @namespace     http://userstyles.org
 // @description	  #{self.userjs_long_description}
 // @author        #{self.user.name}
-// @homepage      http://userstyles.org/styles/#{self.id}#{include_str}
+// @homepage      https://userstyles.org/styles/#{self.id}#{include_str}
 // @run-at        document-start
 // ==/UserScript==
 (function() {
 END_OF_STRING
 		if sections.length == 1 and !has_non_includable
-			string += "var css = \"#{sections[0][:css].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
+			string += "var css = " + css_to_js_literal(sections[0][:css]) + ";\n"
 		else
 			string += "var css = \"\";\n"
 			sections.each do |section|
@@ -361,7 +359,7 @@ END_OF_STRING
 					end
 					string += ")\n\t"
 				end
-				string += "css += \"#{section[:css].gsub(/(\r\n|[\r\n])/, '\n')}\";\n"
+				string += "css += " + css_to_js_literal(section[:css], 1) + ";\n"
 			end
 		end
 		string += <<-END_OF_STRING
@@ -1307,6 +1305,14 @@ Replace = "$STOP()"
 	end
 
 private
+
+	def css_to_js_literal(css, indent = 0)
+		# Retain whitespace as much as possible for both the JS form and the CSS form.
+		# join-ing is faster than concatenation.
+		lines = css.split(/\r\n|[\r\n]/)
+		return "\"" + escape_javascript(css) + "\"" if lines.length == 1
+		return "[\n" + lines.map{|line| ("\t" * (indent + 1)) + "\"" + escape_javascript(line) + "\""}.join(",\n") + "\n" + ("\t" * indent) + "].join(\"\\n\")"
+	end
 
 	def self.get_doc(code)
 		# workaround for 'unclosed comments hang stuff' bug
