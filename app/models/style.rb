@@ -1220,6 +1220,7 @@ Replace = "$STOP()"
 		end
 		self.unintentional_global = self.calculate_unintentional_global
 		self.md5 = self.calculate_md5
+		write_md5
 	end
 
 	def calculate_external_references
