@@ -281,7 +281,7 @@ class Style < ActiveRecord::Base
 		has_non_includable = false
 		includes = []
 
-		if options.empty?
+		if style_settings.empty?
 			sections = style_sections
 		else
 			code = optionned_code(options)
