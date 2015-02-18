@@ -492,9 +492,10 @@ class StylesController < ApplicationController
 	end
 
 	def js
+		is_meta = !params[:format].nil? && params[:format] == 'meta.js'
 		# we would use post for when we have long params (data: uris). gm does not support via post - https://github.com/greasemonkey/greasemonkey/issues/1673
 		# we will store params in flash and redirect to get
-		if request.post?
+		if !is_meta && request.post?
 			flash[:settings] = params
 			id = params[:id]
 			style = Style.find(id)
@@ -507,13 +508,13 @@ class StylesController < ApplicationController
 			render :nothing => true, :status => 404
 			return
 		end
-		if (style.userjs_available)
-			Style.increment_installs(params[:id], 'userjs', request.remote_ip)
-			code = style.userjs(get_option_params())
+		if style.userjs_available
+			Style.increment_installs(params[:id], 'userjs', request.remote_ip) unless is_meta
+			code = style.userjs(get_option_params(), is_meta)
 			if code.nil?
 				render :nothing => true, :status => 400
 			else 
-				send_data(code, :type => "text/javascript", :disposition => "inline")
+				send_data(code, :type => is_meta ? 'text/x-userscript-meta' : 'text/javascript', :disposition => 'inline')
 			end
 		else
 			render :nothing => true, :status => 404

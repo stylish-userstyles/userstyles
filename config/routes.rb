@@ -30,7 +30,7 @@ Userstyles::Application.routes.draw do
   get 'styles/browse_r/' => 'styles#browse_r'
   get 'styles/' => 'styles#browse_r'
   post 'styles/userjs/:id' => 'styles#js'
-  get 'styles/userjs/:id/:foo.user.js' => 'styles#js', :constraints => { :foo => /.*/ }
+  get 'styles/userjs/:id/:foo.:format' => 'styles#js', :constraints => { :foo => /.*/, :format => /(user|meta)\.js/ }
   get 'styles/js/:id/:foo.js' => 'styles#js', :constraints => { :foo => /.*/ }
   get 'styles/ieuserjs/:id/:foo.ieuser.js' => 'styles#js', :constraints => { :foo => /.*/ }
   get 'styles/operacss/:id/:foo.css' => 'styles#opera_css', :constraints => { :foo => /.*/ }

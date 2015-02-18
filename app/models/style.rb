@@ -276,7 +276,7 @@ class Style < ActiveRecord::Base
 	end
 
 	$namespace_pattern = /^\s*@namespace\s+((url\()|['"])[^"')]+(\)|['"]);?$/i
-	def userjs(options = {})
+	def userjs(options = {}, only_meta = false)
 		has_global = false
 		has_non_includable = false
 		includes = []
@@ -331,9 +331,13 @@ class Style < ActiveRecord::Base
 // @author        #{self.user.name}
 // @homepage      https://userstyles.org/styles/#{self.id}#{include_str}
 // @run-at        document-start
+// @version       0.#{updated.utc.strftime('%Y%m%d%H%M%S')}
 // ==/UserScript==
-(function() {
 END_OF_STRING
+
+		return string if only_meta
+
+		string += "(function() {"
 		if sections.length == 1 and !has_non_includable
 			string += "var css = " + css_to_js_literal(sections[0][:css]) + ";\n"
 		else

@@ -6,3 +6,4 @@
 
 Mime::Type.register('text/plain','md5');
 Mime::Type.register('text/javascript','jsonp');
+Mime::Type.register 'text/x-userscript-meta', :user_script_meta
