@@ -29,6 +29,8 @@ Userstyles::Application.configure do
 
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
+
+  config.eager_load = false
 end
 
 
@@ -38,7 +40,7 @@ FORUM_DOMAIN = 'forum.userstyles.local'
 STATIC_DOMAIN = 'userstyles.local'
 UPDATE_DOMAIN = 'https://update.userstyles.org'
 SCREENSHOT_DOMAIN = 'cdn.userstyles.org'
-MD5_PATH = '/home/jason/md5test/'
+MD5_PATH = '/www/md5/'
 COOKIE_DOMAIN = '.userstyles.local'
 
 ActionMailer::Base.delivery_method = :test

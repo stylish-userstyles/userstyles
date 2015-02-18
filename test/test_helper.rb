@@ -12,20 +12,18 @@ class ActiveSupport::TestCase
   # Add more helper methods to be used by all tests here...
 	def get_style_template
 		return Style.new(
-			:id => 123,
 			:short_description => 'Style name',
 			:long_description => 'Style description',
-			:user => User.new(:name => 'me'),
+			:user => User.find(1),
 			:style_code => StyleCode.new
 		)
 	end
 	
 	def get_valid_style
 		return Style.new(
-			:id => 123,
 			:short_description => 'Style name',
 			:long_description => 'Style description',
-			:user => User.new(:name => 'me'),
+			:user => User.find(1),
 			:style_code => StyleCode.new(:code => '*{color:blue}'),
 			:created => DateTime.now,
 			:updated => DateTime.now
