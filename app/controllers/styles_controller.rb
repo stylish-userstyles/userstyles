@@ -300,8 +300,11 @@ class StylesController < ApplicationController
 		else
 			new_sort = sort
 		end
-		begin 
-			@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true, :select => '*, weight() myweight'
+		begin
+			# :ranker => "expr('top(user_weight)')" means that it will be sorted on the top ranking match rather than
+			# an aggregate of all matches. In other words, something matching on "name" will be tied with everything
+			# else matching on "name".
+			@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true, :select => '*, weight() myweight', :ranker => "expr('top(user_weight)')"
 			@no_ads = @styles.empty?
 		rescue ThinkingSphinx::SyntaxError => e
 			# back to the main listing, unless we're already there
