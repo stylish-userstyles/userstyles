@@ -6,7 +6,7 @@
 		</div>
 	<% end %>
 
-	<% if @styles.any?{|s| !s.precalculated_warnings.empty?} %>
+	<% if false && @styles.any?{|s| !s.precalculated_warnings.empty?} %>
 		<div class="notice">
 			Some of your styles have non-loading images - consult the warnings in the list below for details. Styles containing non-loading images will be subject to deletion November 1.
 		</div>
