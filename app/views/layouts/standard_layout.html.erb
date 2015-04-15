@@ -67,6 +67,7 @@
 		<% if @header_include != nil %>
 			<%=@header_include%>
 		<% end %>
+		<%= yield :header_includes %>
 
 		<!--[if lt IE 9]>
 		<script type="text/javascript" src="<%=STATIC_DOMAIN%>/javascripts/html5.js"></script>

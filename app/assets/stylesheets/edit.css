@@ -1,0 +1,17 @@
+//= require codemirror/codemirror.css
+
+#css {
+	font-family: monospace;
+}
+
+#css, .CodeMirror {
+	height: 20em;
+	box-sizing: border-box;
+}
+
+.CodeMirror {
+	border: 1px solid #BBB;
+	border-style: inset;
+	margin: 2px;
+	line-height: 1.5;
+}

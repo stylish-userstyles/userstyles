@@ -1,3 +1,8 @@
+<% content_for :header_includes do %>
+	<%= javascript_include_tag "edit.js" %>
+	<%= stylesheet_link_tag 'edit.css' %>
+<% end %>
+
 <ul>
 	<li>Read <a href="/help/coding">tips on making user styles</a>.</li>
 	<li>To specify which URLs will have the style applied, use <a href="https://github.com/JasonBarnabe/stylish/wiki/Applying-styles-to-specific-sites">the Mozilla @-moz-document format</a>. If you're using Chrome, you can use the "To Mozilla Format" button to generate the code.</li>
@@ -39,8 +44,8 @@ end %>
 	</div>
 
 	<div class="form-controls">
-		<label for="css">CSS</label>
-			<textarea id="css" name="style[css]" required><%=@style.style_code == nil ? "" : @style.style_code.code%></textarea>
+		<label for="css">CSS</label> <span class="linking-note" style="display: none"><input type="checkbox" id="enable-source-editor-code" name="enable-source-editor-code" <%if params['enable-source-editor-code']%>checked<%end%> class="enable-source-editor" data-related-editor="css"><label for="enable-source-editor-code" class="checkbox-label">Enable source editor</label></span><br>
+		<textarea id="css" name="style[css]" required><%=@style.style_code == nil ? "" : @style.style_code.code%></textarea>
 	</div>
 
 	<div class="form-controls">
