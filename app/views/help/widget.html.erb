@@ -3,7 +3,7 @@ widget_url = params['listing-url']
 widget_style = params['widget-style'] || 'v1'
 widget_title = params['widget-title'] || 'User Styles'
 
-url_match = /(?:http:\/\/)?([^\/]+)(\/.*)/.match(widget_url)
+url_match = /(?:https?:\/\/)?([^\/]+)(\/.*)/.match(widget_url)
 if !url_match.nil?
 	domain = url_match[1]
 	path = url_match[2]
@@ -29,8 +29,8 @@ if pathParts.length == 2
 end
 extensionParts = pathParts[0].split(".");
 
-json_url = 'http://' + domain + extensionParts[0] + '.jsonp' + jsonQueryString
-html_url = 'http://userstyles.org' + extensionParts[0] + queryString
+json_url = 'https://' + domain + extensionParts[0] + '.jsonp' + jsonQueryString
+html_url = 'https://userstyles.org' + extensionParts[0] + queryString
 
 %>
 
