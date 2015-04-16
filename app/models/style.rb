@@ -229,13 +229,9 @@ class Style < ActiveRecord::Base
 
 	def related
 		return nil if id.nil?
-		conditions = "id != #{self.id} AND obsolete = 0 AND "
-		if !subcategory.nil?
-			conditions += "subcategory = '#{Style.connection.quote_string(subcategory)}'"
-		else
-			conditions += "category = '#{Style.connection.quote_string(category)}'"
-		end
-		return Style.where(conditions).order("user_id = #{user.id} DESC, popularity_score DESC").limit(3)
+		r = Style.where(['id != ?', id]).where(obsolete: 0).where(category: category).order("user_id = #{user.id} DESC, popularity_score DESC").limit(3)
+		r = r.where(subcategory: subcategory) if !subcategory.nil?
+		return r
 	end
 
 	def self.top_styles(limit, choose_from)
@@ -598,7 +594,7 @@ Replace = "$STOP()"
 		moz_doc_rules.each do |moz_doc_rule|
 			#app-specific protocols
 			if moz_doc_rule[0] == "url" or moz_doc_rule[0] == "url-prefix"
-				if /^(chrome|about|x-jsd|view\-source)/.match(moz_doc_rule[1]) != nil
+				if /^(chrome|about|x-jsd|view\-source|chrome\-extension)/.match(moz_doc_rule[1]) != nil
 					return "app"
 				end
 			end
@@ -620,7 +616,7 @@ Replace = "$STOP()"
 		return "site"
 	end
 
-	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial']]
+	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial'], [/^chrome\-extension\:/, 'chrome-extension']]
 	$app_text_matches = [[/firefox/i, 'browser'], [/stylish/i, 'Stylish'], [/adblock/i, 'AdblockPlus'], [/thunderbird/i, 'Thunderbird'], [/^tb\s/i, 'Thunderbird']]
 	$ip_pattern = /^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):?[0-9]*$/
 	def calculate_subcategory
@@ -674,7 +670,11 @@ Replace = "$STOP()"
 
 	def self.get_subcategory_for_url(url)
 		begin
-			return Style.get_subcategory_for_domain(URI.parse(url).host)
+			uri = URI.parse(url)
+			# Use the domain for some protocols
+			return Style.get_subcategory_for_domain(uri.host) if ['http', 'https', 'ftp'].include?(uri.scheme)
+			# For others (e.g. file), use the protocol itself
+			return uri.scheme
 		rescue
 			return nil
 		end

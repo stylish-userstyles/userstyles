@@ -185,7 +185,7 @@
 								<% related.each do |r| %>
 									<li><%= link_to(h(r.short_description), "/styles/#{r.id}/#{r.url_snippet}") %></li>
 								<% end %>
-								<% if !@style.subcategory.nil? and @style.category == 'site'%>
+								<% if !@style.subcategory.nil? %>
 									 <li class="more">More <%=link_to(h("#{@style.subcategory.capitalize} themes"), :action => "browse", :controller => "styles", :category => @style.subcategory) %></li>
 								<% elsif !@style.category.nil? %>	
 									 <li class="more">More <%=link_to(h("#{@style.category.capitalize} themes"), :action => "browse", :controller => "styles", :category => @style.category) %></li>

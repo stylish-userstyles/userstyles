@@ -765,7 +765,7 @@ protected
 			search_terms.split(' ').each do |term|
 				# fix nginx/passenger's stripping of double slashes
 				# look for protocol:/something
-				missing_double_slash_match = /\A([a-z]+)\:\/([^\/])/.match(term)
+				missing_double_slash_match = /\A([a-z\-]+)\:\/([^\/])/.match(term)
 				if !missing_double_slash_match.nil?
 					term = term.sub(missing_double_slash_match[0], "#{missing_double_slash_match[1]}://#{missing_double_slash_match[2]}")
 				end
