@@ -13,30 +13,18 @@ window.addEventListener("DOMContentLoaded", function() {
 				mode: "css"
 			});
 			codeMirror.setSize(targetWidth, targetHeight);
+			// If the textbox started empty, and the user only used CodeMirror,
+			// it will only get a value when submitting. Submitting will be
+			// cancelled if it has no value.
+			textbox.removeAttribute("required");
 		} else {
 			var editorElement = document.querySelector(".CodeMirror");
 			if (editorElement) {
 				codeMirror.toTextArea();
-				//var targetHeight = getComputedStyle(editorElement).height;
-				//var targetWidth = getComputedStyle(editorElement).width;
-				//textbox.style.height = targetHeight;
-				//textbox.style.height = targetWidth;
-				//editorElement.parentNode.removeChild(editorElement);
-				//codeMirror.destroy();
-				//codeMirror = null;
+				textbox.setAttribute("required", "required");
 			}
 		}
 	});
-
-	// Submitting form - set the textarea to the editor's value
-	/*$('input.enable-source-editor').parents('form').submit(function(e) {
-		var editorElement = document.getElementById("ace-editor");
-		if (editorElement) {
-			var textboxId = $('input.enable-source-editor').attr("data-related-editor")
-			var textbox = document.getElementById(textboxId);
-			textbox.value = codeMirror.getValue();
-		}
-	})*/
 
 	// Page load
 	$('input.enable-source-editor').parents('.linking-note').css('display', 'inline');
