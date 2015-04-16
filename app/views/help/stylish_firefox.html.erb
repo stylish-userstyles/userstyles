@@ -49,20 +49,38 @@
 
 <h3>Hidden Stylish preferences</h3>
 
-<p>Stylish has preferences to customize its behaviour which are not exposed to the UI. These prefs can be changed in about:config.</p>
+<p>Stylish has preferences to customize its behaviour, some of which are not exposed to the UI. These prefs can be changed in about:config.</p>
 <dl>
+	<dt>extensions.stylish.buttonStylesDisplay.app</dt>
+	<dd>How to show app styles in the Stylish toolbar icon. Possible values: show, hide, submenu.</dd>
+	<dt>extensions.stylish.buttonStylesDisplay.global</dt>
+	<dd>How to show global styles in the Stylish toolbar icon. Possible values: show, hide, submenu.</dd>
+	<dt>extensions.stylish.buttonStylesDisplay.siteMatching</dt>
+	<dd>How to show site styles that match the current site in the Stylish toolbar icon. Possible values: show, hide, submenu.</dd>
+	<dt>extensions.stylish.buttonStylesDisplay.siteNonMatching</dt>
+	<dd>How to show site styles that don't match the current site in the Stylish toolbar icon. Possible values: show, hide, submenu.</dd>
 	<dt>extensions.stylish.dbFile</dt>
 	<dd>Path to the stylish.sqlite database which stores installed style info. Default is blank, meaning look for "stylish.sqlite" in the profile folder.</dd>
 	<dt>extensions.stylish.editor</dt>
-	<dd>Text editor to use when editing styles. 0 - Orion (with syntax highlighting) (default), 1 - plain old textbox. Orion is not available in all applications and versions.</dd>
+	<dd>Text editor to use when editing styles. 0 - CodeMirror (with syntax highlighting) (default), 1 - plain old textbox. CodeMirror is not available in all applications and versions.</dd>
+	<dt>extensions.stylish.editorWindowMode</dt>
+	<dd>Whether to show the editor in a tab (0) or in a separate window (1).</dd>
+	<dt>extensions.stylish.editorWindowPersist</dt>
+	<dd>Internal preference used to save the editor window position. Don't touch.</dd>
+	<dt>extensions.stylish.firstRun</dt>
+	<dd>Internal preference controlling data migration on updates. Don't touch.</dd>
 	<dt>extensions.stylish.install.allowedDomains</dt>
 	<dd>Space-seperated list of domains that can bring up install boxes and detect style install status. Default: userstyles.org.</dd>
-	<dt>extensions.stylish.manageView</dt>
-	<dd>Default manage interface. 0 - add-ons dialog (default), 1 - stand-alone dialog, 2 - sidebar. Add-ons dialog is not available in all applications and versions.</dd>
+	<dt>extensions.stylish.promptOnClear</dt>
+	<dd>Whether to confirm before clearing all styles. Default: true. Useful for automated scripts.</dd>
 	<dt>extensions.stylish.promptOnInstall</dt>
-	<dd>Whether to prompt before installing a style. Default: true.</dd>
+	<dd>Whether to confirm before installing a style. Default: true.</dd>
+	<dt>extensions.stylish.styleRegistrationEnabled</dt>
+	<dd>Whether styles will actually be applied - tied to the "Turn all styles on/off" command. Default: true.</dd>
 	<dt>extensions.stylish.updatesEnabled</dt>
 	<dd>Whether to check for updates for styles. Default: true.</dd>
+	<dt>extensions.stylish.wrap_lines</dt>
+	<dd>Whether to wrap lines in the editor. Default: true.</dd>
 </dl>
 
 <div id="misc-bottom-ad" class="ad">
