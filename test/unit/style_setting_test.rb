@@ -56,4 +56,26 @@ class StyleSettingTest < ActiveSupport::TestCase
 
 	end
 
+	test "rgb" do
+		style = get_style_template()
+		style.style_code.code = 'a { color: /*[[one]]*/;} a { color: rgb(/*[[one-rgb]]*/);}'
+
+		ss1 = StyleSetting.new
+		ss1.install_key = 'one'
+		ss1.label = 'one'
+		ss1.setting_type = 'color'
+		ss1.id = 1
+
+		so = StyleSettingOption.new
+		so.label = 'red'
+		so.install_key = 'red'
+		so.value = '#FF0000'
+		so.id = 1
+		ss1.style_setting_options << so
+
+		style.style_settings = [ss1]
+
+		code = style.optionned_code({ss1.install_key => {value: '#FFFFFF'}})
+		assert_equal 'a { color: #FFFFFF;} a { color: rgb(255, 255, 255);}', code
+	end
 end

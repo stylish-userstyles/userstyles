@@ -810,9 +810,20 @@ Replace = "$STOP()"
 				return nil if replacement_value.nil?
 				# we need to escape any backslashes in the *replacement* value, as things like \0 are interpreted as regex groups. we're escaping them to 2 backslashes, which gets doubled to 4 when interpreted by the regex system, then 8 by being a ruby string
 				c.gsub!("/*[[#{setting.install_key}]]*/", replacement_value.gsub('\\','\\\\\\\\'))
+				# For color settings, additionally support a -rgb value.
+				if setting.setting_type == 'color'
+					c.gsub!("/*[[#{setting.install_key}-rgb]]*/", hex_to_rgb(replacement_value).gsub('\\','\\\\\\\\'))
+				end
 			end
 		end
 		return c
+	end
+
+	# From https://www.ruby-forum.com/topic/76667#1143990
+	def hex_to_rgb input
+		a = ( input.match /#(..?)(..?)(..?)/ )[1..3]
+		a.map!{ |x| x + x } if input.size == 4
+		"#{a[0].hex}, #{a[1].hex}, #{a[2].hex}"
 	end
 
 	$common_prefix_enders = {'google' => 'com', 'orkut' => 'com', 'youtube' => 'com', 'facebook' => 'com', 'schuelervz' => 'de', 'wikipedia' => 'org'}
