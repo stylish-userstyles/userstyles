@@ -45,7 +45,10 @@ end %>
 
 	<div class="form-controls">
 		<label for="css">CSS</label> <span class="linking-note" style="display: none"><input type="checkbox" id="enable-source-editor-code" name="enable-source-editor-code" <%if params['enable-source-editor-code']%>checked<%end%> class="enable-source-editor" data-related-editor="css"><label for="enable-source-editor-code" class="checkbox-label">Enable source editor</label></span><br>
-		<textarea id="css" name="style[css]" required><%=@style.style_code == nil ? "" : @style.style_code.code%></textarea>
+		<% if !@style.style_code.nil? && !@style.style_code.id.nil? %>
+			<input type="hidden" name="style[style_code_attributes][id]" value="<%=@style.style_code.id%>">
+		<% end %>
+		<textarea id="css" name="style[style_code_attributes][code]" required><%=@style.style_code.nil? ? "" : @style.style_code.code%></textarea>
 	</div>
 
 	<div class="form-controls">
@@ -56,7 +59,7 @@ end %>
 	<div class="form-controls">
 		<label>Style Settings (Optional)</label> <span class="linking-note"><a href="/help/coding#help-style-settings">Need help with style settings?</a></span>
 		<ul id="edit-style-settings">
-			<li id="new-setting"><input type="button" onclick="addOptionnedSetting('dropdown', false, '', '');return false" value="New Drop-Down Setting"> <input type="button" onclick="return addOptionlessSetting('color', '', '', null);" value="New Color Setting"> <input type="button" onclick="addOptionlessSetting('text', '', '', null);return false" value="New Text Setting"> <input type="button" onclick="addOptionnedSetting('image', false, '', '');return false" value="New Image Setting"></li>
+			<li id="new-setting"><input type="button" onclick="addOptionnedSetting('dropdown', '', '');return false" value="New Drop-Down Setting"> <input type="button" onclick="return addOptionlessSetting('color', '', '', null);" value="New Color Setting"> <input type="button" onclick="addOptionlessSetting('text', '', '', null);return false" value="New Text Setting"> <input type="button" onclick="addOptionnedSetting('image', '', '');return false" value="New Image Setting"></li>
 		</ul>
 		<script>
 			var settings = document.getElementById("edit-style-settings")
@@ -70,32 +73,80 @@ end %>
 				return f;
 			}
 
-			function addOptionnedSetting(type, fromServer, label, installKey) {
-				var code = '<li class="edit-settingType-setting"><div class="edit-setting"><div class="edit-setting-buttons"><input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(event);" value="✖"></div><input name="setting-label-fakeId" placeholder="Label" title="Label displayed to the user" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key" title="Install key - matches the placeholder comment in your code" required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"></div><ul id="edit-style-options-fakeId" class="edit-style-options"><li class="new-option"><input type="button" onclick="return addTextOptionEvent(event, \'settingType\', fakeId, \'\', \'\', \'\', false)" value="Add Option"></li></ul></li>'
-				var id = getFakeId();
-				code = code.replace(/fakeId/g, id).replace(/settingType/g, escapeForReplace(type)).replace(/passedLabel/g, escapeForReplace(label)).replace(/passedInstallKey/g, escapeForReplace(installKey));
+			function addOptionnedSetting(type, label, installKey, savedId) {
+				if (!savedId) {
+					savedId = '';
+				}
+				var code = '' +
+					'<li class="edit-settingType-setting">' +
+						'<div class="edit-setting">' +
+							'<div class="edit-setting-buttons">' +
+								'<input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> ' +
+								'<input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> ' +
+								'<input type="button" onclick="return removeSetting(event);" value="✖">' +
+							'</div>' +
+							'<input name="style[style_settings_attributes][settingIndex][label]" placeholder="Label" title="Label displayed to the user" required maxlength="100" value="passedLabel"> ' +
+							'<input name="style[style_settings_attributes][settingIndex][install_key]" placeholder="Install Key" title="Install key - matches the placeholder comment in your code" required maxlength="20" value="passedInstallKey">' +
+							'<input type="hidden" name="style[style_settings_attributes][settingIndex][setting_type]" value="settingType">' +
+							'<input type="hidden" name="style[style_settings_attributes][settingIndex][id]" value="savedId">' +
+						'</div>' +
+						'<ul id="edit-style-options-settingIndex" class="edit-style-options">' +
+							'<li class="new-option">' +
+								'<input type="button" onclick="return addTextOptionEvent(event, \'settingType\', settingIndex, \'\', \'\', \'\', false)" value="Add Option">' +
+							'</li>' +
+						'</ul>' +
+					'</li>';
+				var nextIndex = getNextSettingIndex();
+				code = code.replace(/settingIndex/g, nextIndex)
+					.replace(/settingType/g, escapeForReplace(type))
+					.replace(/savedId/g, escapeForReplace(savedId))
+					.replace(/passedLabel/g, escapeForReplace(label))
+					.replace(/passedInstallKey/g, escapeForReplace(installKey));
 				settings.insertBefore(html(code), newSetting);
-				if (!fromServer && type == 'dropdown') {
+				if (savedId == '' && type == 'dropdown') {
 					var optionsContainer = newSetting.previousSibling.querySelector("ul");
-					addTextOption(optionsContainer, type, id, '', '', '', false);
-					addTextOption(optionsContainer, type, id, '', '', '', false);
+					addTextOption(optionsContainer, type, nextIndex, '', '', '', false);
+					addTextOption(optionsContainer, type, nextIndex, '', '', '', false);
 				}
 				updateSettingButtons();
-				return id;
+				return nextIndex;
 			}
 
-			function addOptionlessSetting(type, label, installKey, defaultValue) {
-				var code = '<li class="edit-settingType-setting"><input name="setting-label-fakeId" placeholder="Label" title="Label displayed to the user" required maxlength="100" value="passedLabel"> <input name="setting-install-key-fakeId" placeholder="Install Key"  title="Install key - matches the placeholder comment in your code"required maxlength="20" value="passedInstallKey"><input type="hidden" name="style_settings_ids[]" value="fakeId"><input type="hidden" name="setting-type-fakeId" value="settingType"> <label for="option-default-fakeId">Default</label> ';
-				if (type == "color") {
-					code += '<input type="text" class="color {hash:true,required:false}" id="option-default-fakeId" name="option-default-fakeId" value="" size="7" maxlength="7">';
-				} else {
-					code += '<input type="text" id="option-default-fakeId" name="option-default-fakeId" value="" size="20" maxlength="20">';
+			function addOptionlessSetting(type, label, installKey, defaultValue, savedSettingId, savedOptionId) {
+				if (!savedSettingId) {
+					savedSettingId = '';
 				}
-				code += '<input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> <input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> <input type="button" onclick="return removeSetting(event);" value="✖"></li>';
-				var fakeId = getFakeId();
-				code = code.replace(/fakeId/g, fakeId).replace(/settingType/g, escapeForReplace(type)).replace(/passedLabel/g, escapeForReplace(label)).replace(/passedInstallKey/g, escapeForReplace(installKey));
+				if (!savedOptionId) {
+					savedOptionId = '';
+				}
+				var code = '' +
+					'<li class="edit-settingType-setting">' +
+						'<input name="style[style_settings_attributes][settingIndex][label]" placeholder="Label" title="Label displayed to the user" required maxlength="100" value="passedLabel"> ' +
+						'<input name="style[style_settings_attributes][settingIndex][install_key]" placeholder="Install Key" title="Install key - matches the placeholder comment in your code"required maxlength="20" value="passedInstallKey">' +
+						'<input type="hidden" name="style[style_settings_attributes][settingIndex][setting_type]" value="settingType"> ' +
+						'<label for="option-default-settingIndex">Default</label> ' +
+						'<input type="hidden" name="style[style_settings_attributes][settingIndex][id]" value="savedSettingId">' +
+						'<input type="hidden" name="style[style_settings_attributes][settingIndex][style_setting_options_attributes][0][id]" value="savedOptionId">';
+				if (type == "color") {
+					code += '<input type="text" class="color {hash:true,required:false}" id="option-default-settingIndex" name="style[style_settings_attributes][settingIndex][style_setting_options_attributes][0][value]" value="" size="7" maxlength="7">';
+				} else {
+					code += '<input type="text" id="option-default-settingIndex" name="style[style_settings_attributes][settingIndex][style_setting_options_attributes][0][value]" value="" size="20" maxlength="20">';
+				}
+				code += '' +
+					'<div class="edit-setting-buttons">' +
+						'<input class="move-setting-up" type="button" onclick="moveSetting(event, true);return false;" value="↑"> ' +
+						'<input class="move-setting-down" type="button" onclick="moveSetting(event, false);return false;" value="↓"> ' +
+						'<input type="button" onclick="return removeSetting(event);" value="✖">' +
+					'</div></li>';
+				var nextIndex = getNextSettingIndex();
+				code = code.replace(/settingIndex/g, nextIndex)
+					.replace(/settingType/g, escapeForReplace(type))
+					.replace(/savedSettingId/g, escapeForReplace(savedSettingId))
+					.replace(/savedOptionId/g, escapeForReplace(savedOptionId))
+					.replace(/passedLabel/g, escapeForReplace(label))
+					.replace(/passedInstallKey/g, escapeForReplace(installKey));
 				settings.insertBefore(html(code), newSetting);
-				var defaultField = document.getElementById("option-default-" + fakeId);
+				var defaultField = document.getElementById("option-default-" + nextIndex);
 				if (type == "color") {
 					new jscolor.color(defaultField, {hash:true,required:true});
 				}
@@ -105,22 +156,49 @@ end %>
 				updateSettingButtons();
 			}
 
-			function addTextOptionEvent(e, type, fakeId, label, installKey, value, isDefault) {
-				addTextOption(getParent(e.target, "ul"), type, fakeId, label, installKey, value, isDefault);
+			function addTextOptionEvent(e, type, fakeId, label, installKey, value, isDefault, savedId) {
+				addTextOption(getParent(e.target, "ul"), type, fakeId, label, installKey, value, isDefault, savedId);
 			}
 
-			function addTextOption(ul, type, fakeId, label, installKey, value, isDefault) {
-				var code = '<li><div class="edit-option"><div class="edit-option-buttons"><input class="move-option-up" type="button" onclick="moveOption(event, true);return false;" value="↑"> <input class="move-option-down" type="button" onclick="moveOption(event, false);return false;" value="↓"> <input class="remove-option" type="button" onclick="removeTextOption(event);return false;" value="✖"></div><input name="option-label-fakeId[]" required maxlength="100" placeholder="Label" title="Label displayed to the user" value="passedLabel"><input name="option-install-key-fakeId[]" required maxlength="20" placeholder="Install Key" title="Install key - used to keep track of selections when the user updates" value="passedInstallKey" onchange="modifyInstallKey(event)"><input type="radio" name="option-default-fakeId" value="passedInstallKey"' + (isDefault ? 'checked' : '') + '> Default</div>';
+			function addTextOption(ul, type, nextIndex, label, installKey, value, isDefault, savedId) {
+				if (!savedId) {
+					savedId = '';
+				}
+				// Determine the next available index
+				var indexWithinSetting = 0;
+				var previousOptions = document.querySelectorAll("[name^='style[style_settings_attributes][" + nextIndex + "][style_setting_options_attributes]']");
+				if (previousOptions.length > 0) {
+					indexWithinSetting = parseInt(previousOptions[previousOptions.length-1].getAttribute("name").match(/style_setting_options_attributes\]\[([0-9]+)\]/)[1]) + 1;
+				}
+
+				var code = '' +
+					'<li>' +
+						'<div class="edit-option">' +
+							'<div class="edit-option-buttons">' +
+								'<input class="move-option-up" type="button" onclick="moveOption(event, true);return false;" value="↑"> ' +
+								'<input class="move-option-down" type="button" onclick="moveOption(event, false);return false;" value="↓"> ' +
+								'<input class="remove-option" type="button" onclick="removeTextOption(event);return false;" value="✖">' +
+							'</div>' +
+							'<input name="style[style_settings_attributes][optionIndex][style_setting_options_attributes][indexWithinSetting][label]" required maxlength="100" placeholder="Label" title="Label displayed to the user" value="passedLabel">' +
+							'<input name="style[style_settings_attributes][optionIndex][style_setting_options_attributes][indexWithinSetting][install_key]" required maxlength="20" placeholder="Install Key" title="Install key - used to keep track of selections when the user updates" value="passedInstallKey">' +
+							'<input type="radio" name="style[style_settings_attributes][optionIndex][default]" value="indexWithinSetting"' + (isDefault ? 'checked' : '') + '> Default' +
+							'<input type="hidden" name="style[style_settings_attributes][optionIndex][style_setting_options_attributes][indexWithinSetting][id]" value="savedId">' +
+						'</div>';
 				switch (type) {
 					case 'dropdown':
-						code += '<textarea name="option-value-fakeId[]" rows="5" placeholder="Code" title="Code inserted into your CSS">passedValue</textarea>';
+						code += '<textarea name="style[style_settings_attributes][optionIndex][style_setting_options_attributes][indexWithinSetting][value]" rows="5" placeholder="Code" title="Code inserted into your CSS">passedValue</textarea>';
 						break;
 					case 'image':
-						code += '<input class="edit-option-value-url" name="option-value-fakeId[]" type="url" placeholder="URL" title="URL inserted into your CSS" value="passedValue">';
+						code += '<input class="edit-option-value-url" name="style[style_settings_attributes][optionIndex][style_setting_options_attributes][indexWithinSetting][value]" type="url" placeholder="URL" title="URL inserted into your CSS" value="passedValue">';
 						break;
 				}
 				code += '</li>'
-				code = code.replace(/fakeId/g, fakeId).replace(/passedLabel/g, escapeForReplace(label)).replace(/passedValue/g, escapeForReplace(value)).replace(/passedInstallKey/g, escapeForReplace(installKey));
+				code = code.replace(/optionIndex/g, nextIndex)
+					.replace(/passedLabel/g, escapeForReplace(label))
+					.replace(/passedValue/g, escapeForReplace(value))
+					.replace(/passedInstallKey/g, escapeForReplace(installKey))
+					.replace(/indexWithinSetting/g, escapeForReplace(indexWithinSetting))
+					.replace(/savedId/g, escapeForReplace(savedId));
 				ul.insertBefore(html(code), ul.lastChild);
 				ensureDefault(ul);
 				updateOptionButtons(ul);
@@ -204,13 +282,16 @@ end %>
 				}
 			}
 
-			function getFakeId() {
-				var fakeIdElements = document.querySelectorAll("input[name='style_settings_ids[]']");
-				var fakeId;
-				if (fakeIdElements.length == 0) {
-					return 100;
+			function getNextSettingIndex() {
+				var existingElements = document.querySelectorAll("input[name^='style[style_settings_attributes]'][name$='[label]']");
+				var biggestIndex = -1;
+				for (var i = 0; i < existingElements.length; i++) {
+					var number = new Number(existingElements[i].name.split("][")[1]);
+					if (number > biggestIndex) {
+						biggestIndex = number;
+					}
 				}
-				return new Number(fakeIdElements[fakeIdElements.length - 1].value) + 1;
+				return biggestIndex + 1;
 			}
 
 			function getParent(element, nodeName) {
@@ -249,27 +330,10 @@ end %>
 				if (switchRow == null) {
 					return false;
 				}
-				// remember the default selections. changing the names will change them
-				var default1 = row.querySelector("input:checked");
-				var default2 = switchRow.querySelector("input:checked");
-				var identifierInput = row.querySelector("input[name='style_settings_ids[]']");
-				var switchIdentifierInput = switchRow.querySelector("input[name='style_settings_ids[]']");
-				var from = identifierInput.value;
-				var to = switchIdentifierInput.value;
-				switchIdentifiers(row, from, to);
-				switchIdentifiers(switchRow, to, from);
-				identifierInput.value = to;
-				switchIdentifierInput.value = from;
 				if (up) {
 					row.parentNode.insertBefore(row, switchRow);
 				} else {
 					row.parentNode.insertBefore(switchRow, row);
-				}
-				if (default1) {
-					default1.checked = true;
-				}
-				if (default2) {
-					default2.checked = true;
 				}
 				updateSettingButtons();
 				return false;
@@ -297,32 +361,23 @@ end %>
 				}
 			}
 
-			function modifyInstallKey(e) {
-				// update the default radio button's value
-				var input = e.target.parentNode.parentNode.querySelector("input[type='radio']");
-				input.value = e.target.value;
-			}
-
 			// with String.replace, $ is a special character, escape it to $$
 			function escapeForReplace(s) {
-				return s.replace(/\$/g, '$$$$');
+				return ("" + s).replace(/\$/g, '$$$$');
 			}
 
 			var lastId = null;
-			<%
-			@new_style_settings = @style.style_settings if @new_style_settings.nil? and !@style.nil? 
-			if @new_style_settings
-				@new_style_settings.each do |setting|
-					if setting.setting_type == 'dropdown' or setting.setting_type == 'image' %>
-						lastId = addOptionnedSetting('<%=setting.setting_type%>', true, '<%=escape_javascript(setting.label)%>', '<%=escape_javascript(setting.install_key)%>');
-						<% setting.style_setting_options.each do |sov| %>
-							addTextOption(document.getElementById('edit-style-options-' + lastId), '<%=setting.setting_type%>', lastId, '<%=escape_javascript(sov.label)%>', '<%=escape_javascript(sov.install_key)%>', '<%=escape_javascript(sov.value)%>', <%=sov.default%>);
-						<% end
-					else
-						defaultValue = setting.style_setting_options.first.value unless setting.style_setting_options.empty? %>
-						lastId = addOptionlessSetting('<%=setting.setting_type%>', '<%=escape_javascript(setting.label)%>', '<%=escape_javascript(setting.install_key)%>', '<%=escape_javascript(defaultValue)%>');
+			<% @style.live_style_settings.each do |setting|
+				if !setting.has_only_default_option? %>
+					lastId = addOptionnedSetting('<%=setting.setting_type%>', '<%=escape_javascript(setting.label)%>', '<%=escape_javascript(setting.install_key)%>', '<%=escape_javascript(setting.id.to_s)%>');
+					<% setting.live_style_setting_options.each do |sov| %>
+						addTextOption(document.getElementById('edit-style-options-' + lastId), '<%=setting.setting_type%>', lastId, '<%=escape_javascript(sov.label)%>', '<%=escape_javascript(sov.install_key)%>', '<%=escape_javascript(sov.value)%>', <%=sov.default%>, '<%=escape_javascript(sov.id.to_s)%>');
 					<% end
-				end	
+				else
+					only_option = setting.live_style_setting_options.first
+					defaultValue = only_option.value unless only_option.nil? %>
+					lastId = addOptionlessSetting('<%=setting.setting_type%>', '<%=escape_javascript(setting.label)%>', '<%=escape_javascript(setting.install_key)%>', '<%=escape_javascript(defaultValue)%>', '<%=escape_javascript(setting.id.to_s)%>', '<%=only_option.nil? ? '' : escape_javascript(only_option.id.to_s)%>');
+				<% end
 			end %>
 		</script>
 	</div>

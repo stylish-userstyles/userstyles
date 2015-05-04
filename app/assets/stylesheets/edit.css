@@ -15,3 +15,25 @@
 	margin: 2px;
 	line-height: 1.5;
 }
+
+.edit-setting {
+	background-color: #DDD;
+}
+.edit-setting-buttons, .edit-option-buttons {
+	float: right;
+}
+#edit-style-settings {
+	padding: 0;
+}
+#edit-style-settings textarea, .edit-option-value-url {
+	width: 100%;
+}
+#edit-style-settings, #edit-style-settings ul {
+	list-style-type: none;
+}
+#edit-style-settings > li, .edit-style-options {
+	clear: right;
+}
+#edit-style-settings input:not([type]), #edit-style-settings input[type=text] {
+	width: 150px;
+}

@@ -12,8 +12,8 @@ class Style < ActiveRecord::Base
 	strip_attributes
 
 	has_many :discussions, -> { readonly.order('DateInserted') }, :class_name => 'ForumDiscussion', :foreign_key => 'StyleID'
-	has_one :style_code
-	has_many :style_settings, -> { order(:ordinal) }
+	has_one :style_code, :autosave => true
+	has_many :style_settings, -> { order(:ordinal) }, :autosave => true
 	belongs_to :user
 	has_many :screenshots
 	belongs_to :admin_delete_reason, -> { readonly }
@@ -23,6 +23,9 @@ class Style < ActiveRecord::Base
 	alias_attribute :name, :short_description
 	alias_attribute :description, :long_description
 	alias_attribute :example_url, :screenshot_url_override
+
+	accepts_nested_attributes_for :style_settings, allow_destroy: true
+	accepts_nested_attributes_for :style_code
 
 	before_save :truncate_values
 	def truncate_values
@@ -171,11 +174,11 @@ class Style < ActiveRecord::Base
 	validate do |style|
 		style.errors.delete(:style_settings)
 		style.errors.delete(:style_setting_options)
-		style.style_settings.each do |ss|
+		style.live_style_settings.each do |ss|
 			ss.errors.each do |attr, msg|
 				style.errors.add("Style setting #{attr}", msg) unless attr == :style_setting_options
 			end
-			ss.style_setting_options.each do |so|
+			ss.live_style_setting_options.each do |so|
 				so.errors.each do |attr, msg|
 					style.errors.add("Style setting option #{attr}", msg)
 				end
@@ -200,20 +203,20 @@ class Style < ActiveRecord::Base
 		end
 	end
 
-	# used when validating, because setting on the real property saves immediately
-	@_tmp_style_settings = nil
-	def tmp_style_settings
-		@_tmp_style_settings
-	end
-	def tmp_style_settings=(tss)
-		@_tmp_style_settings = tss
-	end
-	def real_style_settings
-		@_tmp_style_settings.nil? ? style_settings : @_tmp_style_settings
+	attr_accessor :rating_avg, :rating_count
+
+	def live_style_settings
+		return style_settings.select{|ss| !ss.marked_for_destruction?}
 	end
 
-	attr_accessor :rating_avg, :rating_count
-	
+	def get_setting_for_id_or_key(setting_id, key)
+		return live_style_settings.find{|ss| ss.id.to_s == setting_id} || live_style_settings.find{|ss| ss.install_key == key}
+	end
+
+	def style_settings_changed?
+		return style_settings.any?{|ss| ss.marked_for_destruction? || ss.new_record? || ss.changed_or_children_changed?}
+	end
+
 	def is_css_valid?
 		if self.style_code.code.count("{") > 0 and self.style_code.code.count("{") == self.style_code.code.count("}") and self.style_code.code.count(":") > 0
 			return true
@@ -277,7 +280,7 @@ class Style < ActiveRecord::Base
 		has_non_includable = false
 		includes = []
 
-		if style_settings.empty?
+		if live_style_settings.empty?
 			sections = style_sections
 		else
 			code = optionned_code(options)
@@ -462,8 +465,8 @@ Replace = "$STOP()"
 	def chrome_json(passed_options)
 		o = {:sections => []}
 		global_sections = []
-		
-		if style_settings.empty?
+
+		if live_style_settings.empty?
 			sections = style_sections
 		else
 			code = optionned_code(passed_options)
@@ -790,7 +793,7 @@ Replace = "$STOP()"
 	# applies the style settings to this style
 	def optionned_code(params)
 		c = style_code.code.dup
-		ss = real_style_settings
+		ss = live_style_settings
 		# nest this two levels deep
 		2.times do
 			ss.each do |setting|
@@ -801,7 +804,7 @@ Replace = "$STOP()"
 						# escape backslashes and double quotes
 						replacement_value = params[setting.install_key][:value].gsub('"', '\\"')
 					else
-						selected_option = setting.style_setting_options.select {|v| v.install_key == params[setting.install_key][:value]}.first
+						selected_option = setting.live_style_setting_options.select {|v| v.install_key == params[setting.install_key][:value]}.first
 						replacement_value = selected_option.value unless selected_option.nil?
 					end
 				end
@@ -922,14 +925,14 @@ Replace = "$STOP()"
 	# who have already installed.
 	def calculate_md5
 		content = style_code.code
-		if !style_settings.empty?
+		if !live_style_settings.empty?
 			# make a hash of install keys and values. 
 			settings_content = {}
-			style_settings.each do |setting|
+			live_style_settings.each do |setting|
 				option_content = {}
 				# these are always user-defined
 				if !['color', 'text'].include?(setting.setting_type)
-					setting.style_setting_options.each do |option|
+					setting.live_style_setting_options.each do |option|
 						option_content[option.install_key] = option.value
 					end
 				end
@@ -1015,7 +1018,7 @@ Replace = "$STOP()"
 	# number of options will be a+b+c...
 	def lazy_code_possibilities
 		#puts "lazying it up\n"
-		setting_possibilities = real_style_settings.map { |setting| setting.possibilities }
+		setting_possibilities = live_style_settings.map { |setting| setting.possibilities }
 		defaults = setting_possibilities.map { |p| p.first }
 		option_possibilities = [defaults]
 		(0..setting_possibilities.size-1).each do |i|
@@ -1032,8 +1035,8 @@ Replace = "$STOP()"
 		codes = []
 		option_possibilities.each do |p|
 			param_has = {}
-			(0..real_style_settings.length-1).each do |i|
-				param_has[real_style_settings[i].install_key] = p[i]
+			(0..live_style_settings.length-1).each do |i|
+				param_has[live_style_settings[i].install_key] = p[i]
 			end
 			codes << [param_has, optionned_code(param_has)]
 		end
@@ -1044,10 +1047,10 @@ Replace = "$STOP()"
 	# returns an array of (options, code) for all possibilities for this style (due to options). 
 	def code_possibilities
 		return [] if style_code.nil?
-		return [[{}, style_code.code]] if real_style_settings.empty?
+		return [[{}, style_code.code]] if live_style_settings.empty?
 
 		#puts "checking options\n"
-		setting_possibilities = real_style_settings.map { |setting| setting.possibilities }
+		setting_possibilities = live_style_settings.map { |setting| setting.possibilities }
 
 		# let's see if this going to be a reasonable number. if it's unreasonable, we'll be lazy
 		total_count = 1
@@ -1072,8 +1075,8 @@ Replace = "$STOP()"
 		option_possibilities.each do |p|
 			param_has = {}
 			p.flatten!
-			(0..real_style_settings.length-1).each do |i|
-				param_has[real_style_settings[i].install_key] = p[i]
+			(0..live_style_settings.length-1).each do |i|
+				param_has[live_style_settings[i].install_key] = p[i]
 			end
 			codes << [param_has, optionned_code(param_has)]
 		end
@@ -1211,7 +1214,7 @@ Replace = "$STOP()"
 
 	def refresh_meta(update_sections = true)
 		if update_sections
-			if self.style_settings.empty?
+			if live_style_settings.empty?
 				self.style_sections = Style.parse_moz_docs_for_code(style_code.code)
 			else
 				self.style_sections = []
@@ -1288,7 +1291,7 @@ Replace = "$STOP()"
 	@_cached_doc_code_hash = nil
 	def get_docs_or_nil
 		return nil if style_code.nil?
-		return @_cached_docs if (!@_cached_docs.nil? and @_cached_doc_code_hash == style_code.code.hash + real_style_settings.hash)
+		return @_cached_docs if (!@_cached_docs.nil? and @_cached_doc_code_hash == style_code.code.hash + live_style_settings.hash)
 		docs = []
 		cp = code_possibilities
 		#logger.debug "#{cp.length} possibilities"
@@ -1306,7 +1309,7 @@ Replace = "$STOP()"
 			docs << doc
 		end
 		@_cached_docs = docs
-		@_cached_doc_code_hash = style_code.code.hash + real_style_settings.hash
+		@_cached_doc_code_hash = style_code.code.hash + live_style_settings.hash
 		#logger.debug "done docs"
 		return docs
 	end
@@ -1542,4 +1545,5 @@ private
 		return '' if option_params.nil? or option_params.empty?
 		return '?' + option_params.map {|k, v| CGI::escape('ik-' + k) + '=' + CGI::escape(v[:iskey] ? 'ik-' + v[:value] : v[:value])}.join('&')
 	end
+
 end

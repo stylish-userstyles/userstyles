@@ -824,28 +824,77 @@ private
 		non_ar_errors = []
 
 		if new
-			@style = Style.new
-			@style["user_id"] = session[:user_id]
+			@style = Style.new(user_id: session[:user_id], style_code: StyleCode.new)
 			now = DateTime.now
-			@style["created"] = now
-			@style["updated"] = now
-			@style.style_code = StyleCode.new
+			@style.created = now
+			@style.updated = now
 		else
 			@style = Style.includes([{:style_settings => :style_setting_options}, :screenshots]).find(params["style"]["id"])
-			#only mark it as updated if the css changed
-			if @style.style_code.code != params["style"]["css"]
-				@style.updated = DateTime.now
-			end
 		end
 
-		@style.short_description = params["style"]["short_description"]
-		@style.long_description = params["style"]["long_description"]
-		@style.additional_info = params["style"]["additional_info"]
-		@style.pledgie_id = params["style"]["pledgie_id"]
-		@style.style_code.code = params["style"]["css"]
-		@style.screenshot_type_preference = params["style"]["screenshot_type_preference"]
-		@style.screenshot_url_override = params["style"]["screenshot_url_override"]
-		@style.license = params["style"]["license"]
+		@style.assign_attributes(style_params)
+
+		# Mark for destruction any existing settings or options that were not passed
+		passed_setting_ids = style_params['style_settings_attributes'].nil? ? [] : style_params['style_settings_attributes'].map{|k, v| v['id']}.select{|v| !v.nil?}
+		@style.style_settings.select{|ss| !ss.new_record?}.each{|existing_setting|
+			if !passed_setting_ids.include?(existing_setting.id.to_s)
+				existing_setting.mark_for_destruction
+			else
+				setting_params = style_params['style_settings_attributes'].values.select{|ss_params| ss_params['id'] == existing_setting.id.to_s}.first
+				passed_option_ids = setting_params['style_setting_options_attributes'].map{|k, v| v['id']}.select{|v| !v.nil?}
+				existing_setting.style_setting_options.select{|sso| !sso.new_record?}.each{|existing_option|
+					existing_option.mark_for_destruction if !passed_option_ids.include?(existing_option.id.to_s)
+				}
+			end
+		}
+
+		# Set up the default setting values for things that only have a default option
+		@style.live_style_settings.select{|ss| ss.has_only_default_option?}.each{|ss|
+			ss.live_style_setting_options.each {|sso|
+				sso.label = 'placeholder' if sso.label.nil?
+				sso.install_key = 'placeholder' if sso.install_key.nil?
+				sso.default = true
+			}
+		}
+
+		# Set up the default setting values for things that have multiple options. The default attribute
+		# is not an attribute of setting, so is not a strong parameter, so we can't use style_params
+		if !params['style']['style_settings_attributes'].nil?
+			params['style']['style_settings_attributes'].values.each{|ss_params|
+				if !ss_params['default'].nil?
+					current_setting = @style.get_setting_for_id_or_key(ss_params['id'], ss_params['install_key'])
+					current_setting.live_style_setting_options.each{|sso| sso.default = false}
+					default_option_params = ss_params['style_setting_options_attributes'][ss_params['default']]
+					current_setting.get_option_for_id_or_key(default_option_params['id'], default_option_params['install_key']).default = true
+				end
+			}
+		end
+
+		# Maintain submitted order for settings and options while attempting to retain the ordinals
+		if !style_params['style_settings_attributes'].nil?
+			last_setting_index = -1
+			style_params['style_settings_attributes'].values.each{|ss_params|
+				current_setting = @style.get_setting_for_id_or_key(ss_params['id'], ss_params['install_key'])
+				# Ensure the ordinal has ascending since the last one
+				if current_setting.ordinal.nil? || current_setting.ordinal <= last_setting_index
+					current_setting.ordinal = last_setting_index + 1
+				end
+				last_setting_index = current_setting.ordinal
+
+				# Same for the options
+				if !ss_params['style_setting_options_attributes'].nil?
+					last_option_index = -1
+					ss_params['style_setting_options_attributes'].values.each{|sso_params|
+						current_option = current_setting.get_option_for_id_or_key(sso_params['id'], sso_params['install_key'])
+						# Ensure the ordinal has ascending since the last one
+						if current_option.ordinal.nil? || current_option.ordinal <= last_option_index
+							current_option.ordinal = last_option_index + 1
+						end
+						last_option_index = current_option.ordinal
+					}
+				end
+			}
+		end
 
 		if @style.screenshot_type_preference == 'manual' && params["style"]["after_screenshot"].nil? && @style.after_screenshot_name.nil?
 			non_ar_errors << ['primary screenshot', 'must be provided with the chosen option']
@@ -885,83 +934,13 @@ private
 			end
 		end
 
-		# @new_style_settings will be read by the edit page in case of a validation fail because setting 
-		# @style.style_settings saves immediately.
-		@new_style_settings = []
-		if !params['style_settings_ids'].nil?
-			params['style_settings_ids'].each do |style_setting_id|
-				ss = StyleSetting.new
-				ss.label = params["setting-label-#{style_setting_id}"]
-				ss.install_key = params["setting-install-key-#{style_setting_id}"]
-				ss.setting_type = params["setting-type-#{style_setting_id}"]
-				ss.ordinal = style_setting_id
-				if ss.setting_type == "dropdown" or ss.setting_type == "image"
-					if !params["option-label-#{style_setting_id}"].nil?
-						(0..(params["option-label-#{style_setting_id}"].size - 1)).each do |i|
-							so = StyleSettingOption.new
-							so.label = params["option-label-#{style_setting_id}"][i]
-							so.install_key = params["option-install-key-#{style_setting_id}"][i]
-							so.value = params["option-value-#{style_setting_id}"][i]
-							so.default = so.install_key == params["option-default-#{style_setting_id}"]
-							so.ordinal = i
-							ss.style_setting_options << so
-						end
-					end
-				else
-					# this just represents the default value and not an actual option
-					so = StyleSettingOption.new
-					so.label = 'placeholder'
-					so.install_key = 'placeholder'
-					so.value = params["option-default-#{style_setting_id}"]
-					so.default = true
-					so.ordinal = 1
-					ss.style_setting_options << so
-				end
-				@new_style_settings << ss
-			end
-		end
-
-		# let's also verify an install_key isn't reused. we can't rely on 
-		# rails validations because they only work after the style
-		# is saved
-		style_setting_used_install_keys = []
-		@new_style_settings.each do |style_setting|
-			style_setting.valid?
-			style_setting.errors.each do |attr, msg|
-				non_ar_errors << ["style setting #{attr}", msg]
-			end
-			if style_setting_used_install_keys.include?(style_setting.install_key)
-				non_ar_errors << ["style settings", "contain duplicate install key '#{style_setting.install_key}'"]
-			else
-				style_setting_used_install_keys << style_setting.install_key
-			end
-			style_setting_options_used_install_keys = []
-			style_setting.style_setting_options.each do |so|
-				so.valid?
-				so.errors.each do |attr, msg|
-					non_ar_errors << ["style setting option #{attr}", msg]
-				end
-				so.errors.clear
-				if style_setting_options_used_install_keys.include?(so.install_key)
-					non_ar_errors << ["style setting options", "contain duplicate install key '#{so.install_key}'"]
-				else
-					style_setting_options_used_install_keys << so.install_key
-				end
-			end
-		end
-
 		# whatever they did, assume they handled the warning
 		@style.precalculated_warnings.each {|pcw| pcw.mark_for_destruction}
 
+		# mark it as updated if the code changed
+		@style.updated = DateTime.now if !@style.new_record? && (@style.style_code.code_changed? || @style.style_settings_changed?)
+
 		begin
-
-			# db doesn't support transactions, so we can't use rails transactions.
-			# when we set the setting just below, they will attempt to save immediately,
-			# which can result in the settings being saved but the style itself not.
-			# to try to prevent this, check validity first. we'll set the settings on a temp
-			# object for the code validator to use
-			@style.tmp_style_settings = @new_style_settings
-
 			@style.refresh_meta(false)
 
 			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or !$tld_specific_bad_domains.index{|d| @style.style_code.code.include?(d)}.nil?
@@ -970,14 +949,9 @@ private
 
 			raise ActiveRecord::RecordInvalid.new(@style) if !non_ar_errors.empty? or !@style.valid?
 
-			@style.tmp_style_settings = nil
-			@style.style_settings.destroy_all
-			@style.style_settings = @new_style_settings
-
 			@style.refresh_meta(true)
 
 			@style.save!
-			@style.style_code.save!
 
 		rescue ActiveRecord::RecordInvalid
 			non_ar_errors.each do |attr, msg|
@@ -1022,6 +996,10 @@ private
 	def fix_bad_chars(s)
 		return s if s.nil?
 		return s.encode('UTF-8', :invalid => :replace, :undef => :replace, :replace => '')
+	end
+
+	def style_params
+		params.require(:style).permit(:short_description, :long_description, :additional_info, :pledgie_id, {style_code_attributes: [:id, :code]}, :screenshot_type_preference, :screenshot_url_override, :license, {style_settings_attributes: [:id, :label, :value, :install_key, :setting_type, {style_setting_options_attributes: [:id, :label, :value, :install_key, :default]}]})
 	end
 
 end

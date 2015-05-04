@@ -93,7 +93,6 @@ protected
 		return style
 	end
 
-
 private
 
 	# User authentication. Controllers are expected to define the following methods:
