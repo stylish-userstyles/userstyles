@@ -15,3 +15,5 @@ config/initializers/omniauth.rb
 db/sphinx
 db/cstore
 config/initializers/jerks.rb
+.ruby-gemset
+.ruby-version
