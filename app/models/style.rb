@@ -274,14 +274,14 @@ class Style < ActiveRecord::Base
 		self.connection.select_all("SELECT subcategory name, SUM(weekly_install_count) installs FROM styles WHERE #{self.sanitize_sql(:category => category)} AND subcategory IS NOT NULL GROUP BY subcategory ORDER BY installs DESC LIMIT 20")
 	end
 
-	$namespace_pattern = /^\s*@namespace\s+((url\()|['"])[^"')]+(\)|['"]);?$/i
+	$namespace_pattern = /\A(\s*@namespace\s+([a-z0-9]+\s+)?((url\()|['"])[^"')]+(\)|['"]);?\s*)+\Z/i
 	def userjs(options = {}, only_meta = false)
 		has_global = false
 		has_non_includable = false
 		includes = []
 
 		if live_style_settings.empty?
-			sections = style_sections
+			sections = [] + style_sections
 		else
 			code = optionned_code(options)
 			return nil if code.nil?
@@ -293,14 +293,16 @@ class Style < ActiveRecord::Base
 			end
 		end
 
-		# if the only global part is a default namespace, we'll strip that out to keep
+		# If there's two sections, and one is just namespaces, combine them.
 		global_sections = sections.select {|section| section[:global] }
-		if global_sections.size == 1
-			sections.delete(global_sections[0]) unless global_sections[0][:css].match($namespace_pattern).nil?
+		if global_sections.size == 1 && sections.size == 2
+			if !global_sections.first.css.match($namespace_pattern).nil?
+				sections.delete(global_sections[0])
+				sections.first.css = global_sections.first.css + "\n" + sections.first.css
+			end
 		end
 
 		sections.each do |section|
-			#puts "=====#{section[:global]} #{section[:rules].nil? ? '' : section[:rules].length} #{section[:code]}\n\n"
 			if section[:global]
 				has_global = true
 			else
@@ -467,7 +469,7 @@ Replace = "$STOP()"
 		global_sections = []
 
 		if live_style_settings.empty?
-			sections = style_sections
+			sections = [] + style_sections
 		else
 			code = optionned_code(passed_options)
 			return nil if code.nil?
@@ -478,11 +480,10 @@ Replace = "$STOP()"
 				sections = Style.parse_moz_docs_for_code(code)
 			end
 		end
-		
+
 		sections.each do |section|
 			s = {:urls => [], :urlPrefixes => [], :domains => [], :regexps => []}
 			s[:code] = section[:css].strip
-			#puts "\n\nglobal#{section[:global]}"
 			if !section[:global]
 				section.style_section_rules.each do |rule|
 					case rule.rule_type
@@ -505,8 +506,13 @@ Replace = "$STOP()"
 			end
 			o[:sections] << s
 		end
-		if global_sections.size == 1
-			o[:sections].delete(global_sections[0]) unless global_sections[0][:code].match($namespace_pattern).nil?
+
+		# If there's two sections, and one is just namespaces, combine them.
+		if global_sections.size == 1 && o[:sections].size == 2
+			if !global_sections[0][:code].match($namespace_pattern).nil?
+				o[:sections].delete(global_sections[0])
+				o[:sections].first[:code] = global_sections[0][:code] + "\n" + o[:sections].first[:code]
+			end
 		end
 
 		o[:url] = "http://#{DOMAIN}/styles/#{id}"

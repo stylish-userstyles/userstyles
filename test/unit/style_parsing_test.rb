@@ -162,6 +162,4 @@ class StyleParsingTest < ActiveSupport::TestCase
 		assert sections[0].css == '* { color: blue; }', sections[0].css
 	end
 
-private
-
 end
