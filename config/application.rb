@@ -38,7 +38,7 @@ module Userstyles
     config.filter_parameters += [:password]
 
     config.active_record.schema_format = :sql
-    config.active_record.raise_in_transactional_callbacks = true
+    #config.active_record.raise_in_transactional_callbacks = true
 
     config.assets.enabled = true
     config.assets.version = '1.0'
