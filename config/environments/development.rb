@@ -13,8 +13,9 @@ Userstyles::Application.configure do
   # Don't care if the mailer can't send
   config.action_mailer.raise_delivery_errors = false
 
-  # Print deprecation notices to the Rails logger
-  config.active_support.deprecation = :log
+  config.active_support.deprecation = Proc.new { |message, callstack|
+    raise NameError, message, callstack
+  }
 
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
