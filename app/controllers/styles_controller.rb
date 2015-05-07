@@ -853,6 +853,7 @@ private
 			ss.live_style_setting_options.each {|sso|
 				sso.label = 'placeholder' if sso.label.nil?
 				sso.install_key = 'placeholder' if sso.install_key.nil?
+				sso.ordinal = 0
 				sso.default = true
 			}
 		}
