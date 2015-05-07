@@ -821,7 +821,10 @@ Replace = "$STOP()"
 				c.gsub!("/*[[#{setting.install_key}]]*/", replacement_value.gsub('\\','\\\\\\\\'))
 				# For color settings, additionally support a -rgb value.
 				if setting.setting_type == 'color'
-					c.gsub!("/*[[#{setting.install_key}-rgb]]*/", hex_to_rgb(replacement_value).gsub('\\','\\\\\\\\'))
+					rgb_value = hex_to_rgb(replacement_value)
+					# Maybe this was a non-RGB passed value? If so, use the default.
+					rgb_value = hex_to_rgb(setting.default_option_value) if rgb_value.nil?
+					c.gsub!("/*[[#{setting.install_key}-rgb]]*/", rgb_value.gsub('\\','\\\\\\\\')) unless rgb_value.nil?
 				end
 			end
 		end
@@ -830,7 +833,9 @@ Replace = "$STOP()"
 
 	# From https://www.ruby-forum.com/topic/76667#1143990
 	def hex_to_rgb input
-		a = ( input.match /#(..?)(..?)(..?)/ )[1..3]
+		rgb_match = input.match /#(..?)(..?)(..?)/
+		return nil if rgb_match.nil?
+		a = rgb_match[1..3]
 		a.map!{ |x| x + x } if input.size == 4
 		"#{a[0].hex}, #{a[1].hex}, #{a[2].hex}"
 	end
