@@ -841,7 +841,11 @@ private
 				existing_setting.mark_for_destruction
 			else
 				setting_params = style_params['style_settings_attributes'].values.select{|ss_params| ss_params['id'] == existing_setting.id.to_s}.first
-				passed_option_ids = setting_params['style_setting_options_attributes'].map{|k, v| v['id']}.select{|v| !v.nil?}
+				if setting_params['style_setting_options_attributes'].nil?
+					passed_option_ids = []
+				else
+					passed_option_ids = setting_params['style_setting_options_attributes'].map{|k, v| v['id']}.select{|v| !v.nil?}
+				end
 				existing_setting.style_setting_options.select{|sso| !sso.new_record?}.each{|existing_option|
 					existing_option.mark_for_destruction if !passed_option_ids.include?(existing_option.id.to_s)
 				}
