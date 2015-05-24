@@ -1,17 +1,19 @@
 Userstyles.org - an online repository of user styles.
 
-Please use forum.userstyles.org for support.
+[![Build Status](https://travis-ci.org/JasonBarnabe/userstyles.svg?branch=master)](https://travis-ci.org/JasonBarnabe/userstyles)
+
+Please use [forum.userstyles.org](https://forum.userstyles.org) for support.
 
 See also:
-* Stylish for Firefox https://github.com/JasonBarnabe/stylish
-* Stylish for Chrome https://github.com/JasonBarnabe/stylish-chrome
+* [Stylish for Firefox](https://github.com/JasonBarnabe/stylish)
+* [Stylish for Chrome](https://github.com/JasonBarnabe/stylish-chrome)
 
 The userstyles.org code is licensed under GPL v3 unless stated
 otherwise. Styles posted on userstyles.org are not hosted in this
 repository and are (C) their respective authors, who may provide them
 under various licenses; see their page on userstyles.org for details.
 
-Copyright (C) 2006-2013 Jason Barnabe <jason.barnabe@gmail.com>
+Copyright (C) 2006-2015 Jason Barnabe <jason.barnabe@gmail.com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
