@@ -1,0 +1,8 @@
+test:
+  adapter: mysql2
+  username: root
+  password:
+  database: userstyles_test
+  pool: 5
+  timeout: 5000
+  host: localhost

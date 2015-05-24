@@ -1,3 +1,10 @@
 language: ruby
 rvm:
   - 2.2.2
+env:
+  - DB=mysql
+before_script:
+  - cp test/travisconfig/database.yml config/database.yml
+  - cp test/travisconfig/secrets.yml config/secrets.yml
+  - mysql -e 'create database userstyles_test'
+  - mysql userstyles_test < db/structure.sql
