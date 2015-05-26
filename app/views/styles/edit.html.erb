@@ -59,7 +59,7 @@ end %>
 	<div class="form-controls">
 		<label>Style Settings (Optional)</label> <span class="linking-note"><a href="/help/coding#help-style-settings">Need help with style settings?</a></span>
 		<ul id="edit-style-settings">
-			<li id="new-setting"><input type="button" onclick="addOptionnedSetting('dropdown', '', '');return false" value="New Drop-Down Setting"> <input type="button" onclick="return addOptionlessSetting('color', '', '', null);" value="New Color Setting"> <input type="button" onclick="addOptionlessSetting('text', '', '', null);return false" value="New Text Setting"> <input type="button" onclick="addOptionnedSetting('image', '', '');return false" value="New Image Setting"></li>
+			<li id="new-setting"><input type="button" onclick="addOptionnedSettingAndOptions('dropdown', '', '');return false" value="New Drop-Down Setting"> <input type="button" onclick="return addOptionlessSetting('color', '', '', null);" value="New Color Setting"> <input type="button" onclick="addOptionlessSetting('text', '', '', null);return false" value="New Text Setting"> <input type="button" onclick="addOptionnedSetting('image', '', '');return false" value="New Image Setting"></li>
 		</ul>
 		<script>
 			var settings = document.getElementById("edit-style-settings")
@@ -103,13 +103,16 @@ end %>
 					.replace(/passedLabel/g, escapeForReplace(label))
 					.replace(/passedInstallKey/g, escapeForReplace(installKey));
 				settings.insertBefore(html(code), newSetting);
-				if (savedId == '' && type == 'dropdown') {
-					var optionsContainer = newSetting.previousSibling.querySelector("ul");
-					addTextOption(optionsContainer, type, nextIndex, '', '', '', false);
-					addTextOption(optionsContainer, type, nextIndex, '', '', '', false);
-				}
 				updateSettingButtons();
 				return nextIndex;
+			}
+
+			// Add a setting with two options
+			function addOptionnedSettingAndOptions(type, label, installKey, savedId) {
+				var index = addOptionnedSetting(type, label, installKey, savedId);
+				var optionsContainer = document.getElementById("edit-style-options-" + index);;
+				addTextOption(optionsContainer, type, index, '', '', '', false);
+				addTextOption(optionsContainer, type, index, '', '', '', false);
 			}
 
 			function addOptionlessSetting(type, label, installKey, defaultValue, savedSettingId, savedOptionId) {
