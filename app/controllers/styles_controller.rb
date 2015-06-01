@@ -731,6 +731,8 @@ protected
 			end
 		end
 		op.each do |k,v|
+			# This can be parsed as a ActionController::Parameters if it has brackets and stuff. It's just supposed to be a string.
+			v = v.to_s
 			if v.start_with?('ik-')
 				op[k] = {:iskey => true, :value => v[3, v.length]}
 			else
