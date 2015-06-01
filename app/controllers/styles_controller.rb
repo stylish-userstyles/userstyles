@@ -131,8 +131,11 @@ class StylesController < ApplicationController
 	def install
 		@no_bots = true
 		source = params[:source]
-		if source == 'stylish-ch' or source == 'stylish-fx' or source == 'stylish-op' or source == 'stylish-sf' or source == 'stylish-do'
-			Style.increment_installs(params[:id], source, request.remote_ip)
+		begin
+			Style.increment_installs(params[:id], source, request.remote_ip) if ['stylish-ch', 'stylish-fx', 'stylish-op', 'stylish-sf', 'stylish-do'].include?(source)
+		rescue ActionDispatch::RemoteIp::IpSpoofAttackError => ex
+			# We won't record it.
+			logger.warn "Will not record install - #{ex}"
 		end
 		render :nothing => true, :status => 200
 	end
@@ -512,7 +515,13 @@ class StylesController < ApplicationController
 			return
 		end
 		if style.userjs_available
-			Style.increment_installs(params[:id], 'userjs', request.remote_ip) unless is_meta
+			begin
+				Style.increment_installs(params[:id], 'userjs', request.remote_ip) unless is_meta
+			rescue ActionDispatch::RemoteIp::IpSpoofAttackError => ex
+				# We won't record it.
+				logger.warn "Will not record install - #{ex}"
+			end
+
 			code = style.userjs(get_option_params(), is_meta)
 			if code.nil?
 				render :nothing => true, :status => 400
