@@ -314,10 +314,14 @@ class StylesController < ApplicationController
 			raise e if params[:category].nil? and params[:search_terms].nil? and params[:page].nil? and params[:order].nil? and params[:sort].nil? and params[:sort_direction].nil?
 			redirect_to :controller => 'styles', :action => 'browse', :category => nil, :search_terms => nil
 			return
-		rescue Riddle::OutOfBoundsError
-			# same url, minus the page param
-			redirect_to :controller => 'styles', :action => 'browse', :search_terms => params[:search_terms], :category => params[:category], :format => params[:format], :sort => params[:sort], :sort_direction => params[:sort_direction]
-			return
+		rescue => e
+			# This is the recommended way to do this! https://github.com/pat/thinking-sphinx/issues/903
+			if e.to_s.starts_with?('offset out of bounds')
+				# same url, minus the page param
+				redirect_to :controller => 'styles', :action => 'browse', :search_terms => params[:search_terms], :category => params[:category], :format => params[:format], :sort => params[:sort], :sort_direction => params[:sort_direction]
+				return
+			end
+			raise e
 		end
 			
 		if search_terms.nil?
