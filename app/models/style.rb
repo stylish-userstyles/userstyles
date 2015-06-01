@@ -210,7 +210,9 @@ class Style < ActiveRecord::Base
 	end
 
 	def get_setting_for_id_or_key(setting_id, key)
-		return live_style_settings.find{|ss| ss.id.to_s == setting_id} || live_style_settings.find{|ss| ss.install_key == key}
+		ss = live_style_settings.find{|ss| ss.id.to_s == setting_id} if !setting_id.blank?
+		return ss if !ss.nil?
+		return live_style_settings.find{|ss| ss.install_key == key}
 	end
 
 	def style_settings_changed?
