@@ -309,16 +309,18 @@ class StylesController < ApplicationController
 			# else matching on "name".
 			@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true, :select => '*, weight() myweight', :ranker => "expr('top(user_weight)')"
 			@no_ads = @styles.empty?
-		rescue ThinkingSphinx::SyntaxError => e
+		rescue ThinkingSphinx::SyntaxError, ThinkingSphinx::QueryError => e
 			# back to the main listing, unless we're already there
 			raise e if params[:category].nil? and params[:search_terms].nil? and params[:page].nil? and params[:order].nil? and params[:sort].nil? and params[:sort_direction].nil?
 			redirect_to :controller => 'styles', :action => 'browse', :category => nil, :search_terms => nil
+			flash[:alert] = "Query failed - #{ERB::Util.html_escape(sphinx_exception_message(e))}"
 			return
 		rescue => e
 			# This is the recommended way to do this! https://github.com/pat/thinking-sphinx/issues/903
 			if e.to_s.starts_with?('offset out of bounds')
 				# same url, minus the page param
 				redirect_to :controller => 'styles', :action => 'browse', :search_terms => params[:search_terms], :category => params[:category], :format => params[:format], :sort => params[:sort], :sort_direction => params[:sort_direction]
+				flash[:alert] = "Query failed - #{ERB::Util.html_escape(sphinx_exception_message(e))}"
 				return
 			end
 			raise e
@@ -1020,6 +1022,10 @@ private
 
 	def style_params
 		params.require(:style).permit(:short_description, :long_description, :additional_info, :pledgie_id, {style_code_attributes: [:id, :code]}, :screenshot_type_preference, :screenshot_url_override, :license, {style_settings_attributes: [:id, :label, :value, :install_key, :setting_type, {style_setting_options_attributes: [:id, :label, :value, :install_key, :default]}]})
+	end
+
+	def sphinx_exception_message(e)
+		e.to_s.split("- SELECT").first
 	end
 
 end
