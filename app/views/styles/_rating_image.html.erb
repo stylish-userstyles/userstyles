@@ -1,0 +1,9 @@
+<% if style.rating.nil? %>
+	N/A
+<% elsif style.rating < 1.5 %>
+	<%=image_tag 'bad.gif', alt: 'Bad', class: 'bad-average-rating'%>
+<% elsif style.rating < 2.5 %>
+	<%=image_tag 'ok.png', alt: 'OK', class: 'ok-average-rating'%>
+<% else %>
+	<%=image_tag 'good.gif', alt: 'Good', class: 'good-average-rating'%>
+<% end %>

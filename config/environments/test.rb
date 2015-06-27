@@ -39,9 +39,8 @@ end
 DOMAIN = 'userstyles.local'
 DOMAIN_PROTOCOL = 'http'
 FORUM_DOMAIN = 'forum.userstyles.local'
-STATIC_DOMAIN = 'userstyles.local'
 UPDATE_DOMAIN = 'https://update.userstyles.org'
-SCREENSHOT_DOMAIN = 'cdn.userstyles.org'
+SCREENSHOT_DOMAIN = 'https://df6a.https.cdn.softlayer.net/80DF6A/static.userstyles.org'
 MD5_PATH = '/tmp/'
 COOKIE_DOMAIN = '.userstyles.local'
 

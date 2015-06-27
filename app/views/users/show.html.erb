@@ -6,12 +6,6 @@
 		</div>
 	<% end %>
 
-	<% if false && @styles.any?{|s| !s.precalculated_warnings.empty?} %>
-		<div class="notice">
-			Some of your styles have non-loading images - consult the warnings in the list below for details. Styles containing non-loading images will be subject to deletion November 1.
-		</div>
-	<% end %>
-
 	<ul>
 		<li><%= link_to "Create new style", :action => "new", :controller => "styles" %></li>
 		<li><%= link_to "Change details", :action => "edit" %></li>
@@ -53,7 +47,7 @@
 			<input type="hidden" name="business" value="<%=obfuscate(@user_displayed.paypal_email)%>">
 			<input type="hidden" name="item_name" value="Styles on userstyles.org">
 			Send <%=@user_displayed.name%> a donation via PayPal:
-			<input type="image" src="<%=STATIC_DOMAIN%>/images/donate-button.gif" alt="Donate">.
+			<input type="image" src="<%=asset_path('/images/donate-button.gif')%>" alt="Donate">.
 		</form>
 	</dd>
 <% end %>
@@ -92,15 +86,7 @@
 						<td class="numeric-value"><%=number_with_delimiter(style.weekly_install_count)%></td>
 						<td class="numeric-value"><%=number_with_delimiter(style.total_install_count)%></td>
 						<td class="image-value">
-							<% if style.rating.nil? %>
-								-
-							<% elsif style.rating < 1.5 %>
-								<img class="bad-average-rating" src="<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
-							<% elsif style.rating < 2.5 %>
-								<img class="ok-average-rating" src="<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
-							<% else %>
-								<img class="good-average-rating" src="<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
-							<% end %>
+							<%=render partial: 'styles/rating_image', locals: {style: style}%>
 						</td>
 						<td class="date-value">
 							<% if @style_forum_stats[style.id].nil? %>
@@ -114,7 +100,7 @@
 							<%=link_to style.obsolete? ? "Undelete" : "Delete", :controller => 'styles', :action => "delete", :id => style.id%>
 							<%=link_to "Stats", :controller => 'styles', :action => "stats", :id => style.id%>
 							<% if !warnings.empty? %>
-								<img src="<%=STATIC_DOMAIN%>/images/warning.png" class="style-warning-icon" alt="Warning" height="15" width="15" onclick="document.getElementById('style-warnings-<%=style.id%>').style.display = 'table-row'">
+								<%=image_tag 'warning.png', class: "style-warning-icon", alt: "Warning", height: 15, width: 15, onclick: "document.getElementById('style-warnings-#{style.id}').style.display = 'table-row'"%>
 							<% end %>
 						</td>
 					</tr>

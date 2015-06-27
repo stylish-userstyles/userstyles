@@ -3,6 +3,6 @@
 	<g:plusone style="display: inline-block; width:80px;"></g:plusone>
 	<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" rel="nofollow"></a>
 	<% if defined?(style) and !style.nil? and !style.after_screenshot_path.nil? %>
-	<a href="http://pinterest.com/pin/create/button/?url=<%=h(URI.escape(style.full_pretty_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")))%>&media=<%=h(URI.escape(STATIC_DOMAIN + style.after_screenshot_path, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")))%>&description=<%=h(URI.escape(style.short_description, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")))%>" class="pin-it-button" count-layout="horizontal"><img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" /></a>
+	<a href="http://pinterest.com/pin/create/button/?url=<%=h(URI.escape(style.full_pretty_url, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")))%>&media=<%=h(URI.escape(asset_url(style.after_screenshot_path), Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")))%>&description=<%=h(URI.escape(style.short_description, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]")))%>" class="pin-it-button" count-layout="horizontal"><img border="0" src="//assets.pinterest.com/images/PinExt.png" title="Pin It" /></a>
 	<% end %>
 </div>

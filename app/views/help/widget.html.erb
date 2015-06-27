@@ -91,9 +91,9 @@ function userstylesLoad() {
 	var s1 = document.createElement("script");
 	s1.setAttribute("async", "true");
 	var s2 = s1.cloneNode(false);
-	s1.src = "#{STATIC_DOMAIN}/widgets/#{h widget_style}.js";
+	s1.src = "#{j asset_url("widgets/#{widget_style}.js")}";
 	c.appendChild(s1);
-	s2.src = "#{h json_url}";
+	s2.src = "#{j json_url}";
 	c.appendChild(s2);
 }
 </script>

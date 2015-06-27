@@ -53,35 +53,7 @@ class StylesController < ApplicationController
 				@page_title = @style.short_description
 				@page_header = @style.short_description
 				@page_title = @page_title + " - Themes and Skins for " + @style.subcategory.capitalize unless @style.subcategory.nil?
-				@header_include = <<-THEEND
-					<link rel="stylish-code" href="#{url_for(:id => params['id'], :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}.css">
-					<script>document.querySelector("link[rel='stylish-code']").setAttribute("href", "#stylish-code");</script>
-					<link rel="stylish-description" href="#stylish-description">
-					<link rel="stylish-install-ping-url" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-fx', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
-					<link rel="stylish-install-ping-url-chrome" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-ch', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
-					<link rel="stylish-install-ping-url-opera" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-op', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
-					<link rel="stylish-install-ping-url-safari" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-sf', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
-					<link rel="stylish-install-ping-url-dolphin" href="#{url_for(:action => 'install', :id => params['id'], :source => 'stylish-do', :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}">
-					<link rel="stylish-code-ie" href="#{CGI.escapeHTML(url_for(:action => 'ie_css', :id => @style.id, :foo => @style.short_description, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
-					<link rel="stylish-code-chrome" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
-					<link rel="stylish-code-opera" href="#{CGI.escapeHTML(url_for(:action => 'chrome_json', :id => @style.id, :host => DOMAIN, :protocol => DOMAIN_PROTOCOL))}">
-					<link rel="stylish-id-url" href="http://#{DOMAIN}/styles/#{@style.id}">
-				THEEND
-				@header_include += <<-THEEND
-					<link rel="stylish-md5-url" href="#{UPDATE_DOMAIN}/#{@style.id}.md5">
-					<link rel="stylish-update-url" href="#{url_for(:id => params['id'], :host => DOMAIN, :protocol => DOMAIN_PROTOCOL)}.css">
-				THEEND
-				@style.style_settings.each do |s|
-					if s.setting_type == "color"
-						@header_include += "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
-						break
-					end
-				end
-				if !@style.screenshot_url.nil?
-					@header_include += "<link rel=\"stylish-example-url\" href=\"#{CGI.escapeHTML(@style.screenshot_url)}\">".html_safe
-				end
 				@meta_description = @style.long_description.gsub(/[\r\n\t]/, ' ').gsub(/\s+{2,}/, ' ').truncate(150)
-				@header_include = @header_include.html_safe
 				@canonical = @style.full_pretty_url
 				@feeds = []
 				@feeds << {:title => @style.short_description, :href => "/styles/#{@style.id}.json", :type => "application/json"}
@@ -145,7 +117,6 @@ class StylesController < ApplicationController
 		@style.user_id = session[:user_id]
 		@page_title = "New style"
 		@no_bots = true
-		@header_include = "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 		render :action => "edit"
 	end
 
@@ -153,7 +124,6 @@ class StylesController < ApplicationController
 		@style = Style.includes(:style_code, :screenshots, {:style_settings => :style_setting_options}).find(params["id"])
 		@no_bots = true
 		@page_title = "Editing " + @style.short_description
-		@header_include = "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 	end
 
 	def test
@@ -979,7 +949,6 @@ private
 			non_ar_errors.each do |attr, msg|
 				@style.errors.add(attr, msg)
 			end
-			@header_include = "<script type='text/javascript' src='#{STATIC_DOMAIN}/javascripts/jscolor.js'></script>\n".html_safe
 			if new
 				@page_title = "New style"
 			else

@@ -24,8 +24,8 @@
 		<% end %>
 		<meta property="fb:admins" content="1319443195">
 		<meta name="viewport" content="width=device-width">
-		<link rel="search" href="<%=STATIC_DOMAIN%>/opensearch.xml" type="application/opensearchdescription+xml" title="userstyles Search">
-		<link rel="icon" href="<%=STATIC_DOMAIN%>/images/s3-16.png" type="image/png">
+		<link rel="search" href="<%=asset_path('opensearch.xml')%>" type="application/opensearchdescription+xml" title="userstyles Search">
+		<link rel="icon" href="<%=asset_path('/images/s3-16.png')%>" type="image/png">
 		<% if not @feeds.nil?
 			for feed in @feeds-%>
 		<link rel="alternate" type="<%=feed[:type]%>" href="<%=feed[:href]%>" title="<%=feed[:title]%>">
@@ -64,13 +64,10 @@
 		</script>
 		<%= javascript_include_tag 'application', :defer => 'defer' %>
 
-		<% if @header_include != nil %>
-			<%=@header_include%>
-		<% end %>
 		<%= yield :header_includes %>
 
 		<!--[if lt IE 9]>
-		<script type="text/javascript" src="<%=STATIC_DOMAIN%>/javascripts/html5.js"></script>
+		<%=javascript_include_tag 'html5.js'%>
 		<![endif]-->
 
 		<!-- Google Analytics -->

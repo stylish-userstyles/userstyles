@@ -65,15 +65,7 @@ cache_unless(show_obsolete || by_current_user, style) do
 				</span>
 				<span>
 					Average Rating:
-					<% if style.rating.nil? %>
-						N/A
-					<% elsif style.rating < 1.5 %>
-						<img class="bad-average-rating" src="<%=STATIC_DOMAIN%>/images/bad.gif" alt="Bad">
-					<% elsif style.rating < 2.5 %>
-						<img class="ok-average-rating" src="<%=STATIC_DOMAIN%>/images/ok.png" alt="OK">
-					<% else %>
-						<img class="good-average-rating" src="<%=STATIC_DOMAIN%>/images/good.gif" alt="Good">
-					<% end %>
+					<%=render partial: 'styles/rating_image', locals: {style: style}%>
 				</span>
 			</div>
 		</div>

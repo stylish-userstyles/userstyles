@@ -6,7 +6,6 @@ class IndexController < ApplicationController
 		@best = Style.top_styles(10, 100)
 		@page_title = "Restyle the web with Stylish!"
 		@meta_description = "Customize your favorite web sites with Stylish and user styles." 
-		@header_include = "<meta name=\"keywords\" content=\"userstyles user styles skin theme stylish firefox chrome extension css userchrome usercontent addon customize\">".html_safe
 		@show_site_wide_ads = false
 	end
 
