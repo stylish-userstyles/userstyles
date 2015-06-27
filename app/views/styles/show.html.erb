@@ -1,5 +1,3 @@
-<% cache_unless(session[:user_id] == @style.user_id || jerk_user, @style) do %>
-
 <% content_for :header_includes do %>
 	<link rel="stylish-code" href="<%=url_for(id: params['id'], host: DOMAIN, protocol: DOMAIN_PROTOCOL)%>.css">
 	<script>document.querySelector("link[rel='stylish-code']").setAttribute("href", "#stylish-code");</script>
@@ -24,6 +22,8 @@
 		<link rel="stylish-example-url" href="<%=@style.screenshot_url%>">
 	<% end %>
 <% end %>
+
+<% cache_unless(session[:user_id] == @style.user_id || jerk_user, @style) do %>
 
 <% if @style.obsolete > 0 %>
 	<section id="obsoletion-message">
