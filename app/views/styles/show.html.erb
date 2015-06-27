@@ -306,7 +306,7 @@
 	<% if !@style.pledgie_id.nil? %>
 		<p id="pledgie">
 			Thank <%= link_to (h @style.user.name), {:controller => "users", :action => "show", :id => @style.user.id}, :rel => 'nofollow' %> for creating this style by donating via Pledgie:
-			<a href='https://www.pledgie.com/campaigns/<%=@style.pledgie_id%>'><img alt='Donate for <%=@style.short_description%>' src='https://www.pledgie.com/campaigns/<%=@style.pledgie_id%>.png?skin_name=chrome' height='37' width='149' border='0'></a>.
+			<a href='https://pledgie.com/campaigns/<%=@style.pledgie_id%>'><img alt='Donate for <%=@style.short_description%>' src='https://pledgie.com/campaigns/<%=@style.pledgie_id%>.png?skin_name=chrome' height='37' width='149' border='0'></a>.
 		</p>
 	<% end %>
 	<% if !@style.user.paypal_email.nil?%>
