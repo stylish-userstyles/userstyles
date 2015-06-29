@@ -8,6 +8,9 @@
 </style>
 <% @styles.each do |style| %>
 	<div class="<%= style.auto_screenshot_date.nil? ? 'never' : (style.auto_screenshot_date <= style.updated.to_date ? 'updated' : 'refresh') %>">
-		<a href="<%=url_for(:action => :automation_page, :id => style.id)%>"><%=h style.short_description%></a> | screenshot: <%=h style.auto_screenshot_date.nil? ? 'never' : style.auto_screenshot_date.strftime("%F")%> | updated: <%=h style.updated.strftime("%F")%>
+		<a href="<%=url_for(:action => :automation_page, :id => style.id)%>"><%=style.short_description%></a>
+		| screenshot: <%=style.auto_screenshot_date.nil? ? 'never' : style.auto_screenshot_date.strftime("%F")%>
+		| setting: <%=style.screenshot_type_preference%>
+		| updated: <%=h style.updated.strftime("%F")%>
 	</div>
 <% end %>

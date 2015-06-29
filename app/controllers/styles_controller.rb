@@ -576,17 +576,21 @@ class StylesController < ApplicationController
 		render :nothing => true, :status => 200
 	end
 
+	# How much more an auto screenshot will get preference over a non-auto screenshot
+	AUTO_SCREENSHOT_MULTIPLIER = 10
+	AUTO_SCREENSHOT_MULTIPLIER_SQL = "IF (screenshot_type_preference = 'auto', #{AUTO_SCREENSHOT_MULTIPLIER}, 1)"
 	def screenshotable
-		bad_content_in = ($bad_content_subcategories.map { |c| "'#{c}'" }).join(',')
-		@styles = Style.active.where('screenshot_url is not null ' +
-			'and screenshot_type_preference = "auto" ' +
-			'and subcategory NOT IN (' + bad_content_in + ')')
-			.order('auto_screenshot_date IS NULL DESC, ' + #styles with no screenshot
-			'IF(updated >= auto_screenshot_date, updated - auto_screenshot_date, -1) DESC, ' + #anything that was updated since the screenshot was generated
-			'auto_screenshot_date, ' + #last time the screenshot was generated
-			'updated DESC') #last time the style was updated
+		@styles = Style
+			.active
+			.where('screenshot_url is not null')
+			.where(screenshot_type_preference: ['auto', 'manual'])
+			.where(['subcategory NOT IN (?)', $bad_content_subcategories])
+			.order("IF(auto_screenshot_date IS NULL, #{AUTO_SCREENSHOT_MULTIPLIER_SQL}, 0) DESC") #styles with no screenshot
+			.order("IF(updated >= auto_screenshot_date, updated - auto_screenshot_date, -1) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #anything that was updated since the screenshot was generated
+			.order("(NOW() - auto_screenshot_date) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the screenshot was generated
+			.order("(NOW() - updated) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the style was updated
 			.limit(1000)
-		render :action => "screenshotable", :layout => false
+		render "screenshotable", layout: false
 	end
 
 	def automation_page
