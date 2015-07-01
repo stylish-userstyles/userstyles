@@ -579,15 +579,16 @@ class StylesController < ApplicationController
 	# How much more an auto screenshot will get preference over a non-auto screenshot
 	AUTO_SCREENSHOT_MULTIPLIER = 10
 	AUTO_SCREENSHOT_MULTIPLIER_SQL = "IF (screenshot_type_preference = 'auto', #{AUTO_SCREENSHOT_MULTIPLIER}, 1)"
+	AUTO_SCREENSHOT_LAST_ATTEMPT_SQL = 'IF (auto_screenshot_last_failure_date IS NULL, auto_screenshot_date, auto_screenshot_last_failure_date)'
 	def screenshotable
 		@styles = Style
 			.active
 			.where('screenshot_url is not null')
 			.where(screenshot_type_preference: ['auto', 'manual'])
 			.where(['subcategory NOT IN (?)', $bad_content_subcategories])
-			.order("IF(auto_screenshot_date IS NULL, #{AUTO_SCREENSHOT_MULTIPLIER_SQL}, 0) DESC") #styles with no screenshot
-			.order("IF(updated >= auto_screenshot_date, updated - auto_screenshot_date, -1) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #anything that was updated since the screenshot was generated
-			.order("(NOW() - auto_screenshot_date) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the screenshot was generated
+			.order("IF(#{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL} IS NULL, #{AUTO_SCREENSHOT_MULTIPLIER_SQL}, 0) DESC") #styles where the screenshot was never attempted
+			.order("IF(updated >= #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}, updated - #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}, -1) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #anything that was updated since the screenshot was attmepted
+			.order("(NOW() - #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the screenshot was attempted
 			.order("(NOW() - updated) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the style was updated
 			.limit(1000)
 		render "screenshotable", layout: false

@@ -934,6 +934,12 @@ Replace = "$STOP()"
 		return nil
 	end
 
+	def last_screenshot_attempt
+		return auto_screenshot_date if auto_screenshot_last_failure_date.nil?
+		return auto_screenshot_last_failure_date if auto_screenshot_date.nil?
+		return [auto_screenshot_date, auto_screenshot_last_failure_date].max
+	end
+
 	# The md5 is based on the code and options. If these have changed, we consider the style as requiring an update for people
 	# who have already installed.
 	def calculate_md5

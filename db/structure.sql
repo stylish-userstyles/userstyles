@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.6.19, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.6.24, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: userstyles
 -- ------------------------------------------------------
--- Server version	5.6.19-1~exp1ubuntu2
+-- Server version	5.6.24-0ubuntu2
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -1056,7 +1056,7 @@ CREATE TABLE `delayed_jobs` (
   `updated_at` datetime DEFAULT NULL,
   `queue` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2109078 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=2109117 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1119,7 +1119,7 @@ CREATE TABLE `style_codes` (
   `code` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `style_id` (`style_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=114415 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=114419 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1174,7 +1174,7 @@ CREATE TABLE `style_sections` (
   `css` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   KEY `style_sections_style_id` (`style_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1305180 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1305185 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1195,7 +1195,7 @@ CREATE TABLE `style_setting_options` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `ix_style_setting_id_install_key` (`style_setting_id`,`install_key`),
   KEY `style_option_values_style_option_id` (`style_setting_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1615262 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=1615282 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1214,7 +1214,7 @@ CREATE TABLE `style_settings` (
   `setting_type` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ix_style_options_style_id_name` (`style_id`,`install_key`)
-) ENGINE=MyISAM AUTO_INCREMENT=445290 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=445307 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1255,6 +1255,7 @@ CREATE TABLE `styles` (
   `pledgie_id` int(11) DEFAULT NULL,
   `additional_info` longtext COLLATE utf8mb4_unicode_ci,
   `auto_screenshot_date` datetime DEFAULT NULL,
+  `auto_screenshot_last_failure_date` datetime DEFAULT NULL,
   `delta` tinyint(1) NOT NULL DEFAULT '1',
   `license` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `code_error` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -1274,7 +1275,7 @@ CREATE TABLE `styles` (
   KEY `subcategory` (`subcategory`),
   KEY `popularity_score` (`popularity_score`),
   KEY `admin_delete_reason_id` (`admin_delete_reason_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=114199 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=114203 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1339,7 +1340,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2015-05-23 22:25:36
+-- Dump completed on 2015-06-30 22:22:53
 INSERT INTO schema_migrations (version) VALUES ('20111007022556');
 
 INSERT INTO schema_migrations (version) VALUES ('20131104171052');
@@ -1349,6 +1350,8 @@ INSERT INTO schema_migrations (version) VALUES ('20141005210800');
 INSERT INTO schema_migrations (version) VALUES ('20141106175043');
 
 INSERT INTO schema_migrations (version) VALUES ('20150523041432');
+
+INSERT INTO schema_migrations (version) VALUES ('20150701025820');
 
 INSERT INTO schema_migrations (version) VALUES ('6');
 
