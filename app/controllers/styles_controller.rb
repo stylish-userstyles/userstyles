@@ -940,8 +940,8 @@ private
 		begin
 			@style.refresh_meta(false)
 
-			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or !$tld_specific_bad_domains.index{|d| @style.style_code.code.include?(d)}.nil?
-				@style.errors.add("Styles", "for adult sites are not allowed on userstyles.org.")
+			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or $tld_specific_bad_domains.any?{|d| @style.style_code.code.include?(d)}
+				non_ar_errors << ["Styles", "for adult sites are not allowed on userstyles.org."]
 			end
 
 			raise ActiveRecord::RecordInvalid.new(@style) if !non_ar_errors.empty? or !@style.valid?
