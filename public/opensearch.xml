@@ -3,14 +3,14 @@
   <ShortName>userstyles.org</ShortName>
   <Description>Find styles on userstyles.org.</Description>
   <Tags>userstyles css stylish</Tags>
-  <Contact>jason@userstyles.org</Contact>
+  <Contact>jason.barnabe@gmail.com</Contact>
   <Url type="text/html" 
        method="get"
-       template="http://userstyles.org/styles/browse/all/{searchTerms}" />
+       template="https://userstyles.org/styles/browse_r?search_terms={searchTerms}" />
   <LongName>userstyles.org Search</LongName>
-  <Image height="16" width="16" type="image/png">http://userstyles.org/images/smallicon.png</Image>
-  <Image height="16" width="16" type="image/vnd.microsoft.icon">http://userstyles.org/images/stylish.ico</Image>
-  <Query role="example" searchTerms="Slashdot" />
+  <Image height="16" width="16" type="image/png">https://userstyles.org/images/s3-16.png</Image>
+  <Image height="16" width="16" type="image/vnd.microsoft.icon">https://userstyles.org/favicon.ico</Image>
+  <Query role="example" searchTerms="dark" />
   <Developer>Jason Barnabe</Developer>
   <Attribution>
     Search data by userstyles.org contributors
