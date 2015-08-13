@@ -150,25 +150,24 @@ class StylesController < ApplicationController
 		redirect_to :action => 'browse', :category => params[:category], :search_terms => params["search-terms"] || params[:id], :sort => 'popularity', :sort_direction => 'desc', :page => 1, :status => 301
 	end
 
-	def browse_r
+	def browse_r(p = params)
 		options = {:controller => 'styles', :action => 'browse', :status => 301}
-		options[:search_terms] = params[:search_terms] unless (!params[:search_terms].nil? and params[:search_terms] == '')
-
+		options[:search_terms] = p[:search_terms] unless (!p[:search_terms].nil? and p[:search_terms] == '')
 		# basic search - only look at the search terms
-		if params[:as].nil?
+		if p[:as].nil?
 			fix_search_url(options)
 			redirect_to options
 			return
 		end
 		
 		# advanced search
-		options[:category] = (params[:category] == '' or params[:category] == 'all') ? nil : params[:category]
-		options[:per_page] = params[:per_page] unless (!params[:per_page].nil? and (params[:per_page] == '' or params[:per_page].to_i == 10))
-		if (!params[:sort].nil? and params[:sort] != 'relevance') or (!params[:sort_direction].nil? and params[:sort_direction] != 'desc')
-			options[:sort] = params[:sort]
-			options[:sort_direction] = params[:sort_direction]
+		options[:category] = (p[:category] == '' or p[:category] == 'all') ? nil : p[:category]
+		options[:per_page] = p[:per_page] unless (!p[:per_page].nil? and (p[:per_page] == '' or p[:per_page].to_i == 10))
+		if (!p[:sort].nil? and p[:sort] != 'relevance') or (!p[:sort_direction].nil? and p[:sort_direction] != 'desc')
+			options[:sort] = p[:sort]
+			options[:sort_direction] = p[:sort_direction]
 		end
-		fix_search_url(params)
+		fix_search_url(p)
 		options[:as] = 1
 		redirect_to options
 	end
@@ -199,8 +198,10 @@ class StylesController < ApplicationController
 			params[:category] = nil
 		end
 
+		# If this is something that needs fixing, make browse_r do it
+		original_params = params.dup
 		if fix_search_url(params)
-			browse_r
+			browse_r(original_params)
 			return
 		end
 
@@ -763,7 +764,7 @@ protected
 				end
 				# look for things in the form of "google.com" or full urls
 				possible_domain_parts = term.split('.')
-				if (possible_domain_parts.length > 1 and !/[a-z]/i.match(possible_domain_parts[-1]).nil?) or term.include?('//')
+				if (possible_domain_parts.length > 1 && !/[a-z]/i.match(possible_domain_parts[-1]).nil?) || term.include?('//') || !(/\Aabout:/ =~ term).nil?
 					urls << term
 				else
 					keywords << term

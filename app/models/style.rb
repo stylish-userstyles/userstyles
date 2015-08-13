@@ -627,7 +627,7 @@ Replace = "$STOP()"
 		return "site"
 	end
 
-	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial'], [/^chrome\-extension\:/, 'chrome-extension']]
+	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about:stylish\-edit/, 'Stylish'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial'], [/^chrome\-extension\:/, 'chrome-extension']]
 	$app_text_matches = [[/firefox/i, 'browser'], [/stylish/i, 'Stylish'], [/adblock/i, 'AdblockPlus'], [/thunderbird/i, 'Thunderbird'], [/^tb\s/i, 'Thunderbird']]
 	$ip_pattern = /^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):?[0-9]*$/
 	def calculate_subcategory
@@ -684,9 +684,12 @@ Replace = "$STOP()"
 			uri = URI.parse(url)
 			# Use the domain for some protocols
 			return Style.get_subcategory_for_domain(uri.host) if ['http', 'https', 'ftp'].include?(uri.scheme)
+			# Hard-coded subcategories
+			special_match = $app_url_matches.find{|regex, subcategory| !(regex =~ url).nil?}
+			return special_match[1] if !special_match.nil?
 			# For others (e.g. file), use the protocol itself
 			return uri.scheme
-		rescue
+		rescue => ex
 			return nil
 		end
 	end
