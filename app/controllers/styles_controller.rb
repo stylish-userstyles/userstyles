@@ -588,7 +588,7 @@ class StylesController < ApplicationController
 			.where(screenshot_type_preference: ['auto', 'manual'])
 			.where(['subcategory NOT IN (?)', $bad_content_subcategories])
 			.order("IF(#{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL} IS NULL, #{AUTO_SCREENSHOT_MULTIPLIER_SQL}, 0) DESC") #styles where the screenshot was never attempted
-			.order("IF(updated >= #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}, updated - #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}, -1) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #anything that was updated since the screenshot was attmepted
+			.order("IF(updated >= #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}, (updated - #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL}, -1) DESC") #anything that was updated since the screenshot was attmepted
 			.order("(NOW() - #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the screenshot was attempted
 			.order("(NOW() - updated) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the style was updated
 			.limit(1000)
