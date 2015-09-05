@@ -141,7 +141,7 @@ GEM
     rake (10.4.2)
     ref (1.0.5)
     riddle (1.5.11)
-    ruby-openid (2.3.0)
+    ruby-openid (2.7.0)
     sanitize (3.0.2)
       crass (~> 0.2.0)
       nokogiri (>= 1.4.4)
@@ -208,7 +208,7 @@ DEPENDENCIES
   rails (~> 4.2.1)
   rails-observers (~> 0.1.2)
   riddle (~> 1.5.11)
-  ruby-openid (~> 2.3.0)
+  ruby-openid (~> 2.7.0)
   sanitize (~> 3.0.0)
   sass-rails
   strip_attributes (~> 1.5.0)
