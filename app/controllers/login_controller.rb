@@ -22,7 +22,7 @@ class LoginController < ApplicationController
 	end
 
 	def login_as
-		session[:user_id] = User.find(params[:id]).id
+		sign_in(User.find(params[:id]))
 		redirect_to '/'
 	end
 
@@ -31,7 +31,7 @@ class LoginController < ApplicationController
 			# Only validate if the user was previously valid. some people may have bad data and if we
 			# validate them, they can't log in.
 			user_was_valid = user.valid?
-			session[:user_id] = user.id
+			sign_in(user)
 			remember = params[:remember] == "true"
 			if remember
 				if user.token.nil?
@@ -110,7 +110,7 @@ class LoginController < ApplicationController
 					end
 					cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 				end
-				session[:user_id] = user.id
+				sign_in(user.id)
 				go_to_return_to()
 			else
 				session[:temp_login_details] = {:provider_identifier => ua.provider_identifier, :email => sreg['email'], :name => sreg['nickname'], :provider => ua.provider, :url => ua.url}
@@ -159,7 +159,7 @@ class LoginController < ApplicationController
 		end
 		user.ip = request.remote_ip()
 		user.save(:validate => user_was_valid)
-		session[:user_id] = user.id
+		sign_in(user)
 		go_to_return_to
 	end
 
@@ -199,7 +199,7 @@ class LoginController < ApplicationController
 		
 		if @user.save
 			session[:temp_login_details] = nil
-			session[:user_id] = @user.id
+			sign_in(@user)
 			go_to_return_to()
 			return
 		end
@@ -235,7 +235,7 @@ class LoginController < ApplicationController
 
 		if @user.save
 			session[:temp_login_details] = nil
-			session[:user_id] = @user.id
+			sign_in(@user)
 			go_to_return_to()
 			return
 		end
@@ -371,7 +371,7 @@ class LoginController < ApplicationController
 				end
 				return
 			end
-			session[:user_id] = user.id
+			sign_in(user)
 			if !return_to.nil?
 				redirect_to return_to
 			else
@@ -421,7 +421,7 @@ class LoginController < ApplicationController
 			handle_omniauth_failure(user.errors.full_messages.join(', '))
 			return
 		end
-		session[:user_id] = user.id
+		sign_in(user)
 		if !return_to.nil?
 			redirect_to return_to
 		else
@@ -471,10 +471,12 @@ private
 			return_to = params[:return_to]
 		end
 		if return_to.nil?
-			logger.info("No return to URL, going to user page")
-			redirect_to(:controller => "users", :action => "show", :id => session[:user_id]) 
+			if session[:user_id]
+				redirect_to(:controller => "users", :action => "show", :id => session[:user_id]) 
+			else
+				redirect_to('/') 
+			end
 		else
-			logger.info("Going to return to URL - " + return_to)
 			session[:return_to] = nil
 			redirect_to(return_to)
 		end

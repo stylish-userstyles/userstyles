@@ -17,7 +17,7 @@ protected
 		return unless session[:user_id].nil?
 		user = User.where(:token => cookies[:login]).first
 		if !user.nil?
-			session[:user_id] = user.id
+			sign_in(user)
 			#restart the clock
 			cookies[:login] = { :value => cookies[:login], :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 		end
@@ -93,6 +93,14 @@ protected
 		return style
 	end
 
+	def sign_in(user)
+		if user.banned
+			flash[:alert] = 'You have been banned.'
+		else
+			session[:user_id] = user.id
+		end
+	end
+
 private
 
 	# User authentication. Controllers are expected to define the following methods:
@@ -115,13 +123,21 @@ private
 			end
 			return
 		end
-		
+
+		user = User.find(session[:user_id])
+		if user.banned
+			flash[:alert] = 'You have been banned.'
+			session[:user_id] = nil
+			redirect_to '/'
+			return
+		end
+
 		# admin only stuff
 		if admin_action?
 			handle_access_denied unless verify_admin_action
 			return
 		end
-		
+
 		# regular user stuff
 		if !verify_private_action(session[:user_id]) and !verify_admin_action
 			handle_access_denied

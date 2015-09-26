@@ -20,7 +20,12 @@
 		<label for="obsoleting-style-id">Superceded by (ID)</label>
 		<input id="obsoleting-style-id" name="style[obsoleting_style_id]" value="<%=h @style.obsoleting_style_id%>">
 	</p>
-	
+
+	<p>
+		<label for="ban-user">Ban user?</label>
+		<input type="checkbox" id="ban-user" name="ban_user" value="1">
+	</p>
+
 	<p>
 		<input type="hidden" name="id" value="<%=@style.id%>">
 		<input type="submit" value="Delete">

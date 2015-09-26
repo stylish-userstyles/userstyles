@@ -467,6 +467,7 @@ class StylesController < ApplicationController
 		end
 		@style.obsoleting_style_id = params[:style][:obsoleting_style_id]
 		@style.save(validate: false)
+		@style.user.update_attribute(:banned, true) if params['ban_user'] == '1'
 		redirect_to(:action => "show", :id => @style.id, :r => Time.now.to_i)
 	end
 	
