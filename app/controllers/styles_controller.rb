@@ -687,9 +687,13 @@ protected
 	def public_action?
 		['show', 'show_redirect', 'install', 'search_url', 'search_text', 'search', 'browse_r', 'browse', 'graveyard', 'updated', 'js', 'opera_css', 'ie_css', 'chrome_json', 'proxomitron', 'by_user', 'expire_by_id', 'screenshotable', 'automation_page', 'test', 'report'].include?(action_name)
 	end
-	
+
+	def moderator_action?
+		['admin_delete', 'admin_delete_save'].include?(action_name)
+	end
+
 	def admin_action?
-		['admin_delete', 'admin_delete_save', 'bad_stuff', 'lotsa_screenshots', 'reviewable'].include?(action_name)
+		['bad_stuff', 'lotsa_screenshots', 'reviewable'].include?(action_name)
 	end
 	
 	def verify_private_action(user_id)

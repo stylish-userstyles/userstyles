@@ -132,7 +132,11 @@ private
 			return
 		end
 
-		# admin only stuff
+		if moderator_action?
+			handle_access_denied unless verify_moderator_action || verify_admin_action
+			return
+		end
+
 		if admin_action?
 			handle_access_denied unless verify_admin_action
 			return
@@ -144,7 +148,15 @@ private
 			return
 		end
 	end
-	
+
+	def moderator_action?
+		return false
+	end
+
+	def verify_moderator_action
+		return session[:user_id] == 136304
+	end
+
 	def verify_admin_action
 		return session[:user_id] == 1
 	end
