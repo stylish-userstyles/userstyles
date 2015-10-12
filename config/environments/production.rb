@@ -61,7 +61,7 @@ DOMAIN = 'userstyles.org'
 DOMAIN_PROTOCOL = 'https'
 FORUM_DOMAIN = 'forum.userstyles.org'
 UPDATE_DOMAIN = 'https://update.userstyles.org'
-SCREENSHOT_DOMAIN = 'https://df6a.https.cdn.softlayer.net/80DF6A/static.userstyles.org'
+SCREENSHOT_DOMAIN = 'https://userstyles.org'
 MD5_PATH = '/home/www/update/'
 COOKIE_DOMAIN = '.userstyles.org'
 
