@@ -102,7 +102,7 @@ class Style < ActiveRecord::Base
 		end
 		
 		# URL references
-		allowed_reference_prefixes = ['http:', 'data:', 'moz-icon:', 'chrome:', 'https:']
+		allowed_reference_prefixes = ['http:', 'data:', 'moz-icon:', 'chrome:', 'https:', 'imap:']
 		references = record.calculate_external_references
 		references.each do |url|
 			# allow certain paths
@@ -605,7 +605,7 @@ Replace = "$STOP()"
 		moz_doc_rules.each do |moz_doc_rule|
 			#app-specific protocols
 			if moz_doc_rule[0] == "url" or moz_doc_rule[0] == "url-prefix"
-				if /^(chrome|about|x-jsd|view\-source|chrome\-extension)/.match(moz_doc_rule[1]) != nil
+				if /^(chrome|about|x-jsd|view\-source|chrome\-extension|imap)/.match(moz_doc_rule[1]) != nil
 					return "app"
 				end
 			end
@@ -627,7 +627,7 @@ Replace = "$STOP()"
 		return "site"
 	end
 
-	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about:stylish\-edit/, 'Stylish'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial'], [/^chrome\-extension\:/, 'chrome-extension']]
+	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about:stylish\-edit/, 'Stylish'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial'], [/^chrome\-extension\:/, 'chrome-extension'], [/^imap\:/, 'Thunderbird']]
 	$app_text_matches = [[/firefox/i, 'browser'], [/stylish/i, 'Stylish'], [/adblock/i, 'AdblockPlus'], [/thunderbird/i, 'Thunderbird'], [/^tb\s/i, 'Thunderbird']]
 	$ip_pattern = /^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):?[0-9]*$/
 	def calculate_subcategory
@@ -1380,7 +1380,7 @@ private
 	end	
 	
 	# ruby's regexp doesn't understand some protocols, so they are exempt
-	$moz_doc_validate_exempt_protocols = /^(about|chrome|javascript|chm|zotero|resource|data|dactyl|view\-source|x\-jsd|jar).*/
+	$moz_doc_validate_exempt_protocols = /^(about|chrome|javascript|chm|zotero|resource|data|dactyl|view\-source|x\-jsd|jar|imap).*/
 	$moz_doc_validate_invalid_url_chars = /[\*\s]/
 	
 	def self.validate_moz_doc(fn, value)
