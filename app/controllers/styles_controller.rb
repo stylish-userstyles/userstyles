@@ -770,7 +770,12 @@ protected
 				# look for things in the form of "google.com" or full urls
 				possible_domain_parts = term.split('.')
 				if (possible_domain_parts.length > 1 && !/[a-z]/i.match(possible_domain_parts[-1]).nil?) || term.include?('//') || !(/\Aabout:/ =~ term).nil?
-					urls << term
+					if term.include?(':')
+						urls << term
+					else
+						# turn "google.com" into an actual URL
+						urls << 'http://' + term
+					end
 				else
 					keywords << term
 				end
