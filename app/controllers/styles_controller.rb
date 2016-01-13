@@ -279,7 +279,7 @@ class StylesController < ApplicationController
 			# an aggregate of all matches. In other words, something matching on "name" will be tied with everything
 			# else matching on "name".
 			@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true, :select => '*, weight() myweight', :ranker => "expr('top(user_weight)')"
-			@no_ads = @styles.empty?
+			@no_ads = @styles.count < 5
 		rescue ThinkingSphinx::SyntaxError, ThinkingSphinx::QueryError => e
 			# back to the main listing, unless we're already there
 			raise e if params[:category].nil? and params[:search_terms].nil? and params[:page].nil? and params[:order].nil? and params[:sort].nil? and params[:sort_direction].nil?
