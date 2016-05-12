@@ -1,6 +1,7 @@
 require 'date'
 require 'csspool'
 require 'public_suffix'
+require 'addressable/uri'
 
 class Style < ActiveRecord::Base
 
@@ -681,7 +682,7 @@ Replace = "$STOP()"
 
 	def self.get_subcategory_for_url(url)
 		begin
-			uri = URI.parse(url)
+			uri = Addressable::URI.parse(url)
 			# Use the domain for some protocols
 			return Style.get_subcategory_for_domain(uri.host) if ['http', 'https', 'ftp'].include?(uri.scheme)
 			# Hard-coded subcategories
@@ -1417,7 +1418,7 @@ private
 		protocols = publicly_accessible_only ? %w(http https ftp) : %w(http https file ftp)
 		return false if (url =~ URI::regexp(protocols)).nil?
 		begin
-			url_value = URI.parse(url)
+			url_value = Addressable::URI.parse(url)
 		rescue
 			return false
 		end
@@ -1494,7 +1495,7 @@ private
 
 	def self.get_domain(url)
 		begin
-			return URI.parse(url).host
+			return Addressable::URI.parse(url).host
 		rescue
 			return nil
 		end

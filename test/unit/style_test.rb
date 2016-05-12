@@ -14,4 +14,7 @@ class StyleTest < ActiveSupport::TestCase
 		assert style.moz_doc_error == 'X' * 100
 	end
 
+	test 'IDN is valid URL' do
+		assert Style.validate_url('http://серьёзныеигры.рф', true)
+	end
 end
