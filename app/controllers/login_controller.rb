@@ -77,17 +77,8 @@ class LoginController < ApplicationController
 			user.ip = request.remote_ip()
 			#user.openid_url = response.identity_url
 			ua = UserAuthenticator.new
-			if session[:oauth_migration].nil?
-				ua.provider = 'openid'
-				ua.provider_identifier = response.identity_url
-			else
-				# someone said they signed in before, but didn't.
-				ua.provider = session[:oauth_migration][:provider]
-				ua.provider_identifier = session[:oauth_migration][:provider_identifier]
-				ua.url = session[:oauth_migration][:url]
-				session[:return_to] = session[:oauth_migration][:return_to] if session[:return_to].nil?
-				session.delete(:oauth_migration)
-			end
+			ua.provider = 'openid'
+			ua.provider_identifier = response.identity_url
 			user.user_authenticators << ua
 			user.email = sreg['email']
 			begin
@@ -138,17 +129,6 @@ class LoginController < ApplicationController
 					user.email = original_email
 				end
 			end
-		end
-
-		# migration from OpenID
-		if !session[:oauth_migration].nil?
-			ua = UserAuthenticator.new
-			ua.provider = session[:oauth_migration][:provider]
-			ua.provider_identifier = session[:oauth_migration][:provider_identifier]
-			ua.url = session[:oauth_migration][:url]
-			session[:return_to] = session[:oauth_migration][:return_to] if session[:return_to].nil?
-			session.delete(:oauth_migration)
-			user.user_authenticators << ua
 		end
 
 		if session[:remember]
@@ -401,12 +381,6 @@ class LoginController < ApplicationController
 			return
 		end
 
-		if provider == 'google_oauth2' and !session[:openid_dont_migrate]
-			session[:oauth_migration] = {:provider => provider, :provider_identifier => uid, :url => url, :name => name, :email => email, :return_to => return_to || request.env['omniauth.origin']}
-			render 'google_migration'
-			return
-		end
-
 		# does another user already have that name?
 		same_name_user = User.find_by_name(name)
 		if !same_name_user.nil?
@@ -431,11 +405,6 @@ class LoginController < ApplicationController
 
 	def omniauth_failure
 		handle_omniauth_failure(params[:message])
-	end
-
-	def resolve_openid_migration
-		session[:openid_dont_migrate] = true
-		redirect_to '/auth/google_oauth2'
 	end
 
 private
