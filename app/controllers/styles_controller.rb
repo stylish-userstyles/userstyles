@@ -167,7 +167,7 @@ class StylesController < ApplicationController
 			options[:sort] = p[:sort]
 			options[:sort_direction] = p[:sort_direction]
 		end
-		fix_search_url(p)
+		fix_search_url(options)
 		options[:as] = 1
 		redirect_to options
 	end
