@@ -22,6 +22,7 @@ class StylesController < ApplicationController
 					@style = Rails.cache.fetch "styles/show/#{params[:id]}" do
 						Style.includes([:user, {:style_settings => :style_setting_options}, :screenshots, :admin_delete_reason, {:discussions => {:original_forum_poster => :users}}]).find(params[:id])
 					end
+					@no_ads = @no_ads || $iffy_words.any?{|word| @style.short_description.include?(word) || @style.long_description.include?(word) || (@style.additional_info && @style.additional_info.include?(word))}
 				rescue ActiveRecord::RecordNotFound
 					@no_ads = true
 					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true
