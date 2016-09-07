@@ -347,7 +347,7 @@
 					when 3
 						rating_class = "good-rating"
 				end %>
-				<li class="<%=rating_class%>"><%=link_to h(discussion.name), discussion.url, {:rel => 'nofollow'}%> by <%=link_to h(discussion.original_poster.name), {:controller => 'users', :action => 'show', :id => discussion.original_poster.id}, {:rel => 'nofollow'}%><%if !discussion.created.nil?%>, <%=discussion.created.strftime('%B %e, %Y')%><% end %></li>
+				<li class="<%=rating_class%>"><%=link_to h(discussion.name), discussion.url, {:rel => 'nofollow'}%><% if discussion.original_poster %> by <%=link_to h(discussion.original_poster.name), {:controller => 'users', :action => 'show', :id => discussion.original_poster.id}, {:rel => 'nofollow'}%><%end%><%if !discussion.created.nil?%>, <%=discussion.created.strftime('%B %e, %Y')%><% end %></li>
 			<% end %>
 			<% if @style.discussions.size != @style.recent_discussions.size %>
 				<li><a href="//<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See more discussions</a></li>
