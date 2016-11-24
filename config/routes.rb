@@ -86,7 +86,7 @@ Userstyles::Application.routes.draw do
   get 'dberror', to: redirect('/help/db_chrome')
   get 'terms-of-use' => 'misc#terms'
   get 'login/policy' => 'login#policy'
-  get 'copyright-notice' => 'misc#policy'
+  get 'copyright-notice' => 'misc#copyright'
 
   match '*path' => 'index#rescue_404', via: [:get, :post]
 end
