@@ -5,9 +5,9 @@ require 'openid/store/filesystem'
 class ApplicationController < ActionController::Base
 
 	layout 'standard_layout'
-	rescue_from 'ActionView::MissingTemplate' do |exception|
-		render(:file => 'public/404.html', :status => 404, :content_type => 'text/html', :layout => true)
-	end
+	#rescue_from 'ActionView::MissingTemplate' do |exception|
+#		render(:file => 'public/404.html', :status => 404, :content_type => 'text/html', :layout => true)
+#	end
 	before_action :refresh_user_from_cookie
 	before_action :authenticate
 

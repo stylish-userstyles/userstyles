@@ -5,6 +5,6 @@ class MiscController < ApplicationController
 	end
 
 	def terms
-		@page_title = 'Stylish - Terms of Use'
+		@page_title = "Stylish - Terms of Use"
 	end
 end
