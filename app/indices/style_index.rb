@@ -7,6 +7,7 @@ ThinkingSphinx::Index.define :style, :with => :active_record, :delta => Thinking
 	indexes category
 	indexes 'IF(ISNULL(subcategory), "none", subcategory)', :as => :subcategory
 	indexes user.name, :as => :author
+  indexes id, :as => :style_id
 
 	# attributes
 	has :popularity_score, :as => :popularity
@@ -15,6 +16,7 @@ ThinkingSphinx::Index.define :style, :with => :active_record, :delta => Thinking
 	where 'obsolete = 0'
 
 	set_property :field_weights => {
+		:style_id => 10,
 		:subcategory => 10,
 		:name => 5,
 		:author => 5,

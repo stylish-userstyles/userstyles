@@ -158,7 +158,7 @@ private
 	end
 
 	def verify_admin_action
-		return session[:user_id] == 1
+		return session[:user_id] == 285465
 	end
 
 	protect_from_forgery

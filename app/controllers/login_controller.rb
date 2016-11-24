@@ -226,7 +226,7 @@ class LoginController < ApplicationController
 	end
 
 	def policy
-		@page_title = 'Privacy policy'
+		@page_title = 'Stylish - Privacy policy'
 	end
 
 	def lost_password
