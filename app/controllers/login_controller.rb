@@ -144,8 +144,14 @@ class LoginController < ApplicationController
 	end
 
 	def name_conflict
+		@no_bots = true
 		@page_title = 'Display name conflict'
-		@taken_name = session[:temp_login_details][:name]
+		if !session.nil? and !session[:temp_login_details].nil?
+			@taken_name = session[:temp_login_details][:name]
+		else
+			render(:file => 'public/403.html', :status => 403, :layout => false)
+		end
+
 	end
 
 	def name_required
