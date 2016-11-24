@@ -88,5 +88,6 @@ Userstyles::Application.routes.draw do
   get 'login/policy' => 'login#policy'
   get 'copyright-notice' => 'misc#copyright'
 
+  match '/:controller(/:action(/:id))', via: [:get, :post]
   match '*path' => 'index#rescue_404', via: [:get, :post]
 end
