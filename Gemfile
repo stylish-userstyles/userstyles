@@ -1,19 +1,19 @@
 source 'http://rubygems.org'
 
-ruby '2.2.2'
+ruby '2.3.1'
 
 gem 'rails', '~> 4.2.1'
 gem 'mysql2', '~> 0.3.0'
 gem 'sanitize', '~> 3.0.0'
 gem 'csspool', '~> 4.0.5'
-gem 'public_suffix', '~> 1.3.1'
+gem 'public_suffix'
 gem 'thinking-sphinx', '~> 3.1.3'
 gem 'riddle', '~> 1.5.11'
 gem 'ts-delayed-delta', '~> 2.0.2'
 gem 'delayed_job', '~> 4.0.6'
 gem 'delayed_job_active_record', '~> 4.0.3'
 gem 'will_paginate', '~> 3.0.5'
-gem 'ruby-openid', '~> 2.3.0'
+gem 'ruby-openid', '~> 2.7.0'
 gem 'strip_attributes', '~> 1.5.0'
 gem 'dynamic_form', '~> 1.1.4'
 gem 'dalli', '~> 2.6.4'
@@ -30,3 +30,9 @@ gem 'coffee-rails'
 gem 'therubyracer'
 gem 'yui-compressor'
 gem 'faker'
+gem 'addressable'
+
+group :development do
+	gem 'better_errors'
+	gem 'binding_of_caller'
+end

@@ -5,48 +5,6 @@
 
 <% else %>
 
-	<%
-	midpoint_ad_position = nil
-	if @no_ads.nil? or !@no_ads
-		if @styles.per_page >= 10 and @styles.length == @styles.per_page
-			midpoint_ad_position = (@styles.per_page / 2).to_i - 1
-		end
-	end
-	@styles.each_with_index do |style, i| %>
-		<%= render :partial => 'listing', :locals => {:style => style} %>
-		<% if i == midpoint_ad_position %>
-			<div id="browse-middle-ad" class="ad">
-				<div class="ad-note"><span>Advertisement</span></div>
-				<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-				<!-- Browse styles middle responsive -->
-				<ins class="adsbygoogle"
-					 style="display:block"
-					 data-ad-client="ca-pub-2247465624637408"
-					 data-ad-slot="1531092119"
-					 data-ad-format="auto"></ins>
-				<script>
-				(adsbygoogle = window.adsbygoogle || []).push({});
-				</script>
-			</div>
-		<% end %>
-	<% end %>
-
-	<% if @no_ads.nil? or !@no_ads %>
-		<div id="browse-bottom-ad" class="ad">
-			<div class="ad-note"><span>Advertisement</span></div>
-			<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-			<!-- Browse styles bottom responsive -->
-			<ins class="adsbygoogle"
-				 style="display:block"
-				 data-ad-client="ca-pub-2247465624637408"
-				 data-ad-slot="6100892515"
-				 data-ad-format="auto"></ins>
-			<script>
-			(adsbygoogle = window.adsbygoogle || []).push({});
-			</script>
-		</div>
-	<% end %>
-
 	<% if !@styles.empty? %>
 		<%= will_paginate @styles %>
 		<% content_for :link_rel_next_prev do %>

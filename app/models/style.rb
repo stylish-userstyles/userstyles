@@ -1,6 +1,7 @@
 require 'date'
 require 'csspool'
 require 'public_suffix'
+require 'addressable/uri'
 
 class Style < ActiveRecord::Base
 
@@ -102,7 +103,7 @@ class Style < ActiveRecord::Base
 		end
 		
 		# URL references
-		allowed_reference_prefixes = ['http:', 'data:', 'moz-icon:', 'chrome:', 'https:']
+		allowed_reference_prefixes = ['http:', 'data:', 'moz-icon:', 'chrome:', 'https:', 'imap:']
 		references = record.calculate_external_references
 		references.each do |url|
 			# allow certain paths
@@ -605,7 +606,7 @@ Replace = "$STOP()"
 		moz_doc_rules.each do |moz_doc_rule|
 			#app-specific protocols
 			if moz_doc_rule[0] == "url" or moz_doc_rule[0] == "url-prefix"
-				if /^(chrome|about|x-jsd|view\-source|chrome\-extension)/.match(moz_doc_rule[1]) != nil
+				if /^(chrome|about|x-jsd|view\-source|chrome\-extension|imap)/.match(moz_doc_rule[1]) != nil
 					return "app"
 				end
 			end
@@ -627,7 +628,7 @@ Replace = "$STOP()"
 		return "site"
 	end
 
-	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial'], [/^chrome\-extension\:/, 'chrome-extension']]
+	$app_url_matches = [[/^chrome\:\/\/browser/, 'browser'], [/^about:stylish\-edit/, 'Stylish'], [/^about\:/, 'browser'], [/^chrome\:\/\/mozapps/, 'browser'], [/^chrome\:\/\/global/, 'browser'], [/^chrome\:\/\/stylish/, 'Stylish'], [/^chrome\:\/\/greasemonkey/, 'Greasemonkey'], [/^chrome\:\/\/adblockplus/, 'AdblockPlus'], [/^chrome\:\/\/inspector/, 'DOMInspector'], [/^chrome\:\/\/dta/, 'DownThemAll'], [/^chrome\:\/\/fireftp/, 'FireFTP'], [/^chrome\:\/\/speeddial/, 'SpeedDial'], [/^chrome\:\/\/fastdial/, 'FastDial'], [/^chrome\-extension\:/, 'chrome-extension'], [/^imap\:/, 'Thunderbird']]
 	$app_text_matches = [[/firefox/i, 'browser'], [/stylish/i, 'Stylish'], [/adblock/i, 'AdblockPlus'], [/thunderbird/i, 'Thunderbird'], [/^tb\s/i, 'Thunderbird']]
 	$ip_pattern = /^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):?[0-9]*$/
 	def calculate_subcategory
@@ -681,12 +682,15 @@ Replace = "$STOP()"
 
 	def self.get_subcategory_for_url(url)
 		begin
-			uri = URI.parse(url)
+			uri = Addressable::URI.parse(url)
 			# Use the domain for some protocols
 			return Style.get_subcategory_for_domain(uri.host) if ['http', 'https', 'ftp'].include?(uri.scheme)
+			# Hard-coded subcategories
+			special_match = $app_url_matches.find{|regex, subcategory| !(regex =~ url).nil?}
+			return special_match[1] if !special_match.nil?
 			# For others (e.g. file), use the protocol itself
 			return uri.scheme
-		rescue
+		rescue => ex
 			return nil
 		end
 	end
@@ -932,6 +936,12 @@ Replace = "$STOP()"
 	def auto_after_screenshot_thumbnail_path
 		return "#{SCREENSHOT_DOMAIN}/auto_style_screenshots/#{self.id}-after-thumbnail.png#{cdn_buster_param}" unless self.auto_screenshot_date.nil?
 		return nil
+	end
+
+	def last_screenshot_attempt
+		return auto_screenshot_date if auto_screenshot_last_failure_date.nil?
+		return auto_screenshot_last_failure_date if auto_screenshot_date.nil?
+		return [auto_screenshot_date, auto_screenshot_last_failure_date].max
 	end
 
 	# The md5 is based on the code and options. If these have changed, we consider the style as requiring an update for people
@@ -1371,7 +1381,7 @@ private
 	end	
 	
 	# ruby's regexp doesn't understand some protocols, so they are exempt
-	$moz_doc_validate_exempt_protocols = /^(about|chrome|javascript|chm|zotero|resource|data|dactyl|view\-source|x\-jsd|jar).*/
+	$moz_doc_validate_exempt_protocols = /^(about|chrome|javascript|chm|zotero|resource|data|dactyl|view\-source|x\-jsd|jar|imap).*/
 	$moz_doc_validate_invalid_url_chars = /[\*\s]/
 	
 	def self.validate_moz_doc(fn, value)
@@ -1408,7 +1418,7 @@ private
 		protocols = publicly_accessible_only ? %w(http https ftp) : %w(http https file ftp)
 		return false if (url =~ URI::regexp(protocols)).nil?
 		begin
-			url_value = URI.parse(url)
+			url_value = Addressable::URI.parse(url)
 		rescue
 			return false
 		end
@@ -1485,7 +1495,7 @@ private
 
 	def self.get_domain(url)
 		begin
-			return URI.parse(url).host
+			return Addressable::URI.parse(url).host
 		rescue
 			return nil
 		end

@@ -22,7 +22,7 @@ class LoginController < ApplicationController
 	end
 
 	def login_as
-		session[:user_id] = User.find(params[:id]).id
+		sign_in(User.find(params[:id]))
 		redirect_to '/'
 	end
 
@@ -31,7 +31,7 @@ class LoginController < ApplicationController
 			# Only validate if the user was previously valid. some people may have bad data and if we
 			# validate them, they can't log in.
 			user_was_valid = user.valid?
-			session[:user_id] = user.id
+			sign_in(user)
 			remember = params[:remember] == "true"
 			if remember
 				if user.token.nil?
@@ -77,17 +77,8 @@ class LoginController < ApplicationController
 			user.ip = request.remote_ip()
 			#user.openid_url = response.identity_url
 			ua = UserAuthenticator.new
-			if session[:oauth_migration].nil?
-				ua.provider = 'openid'
-				ua.provider_identifier = response.identity_url
-			else
-				# someone said they signed in before, but didn't.
-				ua.provider = session[:oauth_migration][:provider]
-				ua.provider_identifier = session[:oauth_migration][:provider_identifier]
-				ua.url = session[:oauth_migration][:url]
-				session[:return_to] = session[:oauth_migration][:return_to] if session[:return_to].nil?
-				session.delete(:oauth_migration)
-			end
+			ua.provider = 'openid'
+			ua.provider_identifier = response.identity_url
 			user.user_authenticators << ua
 			user.email = sreg['email']
 			begin
@@ -110,7 +101,7 @@ class LoginController < ApplicationController
 					end
 					cookies[:login] = { :value => user.token, :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 				end
-				session[:user_id] = user.id
+				sign_in(user.id)
 				go_to_return_to()
 			else
 				session[:temp_login_details] = {:provider_identifier => ua.provider_identifier, :email => sreg['email'], :name => sreg['nickname'], :provider => ua.provider, :url => ua.url}
@@ -140,17 +131,6 @@ class LoginController < ApplicationController
 			end
 		end
 
-		# migration from OpenID
-		if !session[:oauth_migration].nil?
-			ua = UserAuthenticator.new
-			ua.provider = session[:oauth_migration][:provider]
-			ua.provider_identifier = session[:oauth_migration][:provider_identifier]
-			ua.url = session[:oauth_migration][:url]
-			session[:return_to] = session[:oauth_migration][:return_to] if session[:return_to].nil?
-			session.delete(:oauth_migration)
-			user.user_authenticators << ua
-		end
-
 		if session[:remember]
 			if user.token.nil?
 				user.token = user.generate_login_token
@@ -159,13 +139,19 @@ class LoginController < ApplicationController
 		end
 		user.ip = request.remote_ip()
 		user.save(:validate => user_was_valid)
-		session[:user_id] = user.id
+		sign_in(user)
 		go_to_return_to
 	end
 
 	def name_conflict
+		@no_bots = true
 		@page_title = 'Display name conflict'
-		@taken_name = session[:temp_login_details][:name]
+		if !session.nil? and !session[:temp_login_details].nil?
+			@taken_name = session[:temp_login_details][:name]
+		else
+			render(:file => 'public/403.html', :status => 403, :layout => false)
+		end
+
 	end
 
 	def name_required
@@ -199,7 +185,7 @@ class LoginController < ApplicationController
 		
 		if @user.save
 			session[:temp_login_details] = nil
-			session[:user_id] = @user.id
+			sign_in(@user)
 			go_to_return_to()
 			return
 		end
@@ -235,7 +221,7 @@ class LoginController < ApplicationController
 
 		if @user.save
 			session[:temp_login_details] = nil
-			session[:user_id] = @user.id
+			sign_in(@user)
 			go_to_return_to()
 			return
 		end
@@ -246,7 +232,7 @@ class LoginController < ApplicationController
 	end
 
 	def policy
-		@page_title = 'Privacy policy'
+		@page_title = 'Stylish - Privacy policy'
 	end
 
 	def lost_password
@@ -371,7 +357,7 @@ class LoginController < ApplicationController
 				end
 				return
 			end
-			session[:user_id] = user.id
+			sign_in(user)
 			if !return_to.nil?
 				redirect_to return_to
 			else
@@ -401,12 +387,6 @@ class LoginController < ApplicationController
 			return
 		end
 
-		if provider == 'google_oauth2' and !session[:openid_dont_migrate]
-			session[:oauth_migration] = {:provider => provider, :provider_identifier => uid, :url => url, :name => name, :email => email, :return_to => return_to || request.env['omniauth.origin']}
-			render 'google_migration'
-			return
-		end
-
 		# does another user already have that name?
 		same_name_user = User.find_by_name(name)
 		if !same_name_user.nil?
@@ -421,7 +401,7 @@ class LoginController < ApplicationController
 			handle_omniauth_failure(user.errors.full_messages.join(', '))
 			return
 		end
-		session[:user_id] = user.id
+		sign_in(user)
 		if !return_to.nil?
 			redirect_to return_to
 		else
@@ -431,11 +411,6 @@ class LoginController < ApplicationController
 
 	def omniauth_failure
 		handle_omniauth_failure(params[:message])
-	end
-
-	def resolve_openid_migration
-		session[:openid_dont_migrate] = true
-		redirect_to '/auth/google_oauth2'
 	end
 
 private
@@ -471,10 +446,12 @@ private
 			return_to = params[:return_to]
 		end
 		if return_to.nil?
-			logger.info("No return to URL, going to user page")
-			redirect_to(:controller => "users", :action => "show", :id => session[:user_id]) 
+			if session[:user_id]
+				redirect_to(:controller => "users", :action => "show", :id => session[:user_id]) 
+			else
+				redirect_to('/') 
+			end
 		else
-			logger.info("Going to return to URL - " + return_to)
 			session[:return_to] = nil
 			redirect_to(return_to)
 		end

@@ -1,7 +1,7 @@
 <% linkable_name = URI.escape(style.short_description.gsub('?', ''), Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))%>
 
 <div id="style-install-unknown" class="install-status install-info">
-	<p>To use this style, install <a href="https://affiliates.mozilla.org/link/banner/12921/2/6">Firefox</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a>. If you already have Stylish, make sure this site is allowed to run JavaScript.</p>
+	<p>To use this style, install <a href="https://www.mozilla.org/firefox/">Firefox</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a>. If you already have Stylish, make sure this site is allowed to run JavaScript.</p>
 
 	<% if !style.nil? and style.userjs_available? %>
 		<p class="install-note">(Though installing Stylish is recommended, if your browser supports user <em>scripts</em>, you can also <a id="chrome-userjs-install" href="/styles/userjs/<%=style.id%>/<%=linkable_name%>.user.js" class="alternate-install" rel="nofollow">install this style as a user script</a>.)</p>
@@ -9,11 +9,11 @@
 </div>
 
 <div id="style-install-mobile-safari-android" class="install-status install-info" style="display: none">
-	Did you know <a href="https://affiliates.mozilla.org/link/banner/12921/2/6">Firefox is available on Android</a>? You'll need that and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a> to use this.
+	Did you know <a href="https://www.mozilla.org/firefox/">Firefox is available on Android</a>? You'll need that and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a> to use this.
 </div>
 
 <div id="style-install-mobile-chrome-android" class="install-status install-info" style="display: none">
-	Did you know <a href="https://affiliates.mozilla.org/link/banner/12921/2/6">Firefox is available on Android</a>? You'll need that and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a> to use this.
+	Did you know <a href="https://www.mozilla.org/firefox/">Firefox is available on Android</a>? You'll need that and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a> to use this.
 </div>
 
 <div id="stylish-installed-style-installed" class="install-status install-info" style="display: none">
@@ -64,7 +64,7 @@
 </div>
 
 <div id="style-install-ie" class="install-status install-info" style="display: none">
-	<p>To use this style, install <a href="https://affiliates.mozilla.org/link/banner/12921/2/6">Firefox</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a>.</p>
+	<p>To use this style, install <a href="https://www.mozilla.org/firefox/">Firefox</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/stylish/?src=external-installbox">Stylish</a>.</p>
 
 	<% if !style.nil? and style.userjs_available? %>
 		<p class="install-note">(Though installing Stylish is recommended, <a href="http://www.ie7pro.com/">IE7Pro</a> users can also <a id="ie-user-style-install" href="ie7pro://<%=DOMAIN%>/styles/ieuserjs/<%=style.id%>/<%=linkable_name%>.ieuser.js" class="alternate-install">install as a user script</a>.)</p>
@@ -131,7 +131,7 @@
 
 <% if style.chrome_json_available? %>
 	<div id="style-install-chrome" class="install-status install-info" style="display: none">
-		<p>To use this style, first <a id="install-stylish-chrome" href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe">install Stylish</a>.</p>
+		<p>To use this style, first <a id="install-stylish-chrome" href="https://chrome.google.com/webstore/detail/fjnbnpbmkenffdnngjfgmeleoegfcffe">install Stylish</a>. <span class="install-note">(<a href="/login/policy">Privacy Policy</a>)</span></p>
 
 		<% if !style.nil? and style.userjs_available? %>
 			<p class="install-note">(Though installing Stylish is recommended, TamperMonkey users can also <a id="chrome-userjs-install" href="/styles/userjs/<%=style.id%>/<%=linkable_name%>.user.js" class="alternate-install" rel="nofollow">install this style as a user script</a>.)</p>

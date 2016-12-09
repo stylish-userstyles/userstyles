@@ -20,13 +20,14 @@ class ActiveSupport::TestCase
 	end
 	
 	def get_valid_style
-		return Style.new(
+		s = Style.new(
 			:short_description => 'Style name',
 			:long_description => 'Style description',
 			:user => User.find(1),
-			:style_code => StyleCode.new(:code => '*{color:blue}'),
 			:created => DateTime.now,
 			:updated => DateTime.now
 		)
+		s.build_style_code(code: '*{color:blue}')
+		return s
 	end
 end

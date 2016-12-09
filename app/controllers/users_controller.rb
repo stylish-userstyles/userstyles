@@ -112,7 +112,7 @@ class UsersController < ApplicationController
 		if @return_to.nil?
 			@return_to = session[:return_to]
 		end
-		session[:user_id] = @user.id
+		sign_in(@user)
 		if @return_to.nil?
 			redirect_to(:action => "show", :id => @user.id)
 		else

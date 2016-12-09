@@ -43,12 +43,7 @@ class HelpController < ApplicationController
 	def widget_details
 		@page_title = 'Userstyles.org widget details'
 	end
-	
-	def bundle
-		@page_title = 'Bundled software'
-		@no_ads = true
-	end
-	
+
 private
 	def public_action?
 		true

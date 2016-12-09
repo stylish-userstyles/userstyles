@@ -17,3 +17,4 @@ db/cstore
 config/initializers/jerks.rb
 .ruby-gemset
 .ruby-version
+.DS_Store

@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html>
 	<head profile='http://microformats.org/profile/rel-license'>
+		<!-- Google Tag Manager -->
+		<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+			new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+			j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+			'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+		})(window,document,'script','dataLayer','GTM-K8HHNS');</script>
+		<!-- End Google Tag Manager -->
+
+
 		<title>
 			<% if @page_title != nil %>
 				<%=@page_title%> - userstyles.org
@@ -91,6 +100,10 @@
 	</head>
 
 	<body>
+		<!-- Google Tag Manager (noscript) -->
+		<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K8HHNS"
+			height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+		<!-- End Google Tag Manager (noscript) -->
 		<header id="main-header">
 			<h1>
 				<a href="/">userstyles.org</a> -
@@ -169,6 +182,7 @@
 					<% end %>
 					<li id="sidebar-help"><%=link_to_unless_current('Help', {:action => "index", :controller => "help"}, :rel => 'nofollow') %></li>
 					<li id="sidebar-forum"><a href="http://forum.userstyles.org" rel="nofollow">Forum</a></li>
+					<li id="request-style"><a href="https://docs.google.com/forms/d/e/1FAIpQLScK4AotVoyIGjHVDngQMi9FmJadWHhB5hqG_mluJ0SbHSft7Q/viewform" rel="nofollow">Request a Style</a></li>
 				</ul>
 			</nav>
 
@@ -193,25 +207,15 @@
 				end
 			end %>
 
-			<% if @no_ads.nil? or !@no_ads %>
-				<div class="ad">
-					<div class="ad-note"><span>Advertisement</span></div>
-					<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-					<!-- Sidebar responsive -->
-					<ins class="adsbygoogle"
-						 style="display:block"
-						 data-ad-client="ca-pub-2247465624637408"
-						 data-ad-slot="7298424118"
-						 data-ad-format="auto"></ins>
-					<script>
-					(adsbygoogle = window.adsbygoogle || []).push({});
-					</script>
-				</div>
-			<% end %>
 		</div>
 
 		<footer>
-			<p><a href="/contact" rel="nofollow">Contact the admin.</a></p>
+			<font size="2">
+				<p><a href="/contact" rel="nofollow">Contact the admin.</a></p>
+				<p><a href="/terms-of-use" rel="nofollow">Terms of Use</a></p>
+				<p><a href="/login/policy" rel="nofollow">Privacy Policy</a></p>
+				<p><a href="/copyright-notice" rel="nofollow">Copyright Notice</a></p>
+			</font>
 		</footer>
 
 	</body>

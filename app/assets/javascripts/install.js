@@ -226,9 +226,14 @@ function fireCustomEvent(name) {
 
 var stylishActivatedPanel = null;
 function switchToPanel(panelId) {
+	var newPanel = document.getElementById(panelId);
+	if (!newPanel) {
+		return false;
+	}
 	document.getElementById(currentPanel).style.display = "none";
-	document.getElementById(panelId).style.display = "";
+	newPanel.style.display = "";
 	currentPanel = panelId;
+	return true;
 }
 
 function switchBrowserValue(value) {
@@ -362,8 +367,10 @@ function styleCanBeInstalledOpera(event) {
 	genericStyleCanBeInstalled("stylish-installed-style-not-installed-opera");
 }
 function genericStyleCanBeInstalled(panel) {
-	switchToPanel(panel);
-	stylishActivatedPanel = panel;
+	// Stylish can fire this even when we're not a style page, so guard for that.
+	if (switchToPanel(panel)) {
+		stylishActivatedPanel = panel;
+	}
 }
 
 function styleAlreadyInstalled(event) {

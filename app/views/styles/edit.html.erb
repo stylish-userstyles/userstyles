@@ -393,11 +393,11 @@ end %>
 			<div style="margin-left: 2em">
 				<% if !@style.auto_after_screenshot_path.nil? %>
 					<a href="<%=@style.auto_after_screenshot_path%>" rel="lightbox[screenshot] nofollow" title="Automatic primary screenshot"><img src="<%=@style.auto_after_screenshot_thumbnail_path%>"></a><br>
-					(Last generated <%=@style.auto_screenshot_date%>)
+					(Last generated <%=@style.auto_screenshot_date%>.<%if !@style.auto_screenshot_last_failure_date.nil?%> Last attempt to generate failed on <%=@style.auto_screenshot_last_failure_date%>. See <a href="/help/coding#screenshots-doc">screenshot documentation</a> for info.<%end%>)
 				<% elsif @style.auto_screenshots_same%>
-					<strong>(No changes found after style was applied. Last check was on <%=@style.auto_screenshot_date%>. See <a href="/help/coding#screenshots-doc">screenshot documentation</a> for info.)</strong>
+					<strong>(No changes found after style was applied. Last check was on <%=@style.auto_screenshot_date%>. <%if !@style.auto_screenshot_last_failure_date.nil?%> Last attempt to generate screenshots failed on <%=@style.auto_screenshot_last_failure_date%>.<%end%> See <a href="/help/coding#screenshots-doc">screenshot documentation</a> for info.)</strong>
 				<% elsif !@style.id.nil? %>
-					(Automatic screenshot not yet taken.)
+					(Automatic screenshot not yet taken.<%if !@style.auto_screenshot_last_failure_date.nil?%> Last attempt to generate failed on <%=@style.auto_screenshot_last_failure_date%>. See <a href="/help/coding#screenshots-doc">screenshot documentation</a> for info.<%end%>)
 				<% end %>
 			</div>
 		<% end %>
@@ -448,7 +448,7 @@ end %>
 	</div>
 
 	<div class="form-controls">
-		<label for="style_pledgie_id"><a href="http://pledgie.com/">Pledgie</a> Campaign ID (Optional)</label><br>
+		<label for="style_pledgie_id"><a href="https://pledgie.com/">Pledgie</a> Campaign ID (Optional)</label><br>
 		<%=s.text_field(:pledgie_id, :maxlength => 7)%>
 	</div>
 

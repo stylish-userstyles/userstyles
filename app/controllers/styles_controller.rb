@@ -10,8 +10,8 @@ class StylesController < ApplicationController
 
 	protect_from_forgery :except => [:show, :js, :opera_css, :ie_css, :chrome_json, :browse, :report]
 
-	$bad_content_subcategories = ["keezmovies", "xvideos", "jizzhut", "pornhub", "redtube", "tube8", "xnxx", "youjizz", "geisha-porn", "4tube", "xhamster", "youporn", "pussy", "imagefap", "pornbits", "xvideosadult", "youskbe", "moez-m", "dokidokibox", "emflix", "erogeba", "eromate", "xxeronetxx", "exploader", "hardsextube", "iqoo", "lovemake", "pornhost", "shufuni", "slutload", "spankwire", "xxxblog", "xvideosmovie", "free-sexvideosfc2", "yaaabooking", "yvhmovie", "oshirimania", "fakku", "e-hentai", "skins", "megaporn", "pussytorrents", "empflix", "xvideos-userporn", "xvideos-porn", "xvideos-collector", "exhentai", "sextube", "yobt", "asstr", "scor", "pornotube", "pornbb", "iafd", "artinude", "motherless", "keyboardporn", "empornium", "eporner", "freeporn", "fritchy", "lettherebeporn", "literotica", "masterporn", "mywebporno", "peniscult", "saff", "porn-w", "pornerbros", "porntown", "sexotorrent", "userporn", "vintage-erotica-forum", "wkdporn", "xxx-tracker", "livejasmin", "myfreecams", "cheggit", "dumparump", "fapomatic", "playboy", "bareback", "brazzers", "hentairules", "h-zip", "sankakucomplex",  "gelbooru", "konachan", "donmai", "gz-loader", "pinktower", "artemisweb", "suomi-neito", "tokyo-tube", "nukistream", "elog-ch", "adultghibli", "fleshbot", "ascii2d", "doujin-loli-school", "daimajin", "chaturbate", "cam4", "danshiryo", "yuvutu", "mcstories",  "storiesonline", "bestgfe", "stripclublist", "fuskator", "4gifs", "amateurindex", "freeones", "playboy", "adultfanfiction", "hi5", "minkch", "yande", "sexinsex", "eroino", "perfectgirls", "cpz", "ecchi", "eromodels", "erolight", "erolash", "nijie", "okazu24", "bravoteens", "tblop", "elephanttube", "pumbaporn", "pinkworld", "zegaporn", "abcpornsearch", "forhertube", "wtchporn", "1000mg", "sexfotka", 'yiff', 'fetlife', 'rule34', 'pornolab', 'thiendia', 'fusker', 'e621', 'paheal', 'femjoy', 'rei-ayanami', 'kmlg', 'anidub', 'ipmart-forum', 'hentaiverse', 'cinenovinhas', 'mallandrinhas', 'dl-hentaimanga', 'sex', 'sex8', 'sis', 'sis001', 'beelzeboulxxx', 'pururin', 'imgchili', 'pornleech', 'planet-liebe', 'wetyou', 'domai', 'booru', 'derpibooru', 'xtube', 'thisav', 'pornreactor']
-	$tld_specific_bad_domains = ["dmm.co.jp"]
+	$bad_content_subcategories = ["keezmovies", "xvideos", "jizzhut", "pornhub", "redtube", "tube8", "xnxx", "youjizz", "geisha-porn", "4tube", "xhamster", "youporn", "pussy", "imagefap", "pornbits", "xvideosadult", "youskbe", "moez-m", "dokidokibox", "emflix", "erogeba", "eromate", "xxeronetxx", "exploader", "hardsextube", "iqoo", "lovemake", "pornhost", "shufuni", "slutload", "spankwire", "xxxblog", "xvideosmovie", "free-sexvideosfc2", "yaaabooking", "yvhmovie", "oshirimania", "fakku", "e-hentai", "skins", "megaporn", "pussytorrents", "empflix", "xvideos-userporn", "xvideos-porn", "xvideos-collector", "exhentai", "sextube", "yobt", "asstr", "pornotube", "pornbb", "iafd", "artinude", "motherless", "keyboardporn", "empornium", "eporner", "freeporn", "fritchy", "lettherebeporn", "literotica", "masterporn", "mywebporno", "peniscult", "saff", "porn-w", "pornerbros", "porntown", "sexotorrent", "userporn", "vintage-erotica-forum", "wkdporn", "xxx-tracker", "livejasmin", "myfreecams", "cheggit", "dumparump", "fapomatic", "playboy", "bareback", "brazzers", "hentairules", "h-zip", "sankakucomplex",  "gelbooru", "konachan", "donmai", "gz-loader", "pinktower", "artemisweb", "suomi-neito", "tokyo-tube", "nukistream", "elog-ch", "adultghibli", "fleshbot", "ascii2d", "doujin-loli-school", "daimajin", "chaturbate", "cam4", "danshiryo", "yuvutu", "mcstories",  "storiesonline", "bestgfe", "stripclublist", "fuskator", "4gifs", "amateurindex", "freeones", "playboy", "adultfanfiction", "hi5", "minkch", "yande", "sexinsex", "eroino", "perfectgirls", "cpz", "ecchi", "eromodels", "erolight", "erolash", "nijie", "okazu24", "bravoteens", "tblop", "elephanttube", "pumbaporn", "pinkworld", "zegaporn", "abcpornsearch", "forhertube", "wtchporn", "1000mg", "sexfotka", 'yiff', 'fetlife', 'rule34', 'pornolab', 'thiendia', 'fusker', 'e621', 'paheal', 'femjoy', 'rei-ayanami', 'kmlg', 'anidub', 'ipmart-forum', 'hentaiverse', 'cinenovinhas', 'mallandrinhas', 'dl-hentaimanga', 'sex', 'sex8', 'sis', 'sis001', 'beelzeboulxxx', 'pururin', 'imgchili', 'pornleech', 'planet-liebe', 'wetyou', 'domai', 'booru', 'derpibooru', 'xtube', 'thisav', 'pornreactor', 't66y', 'bearhk', 'betterfap', 'javhdonline', 'anispiral', 'dropbooks', 'anichan', 'anime365', 'b-anime']
+	$tld_specific_bad_domains = ["dmm.co.jp", "scor.dk"]
 	$bad_words = ['porn', 'erotic', 'porno', 'booty', 'nude', 'sexo', 'naked', 'bondage', 'jizz', 'milf', 'jailbait', 'fag', 'nsfw', 'sex', 'sexy', 'boob', 'boobs', 'tits', 'cock', 'penis', 'vagina', 'fap', 'fapping', 'masturbate', 'hentai', 'slut', 'sluts', 'whore', 'whores', 'anus', 'bollock', 'boner', 'clit', 'condom', 'crotch', 'cunt', 'dildo', 'furaffinity' ,'horny', 'ecchi'] + $bad_content_subcategories - ['skins']
 	$iffy_words = ['babe', 'girl', 'underwear', 'panty', 'panties'] + $bad_words
 
@@ -22,6 +22,7 @@ class StylesController < ApplicationController
 					@style = Rails.cache.fetch "styles/show/#{params[:id]}" do
 						Style.includes([:user, {:style_settings => :style_setting_options}, :screenshots, :admin_delete_reason, {:discussions => {:original_forum_poster => :users}}]).find(params[:id])
 					end
+					@no_ads = @no_ads || $iffy_words.any?{|word| @style.short_description.include?(word) || @style.long_description.include?(word) || (@style.additional_info && @style.additional_info.include?(word))}
 				rescue ActiveRecord::RecordNotFound
 					@no_ads = true
 					render :file => "#{Rails.root}/public/404.html", :status => 404, :layout => true
@@ -150,25 +151,24 @@ class StylesController < ApplicationController
 		redirect_to :action => 'browse', :category => params[:category], :search_terms => params["search-terms"] || params[:id], :sort => 'popularity', :sort_direction => 'desc', :page => 1, :status => 301
 	end
 
-	def browse_r
+	def browse_r(p = params)
 		options = {:controller => 'styles', :action => 'browse', :status => 301}
-		options[:search_terms] = params[:search_terms] unless (!params[:search_terms].nil? and params[:search_terms] == '')
-
+		options[:search_terms] = p[:search_terms] unless (!p[:search_terms].nil? and p[:search_terms] == '')
 		# basic search - only look at the search terms
-		if params[:as].nil?
+		if p[:as].nil?
 			fix_search_url(options)
 			redirect_to options
 			return
 		end
 		
 		# advanced search
-		options[:category] = (params[:category] == '' or params[:category] == 'all') ? nil : params[:category]
-		options[:per_page] = params[:per_page] unless (!params[:per_page].nil? and (params[:per_page] == '' or params[:per_page].to_i == 10))
-		if (!params[:sort].nil? and params[:sort] != 'relevance') or (!params[:sort_direction].nil? and params[:sort_direction] != 'desc')
-			options[:sort] = params[:sort]
-			options[:sort_direction] = params[:sort_direction]
+		options[:category] = (p[:category] == '' or p[:category] == 'all') ? nil : p[:category]
+		options[:per_page] = p[:per_page] unless (!p[:per_page].nil? and (p[:per_page] == '' or p[:per_page].to_i == 10))
+		if (!p[:sort].nil? and p[:sort] != 'relevance') or (!p[:sort_direction].nil? and p[:sort_direction] != 'desc')
+			options[:sort] = p[:sort]
+			options[:sort_direction] = p[:sort_direction]
 		end
-		fix_search_url(params)
+		fix_search_url(options)
 		options[:as] = 1
 		redirect_to options
 	end
@@ -199,8 +199,10 @@ class StylesController < ApplicationController
 			params[:category] = nil
 		end
 
+		# If this is something that needs fixing, make browse_r do it
+		original_params = params.dup
 		if fix_search_url(params)
-			browse_r
+			browse_r(original_params)
 			return
 		end
 
@@ -278,7 +280,7 @@ class StylesController < ApplicationController
 			# an aggregate of all matches. In other words, something matching on "name" will be tied with everything
 			# else matching on "name".
 			@styles = Style.search keywords, :match_mode => :extended, :page => params[:page], :order => new_sort.gsub('DIR', sort_direction.upcase), :per_page => options[:per_page], :conditions => new_search_conditions, :populate => true, :select => '*, weight() myweight', :ranker => "expr('top(user_weight)')"
-			@no_ads = @styles.empty?
+			@no_ads = @styles.count < 5
 		rescue ThinkingSphinx::SyntaxError, ThinkingSphinx::QueryError => e
 			# back to the main listing, unless we're already there
 			raise e if params[:category].nil? and params[:search_terms].nil? and params[:page].nil? and params[:order].nil? and params[:sort].nil? and params[:sort_direction].nil?
@@ -466,6 +468,7 @@ class StylesController < ApplicationController
 		end
 		@style.obsoleting_style_id = params[:style][:obsoleting_style_id]
 		@style.save(validate: false)
+		@style.user.update_attribute(:banned, true) if params['ban_user'] == '1'
 		redirect_to(:action => "show", :id => @style.id, :r => Time.now.to_i)
 	end
 	
@@ -576,17 +579,22 @@ class StylesController < ApplicationController
 		render :nothing => true, :status => 200
 	end
 
+	# How much more an auto screenshot will get preference over a non-auto screenshot
+	AUTO_SCREENSHOT_MULTIPLIER = 10
+	AUTO_SCREENSHOT_MULTIPLIER_SQL = "IF (screenshot_type_preference = 'auto', #{AUTO_SCREENSHOT_MULTIPLIER}, 1)"
+	AUTO_SCREENSHOT_LAST_ATTEMPT_SQL = 'IF (auto_screenshot_last_failure_date IS NULL, auto_screenshot_date, auto_screenshot_last_failure_date)'
 	def screenshotable
-		bad_content_in = ($bad_content_subcategories.map { |c| "'#{c}'" }).join(',')
-		@styles = Style.active.where('screenshot_url is not null ' +
-			'and screenshot_type_preference = "auto" ' +
-			'and subcategory NOT IN (' + bad_content_in + ')')
-			.order('auto_screenshot_date IS NULL DESC, ' + #styles with no screenshot
-			'IF(updated >= auto_screenshot_date, updated - auto_screenshot_date, -1) DESC, ' + #anything that was updated since the screenshot was generated
-			'auto_screenshot_date, ' + #last time the screenshot was generated
-			'updated DESC') #last time the style was updated
+		@styles = Style
+			.active
+			.where('screenshot_url is not null')
+			.where(screenshot_type_preference: ['auto', 'manual'])
+			.where(['subcategory NOT IN (?)', $bad_content_subcategories])
+			.order("IF(#{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL} IS NULL, #{AUTO_SCREENSHOT_MULTIPLIER_SQL}, 0) DESC") #styles where the screenshot was never attempted
+			.order("IF(updated >= #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}, (updated - #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL}, -1) DESC") #anything that was updated since the screenshot was attmepted
+			.order("(NOW() - #{AUTO_SCREENSHOT_LAST_ATTEMPT_SQL}) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the screenshot was attempted
+			.order("(NOW() - updated) * #{AUTO_SCREENSHOT_MULTIPLIER_SQL} DESC") #last time the style was updated
 			.limit(1000)
-		render :action => "screenshotable", :layout => false
+		render "screenshotable", layout: false
 	end
 
 	def automation_page
@@ -680,9 +688,13 @@ protected
 	def public_action?
 		['show', 'show_redirect', 'install', 'search_url', 'search_text', 'search', 'browse_r', 'browse', 'graveyard', 'updated', 'js', 'opera_css', 'ie_css', 'chrome_json', 'proxomitron', 'by_user', 'expire_by_id', 'screenshotable', 'automation_page', 'test', 'report'].include?(action_name)
 	end
-	
+
+	def moderator_action?
+		['admin_delete', 'admin_delete_save'].include?(action_name)
+	end
+
 	def admin_action?
-		['admin_delete', 'admin_delete_save', 'bad_stuff', 'lotsa_screenshots', 'reviewable'].include?(action_name)
+		['bad_stuff', 'lotsa_screenshots', 'reviewable'].include?(action_name)
 	end
 	
 	def verify_private_action(user_id)
@@ -758,8 +770,13 @@ protected
 				end
 				# look for things in the form of "google.com" or full urls
 				possible_domain_parts = term.split('.')
-				if (possible_domain_parts.length > 1 and !/[a-z]/i.match(possible_domain_parts[-1]).nil?) or term.include?('//')
-					urls << term
+				if (possible_domain_parts.length > 1 && !/[a-z]/i.match(possible_domain_parts[-1]).nil?) || term.include?('//') || !(/\Aabout:/ =~ term).nil?
+					if term.include?(':')
+						urls << term
+					else
+						# turn "google.com" into an actual URL
+						urls << 'http://' + term
+					end
 				else
 					keywords << term
 				end
@@ -935,8 +952,8 @@ private
 		begin
 			@style.refresh_meta(false)
 
-			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or !$tld_specific_bad_domains.index{|d| @style.style_code.code.include?(d)}.nil?
-				@style.errors.add("Styles", "for adult sites are not allowed on userstyles.org.")
+			if (!@style.subcategory.nil? and $bad_content_subcategories.include?(@style.subcategory)) or $tld_specific_bad_domains.any?{|d| @style.style_code.code.include?(d)}
+				non_ar_errors << ["Styles", "for adult sites are not allowed on userstyles.org."]
 			end
 
 			raise ActiveRecord::RecordInvalid.new(@style) if !non_ar_errors.empty? or !@style.valid?

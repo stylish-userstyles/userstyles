@@ -5,7 +5,9 @@ require 'openid/store/filesystem'
 class ApplicationController < ActionController::Base
 
 	layout 'standard_layout'
-
+	rescue_from 'ActionView::MissingTemplate' do |exception|
+		render(:file => 'public/404.html', :status => 404, :content_type => 'text/html', :layout => true)
+	end
 	before_action :refresh_user_from_cookie
 	before_action :authenticate
 
@@ -17,7 +19,7 @@ protected
 		return unless session[:user_id].nil?
 		user = User.where(:token => cookies[:login]).first
 		if !user.nil?
-			session[:user_id] = user.id
+			sign_in(user)
 			#restart the clock
 			cookies[:login] = { :value => cookies[:login], :expires => 2.weeks.from_now, :domain => COOKIE_DOMAIN}
 		end
@@ -93,6 +95,14 @@ protected
 		return style
 	end
 
+	def sign_in(user)
+		if user.banned
+			flash[:alert] = 'You have been banned.'
+		else
+			session[:user_id] = user.id
+		end
+	end
+
 private
 
 	# User authentication. Controllers are expected to define the following methods:
@@ -115,22 +125,42 @@ private
 			end
 			return
 		end
-		
-		# admin only stuff
+
+		user = User.find(session[:user_id])
+		if user.banned
+			flash[:alert] = 'You have been banned.'
+			session[:user_id] = nil
+			redirect_to '/'
+			return
+		end
+
+		if moderator_action?
+			handle_access_denied unless verify_moderator_action || verify_admin_action
+			return
+		end
+
 		if admin_action?
 			handle_access_denied unless verify_admin_action
 			return
 		end
-		
+
 		# regular user stuff
 		if !verify_private_action(session[:user_id]) and !verify_admin_action
 			handle_access_denied
 			return
 		end
 	end
-	
+
+	def moderator_action?
+		return false
+	end
+
+	def verify_moderator_action
+		return session[:user_id] == 136304
+	end
+
 	def verify_admin_action
-		return session[:user_id] == 1
+		return session[:user_id] == 285465
 	end
 
 	protect_from_forgery

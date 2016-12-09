@@ -1,5 +1,3 @@
-<% cache_unless(session[:user_id] == @style.user_id || jerk_user, @style) do %>
-
 <% content_for :header_includes do %>
 	<link rel="stylish-code" href="<%=url_for(id: params['id'], host: DOMAIN, protocol: DOMAIN_PROTOCOL)%>.css">
 	<script>document.querySelector("link[rel='stylish-code']").setAttribute("href", "#stylish-code");</script>
@@ -24,6 +22,8 @@
 		<link rel="stylish-example-url" href="<%=@style.screenshot_url%>">
 	<% end %>
 <% end %>
+
+<% cache_unless(session[:user_id] == @style.user_id || jerk_user, @style) do %>
 
 <% if @style.obsolete > 0 %>
 	<section id="obsoletion-message">
@@ -169,32 +169,6 @@
 		<div id="subcategory"><%=@style.subcategory%></div>
 	</div>
 
-	<%
-	# We can't overlap the ads, even with select boxes. If we have anything that might overlap it, show it further below.
-	# - Text and image are OK
-	# - Color opens a pop-up, not OK
-	# - Dropdown settings past a certain length, not OK
-	show_ad_above_meta = @style.style_settings.all? {|ss| ['text', 'image'].include?(ss.setting_type) or (ss.setting_type == 'dropdown' and ss.style_setting_options.length <= 3) }
-	if (@no_ads.nil? or !@no_ads) and show_ad_above_meta %>
-		<div id="below-install-ad" class="ad">
-			<div class="ad-note"><span>Advertisement</span></div>
-			<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-			<!-- Style pages below install responsive -->
-			<ins class="adsbygoogle"
-				 style="display:block"
-				 data-ad-client="ca-pub-2247465624637408"
-				 <% if experiment_chitika_on %>
-				 data-ad-slot="7996428119"
-				 <% else %>
-				 data-ad-slot="1865604119"
-				 <% end %>
-				 data-ad-format="auto"></ins>
-			<script>
-			(adsbygoogle = window.adsbygoogle || []).push({});
-			</script>
-		</div>
-	<% end %>
-
 	<div id="info-tables">
 
 		<table id="style-author-info">
@@ -282,22 +256,6 @@
 	</section>
 <% end %>
 
-<% if (@no_ads.nil? or !@no_ads) and !show_ad_above_meta %>
-	<div id="below-meta-ad" class="ad">
-		<div class="ad-note"><span>Advertisement</span></div>
-		<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-		<!-- Style pages below meta responsive -->
-		<ins class="adsbygoogle"
-			 style="display:block"
-			 data-ad-client="ca-pub-2247465624637408"
-			 data-ad-slot="8140651313"
-			 data-ad-format="auto"></ins>
-		<script>
-		(adsbygoogle = window.adsbygoogle || []).push({});
-		</script>
-	</div>
-<% end %>
-
 <section id="discussions-area">
 	<h2>Feedback</h2>
 
@@ -306,7 +264,7 @@
 	<% if !@style.pledgie_id.nil? %>
 		<p id="pledgie">
 			Thank <%= link_to (h @style.user.name), {:controller => "users", :action => "show", :id => @style.user.id}, :rel => 'nofollow' %> for creating this style by donating via Pledgie:
-			<a href='https://www.pledgie.com/campaigns/<%=@style.pledgie_id%>'><img alt='Donate for <%=@style.short_description%>' src='https://www.pledgie.com/campaigns/<%=@style.pledgie_id%>.png?skin_name=chrome' height='37' width='149' border='0'></a>.
+			<a href='https://pledgie.com/campaigns/<%=@style.pledgie_id%>'><img alt='Donate for <%=@style.short_description%>' src='https://pledgie.com/campaigns/<%=@style.pledgie_id%>.png?skin_name=chrome' height='37' width='149' border='0'></a>.
 		</p>
 	<% end %>
 	<% if !@style.user.paypal_email.nil?%>
@@ -347,7 +305,7 @@
 					when 3
 						rating_class = "good-rating"
 				end %>
-				<li class="<%=rating_class%>"><%=link_to h(discussion.name), discussion.url, {:rel => 'nofollow'}%> by <%=link_to h(discussion.original_poster.name), {:controller => 'users', :action => 'show', :id => discussion.original_poster.id}, {:rel => 'nofollow'}%><%if !discussion.created.nil?%>, <%=discussion.created.strftime('%B %e, %Y')%><% end %></li>
+				<li class="<%=rating_class%>"><%=link_to h(discussion.name), discussion.url, {:rel => 'nofollow'}%><% if discussion.original_poster %> by <%=link_to h(discussion.original_poster.name), {:controller => 'users', :action => 'show', :id => discussion.original_poster.id}, {:rel => 'nofollow'}%><%end%><%if !discussion.created.nil?%>, <%=discussion.created.strftime('%B %e, %Y')%><% end %></li>
 			<% end %>
 			<% if @style.discussions.size != @style.recent_discussions.size %>
 				<li><a href="//<%=FORUM_DOMAIN%>/?Discussion/StyleID=<%=@style.id%>" rel="nofollow">See more discussions</a></li>
